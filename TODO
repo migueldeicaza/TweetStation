@@ -1,0 +1,112 @@
+* Missing Stuff
+	Refresh user pictures when they change.  
+		Currently, once we download a pic, we never update it
+
+	Protocol:
+		When posting a tweet, the POST data result should
+		be added to the main view.
+
+		When favoriting/unfavoriting, we need to add those
+		tweets to Favorites tab, or recompute that tab
+		on demand.
+
+	TweetCell: Use only Draw calls?
+
+	On Load:
+		Hook up "Load more" and add better artwork
+		Custom control to show "Load more" with some better artwork
+		Support removal of the control on load, instead than on tap,
+		to give a visual cue of what is happening.
+
+	Search text
+		With history of previous searches
+	Nearby tweets
+	Goto user
+	composer:
+		Sending Direct Messages
+		Uploading pictures
+		Looking up the list of friends
+	TweetCell - Main Display
+		Show star info, geo info, and pic info?
+
+	Remove old tweets from the database, 2 week old tweets?
+	Showing User Pictures
+	Loading medium sized picture
+	Add picture shadow
+	Chicken noises for reload
+	Music for composing
+	Turning a search into a saved search
+	Lists:
+		Instead of managing lists, be able to "add user to list" in the UI in the profile view.
+		Delete from list.
+		Edit, Delete, Info
+		Special List timeline controller that lets edit	
+	User profile:	
+		Red Color for Blocking users
+		Showing first joined twitter
+		Listing friends
+		Listing followers
+		Merge friends + followers in a single cell to save space?
+		Showing a map for the user profile
+		Show if the tweet is protected/user protected
+	Account editor
+	New accont
+	Hooking up OAuth
+	Show timeline separator (like tweetie, after X hours shows a gap)
+		Reloads on gap
+	Remember last tab
+	FullProfileView
+		Needs an animating element while loading data from the network,
+
+* Post 1.0:
+
+	Direct Messages special view
+		Grouped per user, blend conversation together
+
+* Http Stack
+
+	Since all calls to the twitter API are to the same server,
+	we should have an API that serializes all calls, maybe even
+	reuses the WebClient instance.
+
+	WebClient does not use the ThreadPool, instead it uses a 
+	new thread, perhaps move to HttpWebRequest?
+
+	Need HttpWebRequest for POST anyways (needed for inserting
+	the result of a post).
+
+	Should support high-priority vs low-priority requests.  Some
+	operations like trend fetching do not have to be a top 
+	priority.
+
+* Idea: Memory management
+
+	Modify the TImelineController to reload data on demand, 
+	since CocoaTouch does not really kill leaf instances
+	of view controllers so we can end up carrying a lot of
+	data around.
+
+	Problem: we can only do this if a child is not currently
+	visible.
+
+* ImageStore:
+
+	Support downloading different kinds of image sizes
+	The 73x73 image for large views
+	The full version for full display
+
+* TweetDetail
+
+	Put a border around the image loaded.
+	Add support for loading twitpic images.
+
+
+* Application
+
+	Remember where we are (drilled down on a tweet? or search)
+
+* Accounts
+
+	Link to create account
+
+	Support OAuth

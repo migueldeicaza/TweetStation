@@ -1,0 +1,10 @@
+{
+	Title = AppSettings;
+	StringsTable = Root;
+	PreferenceSpecifiers = (
+		{
+			Type = PSGroupSpecifier;
+			Title = Options;
+		},
+	);
+}

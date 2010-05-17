@@ -1,0 +1,57 @@
+TweetStation
+
+	TweetStation was originally a sample program that I created
+	for my own use.  I was a fan of the older UI in Echofon and
+	liked many of the elements of Tweetie2, but like every
+	programmer, I wanted to make some changes.
+
+	It was also a test bed for testing APIs and answering
+	MonoTouch users's questions.  It is the original application
+	that lead to the creation of MonoTouch.Dialog, as I figured
+	that there should be a better way of constructing dialog boxes
+	than creating models and delegates left and right.
+
+	TweetStation is an open source, MIT X11 licensed twitter
+	client written for MonoTouch.
+
+Design Goals
+============
+
+   Exceptions
+
+	The code uses try/catch extensively in the code in areas that
+	have to process data from twitter, I assume that the data
+	might be broken or that my original assumptions or their
+	documentation might be wrong.  You will notice in the code
+	that all exceptions are printed out, I want to keep that this
+	way for that reason.
+
+   MonoTouch.Dialog
+
+	Most of the UI was created with MonoTouch.Dialog and various
+	custom views and Elements designed for twitter.  There is not
+	a single UITableView coded in the traditional style.
+
+   Memory Usage
+
+	In some parts of the code I tried to minimize memory usage by
+	not creating thousands of objects that would be thrown out
+	(Tweet parsing for example), so I just recycle some instances
+	sometimes.
+
+   Singletons
+
+	There are a handful of singleton classes as well, I tend to
+	reset those instead of creating new instances as they would
+	avoid creating expensive objects or objects that are known to
+	leak in CocoaTouch anyways.
+
+   Pending Task Queue
+
+	I never know if a tweet has been starred or not when there is
+	no network connectivity.   With TweetStation all the pending
+	requests are kept in a queue and flushed at periodic intervals.
+
+	This is used both to post tweets and favorite posts, allowing
+	the settings to take place right away, even if there is no
+	network connectivity

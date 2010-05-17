@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="3.5" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">iPhoneSimulator</Platform>
+    <ProductVersion>9.0.21022</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{7C7D3161-2DFB-4201-B70E-88ACD3976AA9}</ProjectGuid>
+    <ProjectTypeGuids>{E613F3A2-FE9C-494F-B74E-F63BCB86FEA6};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>TweetStation</RootNamespace>
+    <MainNibFile>MainWindow.xib</MainNibFile>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <AssemblyName>TweetStation</AssemblyName>
+    <MtouchMinimumOS>3.0</MtouchMinimumOS>
+    <BundleIdentifier>org.tirania.tweetstation</BundleIdentifier>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|iPhoneSimulator' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\iPhoneSimulator\Debug</OutputPath>
+    <DefineConstants>DEBUG</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
+    <MtouchLink>None</MtouchLink>
+    <MtouchDebug>True</MtouchDebug>
+    <MtouchExtraArgs>-i18n=west</MtouchExtraArgs>
+    <MtouchSdkVersion>3.2</MtouchSdkVersion>
+    <MtouchI18n />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhoneSimulator' ">
+    <DebugType>none</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\iPhoneSimulator\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
+    <MtouchLink>None</MtouchLink>
+    <MtouchDebug>False</MtouchDebug>
+    <MtouchSdkVersion>3.0</MtouchSdkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|iPhone' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\iPhone\Debug</OutputPath>
+    <DefineConstants>DEBUG</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
+    <CodesignKey>iPhone Developer</CodesignKey>
+    <MtouchDebug>True</MtouchDebug>
+    <MtouchSdkVersion>3.0</MtouchSdkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhone' ">
+    <DebugType>none</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\iPhone\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
+    <CodesignKey>iPhone Developer: Miguel de Icaza (6YW2BSTNRQ)</CodesignKey>
+    <MtouchDebug>False</MtouchDebug>
+    <MtouchSdkVersion>3.0</MtouchSdkVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Core" />
+    <Reference Include="monotouch" />
+    <Reference Include="System.Json" />
+    <Reference Include="System.Web.Services" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="MainWindow.xib.designer.cs">
+      <DependentUpon>MainWindow.xib</DependentUpon>
+    </Compile>
+    <Compile Include="Main.cs" />
+    <Compile Include="SqliteNet\SQLite.cs" />
+    <Compile Include="Data\TwitterAccount.cs" />
+    <Compile Include="Data\Tweet.cs" />
+    <Compile Include="Data\Database.cs" />
+    <Compile Include="Dialogs\EditAccount.cs" />
+    <Compile Include="Utilities\Util.cs" />
+    <Compile Include="UI\TweetCell.cs" />
+    <Compile Include="Utilities\Locale.cs" />
+    <Compile Include="Utilities\Graphics.cs" />
+    <Compile Include="Data\ImageStore.cs" />
+    <Compile Include="UI\DetailTweetViewController.cs" />
+    <Compile Include="Utilities\ButtonsView.cs" />
+    <Compile Include="UI\Composer.cs" />
+    <Compile Include="UI\TweetView.cs" />
+    <Compile Include="UI\FullProfileView.cs" />
+    <Compile Include="UI\PictureViewer.cs" />
+    <Compile Include="UI\Follow.cs" />
+    <Compile Include="UI\Conversation.cs" />
+    <Compile Include="UI\Web.cs" />
+    <Compile Include="Utilities\LRUCache.cs" />
+    <Compile Include="UI\ShortProfile.cs" />
+    <Compile Include="UI\Timeline.cs" />
+    <Compile Include="UI\SearchTab.cs" />
+    <Compile Include="UI\SearchUser.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="MainWindow.xib" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ProjectExtensions>
+    <MonoDevelop>
+      <Properties InternalTargetFrameworkVersion="IPhone" />
+    </MonoDevelop>
+  </ProjectExtensions>
+  <ItemGroup>
+    <Folder Include="SqliteNet\" />
+    <Folder Include="Data\" />
+    <Folder Include="Dialogs\" />
+    <Folder Include="Utilities\" />
+    <Folder Include="UI\" />
+    <Folder Include="Images\" />
+    <Folder Include="x\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="home_timeline.json" />
+    <Content Include="Images\friends.png" />
+    <Content Include="Images\gps.png" />
+    <Content Include="Images\shrink.png" />
+    <Content Include="Images\replies.png" />
+    <Content Include="Images\messages.png" />
+    <Content Include="Images\home.png" />
+    <Content Include="Images\lupa.png" />
+    <Content Include="Images\default_profile_4_normal.png" />
+    <Content Include="Images\star-off.png" />
+    <Content Include="Images\star-on.png" />
+    <Content Include="Images\fav.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\MonoTouch.Dialog\MonoTouch.Dialog\MonoTouch.Dialog.csproj">
+      <Project>{3FFBFFF8-5560-4EDE-82E5-3FFDFBBA8A50}</Project>
+      <Name>MonoTouch.Dialog</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="Info.plist" />
+  </ItemGroup>
+</Project>
