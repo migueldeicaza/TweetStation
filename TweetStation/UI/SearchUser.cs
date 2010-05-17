@@ -14,18 +14,19 @@ using System.Linq;
 namespace TweetStation
 {
 	public abstract class SearchDialog : DialogViewController {
-		SearchMirrorElement searchMirror;
-		Section entries;
+		protected SearchMirrorElement searchMirror;
 		
-		public SearchDialog () : base (UITableViewStyle.Plain, null)
+		public SearchDialog () : base (null, true)
 		{
 			EnableSearch = true;
+			Style = UITableViewStyle.Plain;
 		}
 		
 		public override void OnSearchTextChanged (string text)
 		{
 			base.OnSearchTextChanged (text);
 			searchMirror.Text = text;
+			TableView.SetNeedsDisplay ();
 		}
 		
 		public override void ViewWillAppear (bool animated)
@@ -36,11 +37,11 @@ namespace TweetStation
 			Section entries = new Section () {
 				searchMirror
 			};
+			PopulateSearch (entries);
 			
 			Root = new RootElement (Locale.GetText ("Search")){
 				entries,
 			};
-			PopulateSearch (entries);
 
 			StartSearch ();
 			PerformFilter ("");
@@ -60,6 +61,19 @@ namespace TweetStation
 			entries.Add (from x in Database.Main.Query<User> ("SELECT Screenname from User ORDER BY Screenname")
 				             select (Element) new StringElement (x.Screenname));
 		}
+		
+		public override void Selected (NSIndexPath indexPath)
+		{
+			var element = Root [0][indexPath.Row];
+			DialogViewController dvc;
+			
+			if (element is SearchMirrorElement)
+				dvc = new FullProfileView (((SearchMirrorElement) element).Text);
+			else
+				dvc = new FullProfileView (((StringElement) element).Caption);
+			
+			ActivateController (dvc);
+		}
 	}
 	
 	// 
@@ -70,18 +84,19 @@ namespace TweetStation
 		string text;
 		public string Text { 
 			get { return text; }
-			set { text = value; Value = Locale.Format ("Go to user '{0}'", text); }
+			set { text = value; Caption = Locale.Format ("Go to user '{0}'", text); }
 		}
 		
-		public SearchMirrorElement () : base ("")
+		public SearchMirrorElement () : base ("Foo")
 		{
+			TextColor = UIColor.FromRGB (0.13f, 0.43f, 0.84f);
+			Font = UIFont.SystemFontOfSize (14);
 		}
 		
 		public override bool Matches (string test)
 		{
 			return !String.IsNullOrEmpty (text);
-		}
-		
+		}		
 	}
 }
 
