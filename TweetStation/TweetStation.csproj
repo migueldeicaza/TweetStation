@@ -101,7 +101,8 @@
     <Compile Include="UI\ShortProfile.cs" />
     <Compile Include="UI\Timeline.cs" />
     <Compile Include="UI\SearchTab.cs" />
-    <Compile Include="UI\SearchUser.cs" />
+    <Compile Include="UI\Searches.cs" />
+    <Compile Include="UI\User.cs" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="MainWindow.xib" />

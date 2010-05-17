@@ -110,8 +110,10 @@ namespace TweetStation {
 			foreach (var tweet in Database.Main.Query<Tweet> (
 				"SELECT * FROM Tweet WHERE LocalAccountId = ? AND Kind = ? ORDER BY CreatedAt DESC LIMIT ? OFFSET ?", 
 				Account.LocalAccountId, kind, limit, skip)){
-				if (tweet.Id == lastId)
+				if (tweet.Id == lastId){
 					continuous = true;
+					yield break;
+				}
 				yield return (Element) new TweetElement (tweet);
 			}
 		}
@@ -196,40 +198,41 @@ namespace TweetStation {
 	// This version fo the BaseTimelineViewController does not store anything
 	// on the database, it loads the data directly from the network into memory
 	//
-	// Used for transient information display
+	// Used for transient information display, it is used by two derived classes
+	// one shows tweets, the other shows users.
 	//
-	public class StreamedTimelineViewController : BaseTimelineViewController {
+	public abstract class StreamedViewController : BaseTimelineViewController {
 		const int PadX = 4;
+		protected User ReferenceUser;
+		protected string Title;
 		ShortProfileView shortProfileView;
-		string title;
 		Uri url;
-		User reference;
 		bool loaded;
 		
-		public StreamedTimelineViewController (string title, Uri url, User reference) : base (true)
+		public StreamedViewController (string title, Uri url, User reference) : base (true)
 		{
 			this.url = url;
-			this.title = title;
-			this.reference = reference;
+			this.Title = title;
+			this.ReferenceUser = reference;
 			
 			this.NavigationItem.Title = title;
 			EnableSearch = true;
 		}
 		
-		public StreamedTimelineViewController (string title, Uri url) : this (title, url, null)
+		public StreamedViewController (string title, Uri url) : this (title, url, null)
 		{
 		}		
 		
-		protected override string TimelineTitle { get { return title; } }
+		protected override string TimelineTitle { get { return Title; } }
 		
 		protected override void ResetState ()
 		{
-			if (reference != null){
+			if (ReferenceUser != null){
 				var profileRect = new RectangleF (PadX, 0, View.Bounds.Width-30-PadX*2, 100);
-				shortProfileView = new ShortProfileView (profileRect, reference.Id, true);
-				shortProfileView.PictureTapped += delegate { PictureViewer.Load (this, reference.Id); };
-				shortProfileView.UrlTapped += delegate { WebViewController.OpenUrl (this, reference.Url); };
-				shortProfileView.Tapped += delegate { ActivateController (new FullProfileView (reference.Id)); };
+				shortProfileView = new ShortProfileView (profileRect, ReferenceUser.Id, true);
+				shortProfileView.PictureTapped += delegate { PictureViewer.Load (this, ReferenceUser.Id); };
+				shortProfileView.UrlTapped += delegate { WebViewController.OpenUrl (this, ReferenceUser.Url); };
+				shortProfileView.Tapped += delegate { ActivateController (new FullProfileView (ReferenceUser.Id)); };
 				TableView.TableHeaderView = shortProfileView;
 			}
 		}
@@ -241,7 +244,7 @@ namespace TweetStation {
 				return;
 			SearchPlaceholder = "Search";
 			loaded = true;
-			Root = Util.MakeProgressRoot (title);
+			Root = Util.MakeProgressRoot (Title);
 			TriggerRefresh ();
 		}
 		
@@ -250,7 +253,7 @@ namespace TweetStation {
 		{
 			Account.Download (url, result => {
 				if (result == null){
-					Root = new RootElement (title) {
+					Root = new RootElement (Title) {
 						new Section () {
 							new StringElement ("Unable to download the timeline")
 						}
@@ -258,24 +261,57 @@ namespace TweetStation {
 					return;
 				}
 				ReloadComplete ();
-				
-				var tweetStream = Tweet.TweetsFromStream (new MemoryStream (result), reference);
-				
-				Root = new RootElement (title){
-					new Section () {
-						from tweet in tweetStream select (Element) new TweetElement (tweet)
-					}
-				};
+				PopulateRootFrom (result);
 			});
+		}
+		
+		protected abstract void PopulateRootFrom (byte [] data);
+	}
+	
+	public class StreamedTimelineViewController : StreamedViewController {
+		public StreamedTimelineViewController (string title, Uri url, User reference) : base (title, url, reference)
+		{
+		}
+		
+		public StreamedTimelineViewController (string title, Uri url) : this (title, url, null)
+		{
+		}		
+
+		protected override void PopulateRootFrom (byte [] result)
+		{
+			var tweetStream = Tweet.TweetsFromStream (new MemoryStream (result), ReferenceUser);
+			
+			Root = new RootElement (Title){
+				new Section () {
+					from tweet in tweetStream select (Element) new TweetElement (tweet)
+				}
+			};
+		}
+	}
+
+	public class StreamedUserViewController : StreamedViewController {
+		public StreamedUserViewController (string title, Uri url, User reference) : base (title, url, reference)
+		{
+		}
+
+		protected override void PopulateRootFrom (byte [] result)
+		{
+			var userStream = User.LoadUsers (new MemoryStream (result));
+			
+			Root = new RootElement (Title){
+				new Section () {
+					from user in userStream select (Element) new UserElement (user)
+				}
+			};
 		}
 	}
 	
-	public class TimelineElement : RootElement {
+	public class TimelineRootElement : RootElement {
 		User reference;
 		string nestedCaption;
 		string url;
 		
-		public TimelineElement (string nestedCaption, string caption, string url, User reference) : base (caption)
+		public TimelineRootElement (string nestedCaption, string caption, string url, User reference) : base (caption)
 		{
 			this.nestedCaption = nestedCaption;
 			this.reference = reference;
@@ -288,7 +324,24 @@ namespace TweetStation {
 				Account = TwitterAccount.CurrentAccount
 			};
 		}
+	}
+	
+	public class UserRootElement : RootElement {
+		User reference;
+		string url;
 		
+		public UserRootElement (User reference, string caption, string url) : base (caption)
+		{
+			this.reference = reference;
+			this.url = url;
+		}
+		
+		protected override UIViewController MakeViewController ()
+		{
+			return new StreamedUserViewController (reference.Screenname, new Uri (url), reference) {
+				Account = TwitterAccount.CurrentAccount
+			};
+		}
 	}
 }
 

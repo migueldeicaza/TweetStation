@@ -1,6 +1,7 @@
 using System;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using MonoTouch.Foundation;
 using MonoTouch.Dialog;
 using MonoTouch.UIKit;
@@ -46,7 +47,7 @@ namespace TweetStation
 				Root = Util.MakeError (diagMsg);
 				return;
 			}
-			user = User.LoadUsers (new MemoryStream (res));
+			user = User.LoadUsers (new MemoryStream (res)).FirstOrDefault ();
 			if (user == null)
 				Root = Util.MakeError (diagMsg);
 			else
@@ -68,8 +69,10 @@ namespace TweetStation
 				}
 			};
 			
-			var tweets = String.Format ("http://api.twitter.com/1/statuses/user_timeline.json?skip_user=true&id={0}", user.Id);
-			var favorites = String.Format ("http://api.twitter.com/version/favorites.json?id={0}", user.Id);
+			var tweetsUrl = String.Format ("http://api.twitter.com/1/statuses/user_timeline.json?skip_user=true&id={0}", user.Id);
+			var favoritesUrl = String.Format ("http://api.twitter.com/1/favorites.json?id={0}", user.Id);
+			var followersUrl = String.Format ("http://api.twitter.com/1/statuses/followers.json?id={0}", user.Id);
+			var friendsUrl = String.Format ("http://api.twitter.com/1/statuses/friends.json?id={0}", user.Id);
 			
 #if false
 			followButton = new StyledStringElement (FollowText, ToggleFollow){
@@ -84,10 +87,10 @@ namespace TweetStation
 			Root = new RootElement (user.Screenname){
 				main,
 				new Section () {
-					new TimelineElement (user.Screenname, Locale.Format ("{0:#,#} tweets", user.StatusesCount), tweets, user),
-					new TimelineElement (user.Screenname, Locale.Format ("{0:#,#} favorites", user.FavCount), favorites, null),
-					new FollowElement (user, Locale.Format ("{0:#,#} friends", user.FriendsCount), "friends"),
-					new FollowElement (user, Locale.Format ("{0:#,#} followers", user.FollowersCount), "followers"),
+					new TimelineRootElement (user.Screenname, Locale.Format ("{0:#,#} tweets", user.StatusesCount), tweetsUrl, user),
+					new TimelineRootElement (user.Screenname, Locale.Format ("{0:#,#} favorites", user.FavCount), favoritesUrl, null),
+					new UserRootElement (user, Locale.Format ("{0:#,#} friends", user.FriendsCount), friendsUrl),
+					new UserRootElement (user, Locale.Format ("{0:#,#} followers", user.FollowersCount), followersUrl),
 				},
 				sfollow,
 			};

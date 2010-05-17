@@ -42,15 +42,15 @@ namespace TweetStation
 		
 		void ReloadAccount ()
 		{
-			lists = new Section ("Lists") {
-				new StringElement ("New list", delegate { EditList (null, new ListDefinition ()); })
+			lists = new Section (Locale.GetText ("Lists")) {
+				new StringElement (Locale.GetText ("New list"), delegate { EditList (null, new ListDefinition ()); })
 			};
 			
-			Root = new RootElement ("Search") {
+			Root = new RootElement (Locale.GetText ("Search")) {
 				new Section () {
-					new RootElement ("Search"),
-					new RootElement ("Nearby"),
-					new RootElement ("Go to User", delegate { return new SearchUser (); })
+					new RootElement (Locale.GetText ("Search"), x => new TwitterTextSearch ()),
+					new RootElement (Locale.GetText ("Nearby")),
+					new RootElement (Locale.GetText ("Go to User"), x => new SearchUser ())
 				},
 				lists,
 			};
@@ -157,7 +157,7 @@ namespace TweetStation
 						string name = list ["full_name"];
 						string listname = list ["name"];
 						string url = "http://api.twitter.com/1/" + account.Username + "/lists/" + listname + "/statuses.json";
-						lists.Insert (pos++, UITableViewRowAnimation.Fade, new TimelineElement (name, name, url, null));
+						lists.Insert (pos++, UITableViewRowAnimation.Fade, new TimelineRootElement (name, name, url, null));
 					}
 				} catch (Exception e){
 					Console.WriteLine (e);
@@ -208,62 +208,5 @@ namespace TweetStation
 			};
 			ActivateController (editor);
 		}		
-	}
-	
-	// 
-	// A view controller that performs a searc
-	//
-	public class SearchViewController : BaseTimelineViewController {
-		string search;
-		
-		public SearchViewController (string search) : base (true)
-		{
-			this.search = search;
-		}
-
-		protected override string TimelineTitle {
-			get {
-				return search;
-			}
-		}
-		
-		protected override void ResetState ()
-		{
-			Root = Util.MakeProgressRoot (search);
-			TriggerRefresh ();
-		}
-		
-		public override void ReloadTimeline ()
-		{
-			TwitterAccount.CurrentAccount.Download (new Uri ("http://search.twitter.com/search.json?q=" + HttpUtility.UrlEncode (search)), res => {
-				if (res == null){
-					Root = Util.MakeError ("search");
-					return;
-				}
-				var tweetStream = Tweet.TweetsFromSearchResults (new MemoryStream (res));
-				
-				Root = new RootElement (search){
-					new Section () {
-						from tweet in tweetStream select (Element) new TweetElement (tweet)
-					}
-				};
-				ReloadComplete ();
-			});
-		}
-	}
-	
-	public class SearchElement : RootElement {
-		string query;
-		
-		public SearchElement (string caption, string query) : base (caption)
-		{
-			this.query = query;
-		}
-
-		protected override UIViewController MakeViewController ()
-		{
-			return new SearchViewController (query) { Account = TwitterAccount.CurrentAccount };
-		}
-		
 	}
 }

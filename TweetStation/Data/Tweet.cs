@@ -456,7 +456,7 @@ namespace TweetStation
 		// Loads the users from the stream, as a convenience, 
 		// returns the last user loaded (which during lookups is a single one)
 		//
-		static public User LoadUsers (Stream source)
+		static public IEnumerable<User> LoadUsers (Stream source)
 		{
 			JsonValue root;
 			
@@ -464,15 +464,15 @@ namespace TweetStation
 				root = (JsonValue) JsonValue.Load (source);
 			} catch (Exception e) {
 				Console.WriteLine (e);
-				return null;
+				yield break;
 			}
 			
-			User user = new User ();
 			foreach (JsonObject juser in root){
+				User user = new User ();
 				user.UpdateFromJson (juser);
 				Database.Main.Insert (user, "OR REPLACE");
+				yield return user;
 			}
-			return user;
 		}
 		
 		// 

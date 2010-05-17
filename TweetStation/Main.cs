@@ -24,7 +24,7 @@ namespace TweetStation
 		TwitterAccount account;
 		TimelineViewController main, mentions, messages;
 		SearchesViewController searches;
-		StreamedTimelineViewController favorites;
+		StreamedViewController favorites;
 		public UIView MainView;
 		
 		UINavigationController [] navigationRoots;

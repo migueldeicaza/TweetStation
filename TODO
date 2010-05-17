@@ -11,15 +11,13 @@
 		on demand.
 
 	TweetCell: Use only Draw calls?
+		The tweetie blog suggested so
 
 	On Load:
-		Hook up "Load more" and add better artwork
 		Custom control to show "Load more" with some better artwork
 		Support removal of the control on load, instead than on tap,
 		to give a visual cue of what is happening.
 
-	Search text
-		With history of previous searches
 	Nearby tweets
 	composer:
 		Sending Direct Messages
@@ -43,16 +41,13 @@
 	User profile:	
 		Red Color for Blocking users
 		Showing first joined twitter
-		Listing friends
-		Listing followers
 		Merge friends + followers in a single cell to save space?
 		Showing a map for the user profile
 		Show if the tweet is protected/user protected
+		Show pictures if we recognize the url
 	Account editor
 	New accont
 	Hooking up OAuth
-	Show timeline separator (like tweetie, after X hours shows a gap)
-		Reloads on gap
 	Remember last tab
 	FullProfileView
 		Needs an animating element while loading data from the network,
@@ -61,6 +56,16 @@
 
 	Direct Messages special view
 		Grouped per user, blend conversation together
+
+	UserCell for "Go to user" cell to show Screenname, fullname, icon
+		This automatically makes a 3 things nicer
+
+
+	Pagination support for StreamedUserViewController and StreamedTimelineViewController
+
+* Wanted
+
+	ActivityElement to support a message in addition to the activity
 
 * Http Stack
 
