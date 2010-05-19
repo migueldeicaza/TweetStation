@@ -22,6 +22,7 @@ namespace TweetStation
 		UIToolbar toolbar;
 		UILabel charsLeft;
 		internal UIBarButtonItem GpsButtonItem;
+		public event NSAction LookupUserRequested;
 		
 		public ComposerView (RectangleF bounds, Composer composer) : base (bounds)
 		{
@@ -44,6 +45,7 @@ namespace TweetStation
 			toolbar.SetItems (new UIBarButtonItem [] {
 				new UIBarButtonItem (UIBarButtonSystemItem.Trash, delegate { textView.Text = ""; } ) { Style = style },
 				new UIBarButtonItem (UIBarButtonSystemItem.FlexibleSpace, null),
+				new UIBarButtonItem (UIBarButtonSystemItem.Search, delegate { if (LookupUserRequested != null) LookupUserRequested (); }) { Style = style },
 				new UIBarButtonItem (UIBarButtonSystemItem.Camera, null, null) { Style = style },
 				GpsButtonItem }, false);	
 
@@ -95,7 +97,7 @@ namespace TweetStation
 		{
 			textView.Frame = new RectangleF (0, 0, bounds.Width, bounds.Height-44);
 			toolbar.Frame = new RectangleF (0, bounds.Height-44, bounds.Width, 44);
-			charsLeft.Frame = new RectangleF (160, bounds.Height-44, 50, 44);
+			charsLeft.Frame = new RectangleF (118, bounds.Height-44, 50, 44);
 		}
 		
 		public string Text { 
@@ -141,6 +143,11 @@ namespace TweetStation
 			
 			// Composer
 			composerView = new ComposerView (ComputeComposerSize (RectangleF.Empty), this);
+			composerView.LookupUserRequested += delegate {
+				PresentModalViewController (new UserSelector (userName => {
+					composerView.Text += ("@" + userName + " ");
+				}), true);
+			};
 			
 			// Add the views
 			NSNotificationCenter.DefaultCenter.AddObserver ("UIKeyboardWillShowNotification", KeyboardWillShow);

@@ -84,8 +84,10 @@ namespace TweetStation
 		public override void OnSearchTextChanged (string text)
 		{
 			base.OnSearchTextChanged (text);
-			SearchMirror.Text = text;
-			TableView.SetNeedsDisplay ();
+			if (SearchMirror != null){
+				SearchMirror.Text = text;
+				TableView.SetNeedsDisplay ();
+			}
 		}
 
 		public abstract SearchMirrorElement MakeMirror ();
@@ -94,9 +96,10 @@ namespace TweetStation
 			base.ViewWillAppear (animated);
 			
 			SearchMirror = MakeMirror ();
-			Section entries = new Section () {
-				SearchMirror
-			};
+			Section entries = new Section ();
+			if (SearchMirror != null)
+				entries.Add (SearchMirror);
+
 			PopulateSearch (entries);
 			
 			Root = new RootElement (Locale.GetText ("Search")){
@@ -113,8 +116,12 @@ namespace TweetStation
 			
 			if (element is SearchMirrorElement)
 				return ((SearchMirrorElement) element).Text;
-			else
+			else if (element is StringElement){
 				return ((StringElement) element).Caption;
+			} else if (element is UserElement) {
+				return ((UserElement) element).User.Screenname;
+			} else
+				throw new Exception ("Unknown item in SearchDialog");
 		}
 		
 		public abstract void PopulateSearch (Section entries);
@@ -132,13 +139,43 @@ namespace TweetStation
 		
 		public override void PopulateSearch (Section entries)
 		{
-			entries.Add (from x in Database.Main.Query<User> ("SELECT Screenname from User ORDER BY Screenname")
+			entries.Add (from x in Database.Main.Query<User> ("SELECT * from User ORDER BY Screenname")
 				             select (Element) new UserElement (x));
 		}
 		
 		public override void Selected (NSIndexPath indexPath)
 		{
 			ActivateController (new FullProfileView (GetItemText (indexPath)));
+		}
+	}
+	
+	// 
+	// The user selector is just like the user search, but does not activate the
+	// nested controller, instead it sets the value and dismisses the controller
+	//
+	public class UserSelector : SearchUser {
+		Action<string> userSelected;
+		
+		public UserSelector (Action<string> userSelected)
+		{
+			this.userSelected = userSelected;
+		}
+		
+		public override SearchMirrorElement MakeMirror ()
+		{
+			 return new SearchMirrorElement (Locale.GetText ("@{0}"));
+		}
+		
+		public override void Selected (NSIndexPath indexPath)
+		{
+			DismissModalViewControllerAnimated (true);
+			userSelected (GetItemText (indexPath));
+		}
+		
+		public override void FinishSearch ()
+		{
+			base.FinishSearch ();
+			DismissModalViewControllerAnimated (true);
 		}
 	}
 	
@@ -195,7 +232,7 @@ namespace TweetStation
 		{
 			this.format = format;
 			TextColor = UIColor.FromRGB (0.13f, 0.43f, 0.84f);
-			Font = UIFont.SystemFontOfSize (14);
+			Font = UIFont.BoldSystemFontOfSize (18);
 		}
 		
 		public override bool Matches (string test)

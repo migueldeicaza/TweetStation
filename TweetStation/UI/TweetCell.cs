@@ -99,10 +99,13 @@ namespace TweetStation
 			timeLabel.Text = Util.FormatTime (new TimeSpan (DateTime.UtcNow.Ticks - tweet.CreatedAt));
 			
 			var img = ImageStore.GetLocalProfilePicture (tweet.UserId);
-			if (img == null && tweet.UserId < 0){
-				// For the negative user ids, we can try looking up by screename now
+			
+			// 
+			// For fake UserIDs (returned by the search), we try looking up by screename now
+			//
+			if (img == null)
 				img = ImageStore.GetLocalProfilePicture (tweet.Screename);
-			}
+			
 			
 			if (img == null)
 				ImageStore.QueueRequestForPicture (tweet.UserId, tweet.PicUrl, this);

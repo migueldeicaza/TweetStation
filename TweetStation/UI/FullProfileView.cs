@@ -18,7 +18,7 @@ namespace TweetStation
 		User user;
 		bool following, blocking;
 		
-		public FullProfileView (long id) : base (UITableViewStyle.Grouped, null, true)
+			public FullProfileView (long id) : base (UITableViewStyle.Grouped, null, true)
 		{
 			user = User.FromId (id);
 			if (user == null)

@@ -34,8 +34,10 @@ namespace TweetStation {
 						
 						if (e.ButtonIndex == 0)
 							Composer.Main.NewTweet (this);
-						else
-							Composer.Main.Direct (this, "");
+						else {
+							var selector = new UserSelector (name => { Composer.Main.Direct (this, name); });
+							PresentModalViewController (selector, true);
+						}
 					};
 					sheet.ShowInView (Util.MainAppDelegate.MainView);
 				} else {
@@ -122,7 +124,6 @@ namespace TweetStation {
 		long? GetTableTweetId (int pos)
 		{
 			var mainSection = Root [0];
-			long lastId = 0;
 			if (mainSection.Elements.Count > pos){
 				return (mainSection.Elements [pos] as TweetElement).Tweet.Id;
 			} else
@@ -148,7 +149,9 @@ namespace TweetStation {
 			
 			Account.ReloadTimeline (kind, since, max_id, count => {
 				if (count == -1){
-					mainSection.Insert (insertPoint, new StringElement (Locale.Format ("Net failure on {0}", DateTime.Now)));
+					mainSection.Insert (insertPoint, new StyledStringElement (Locale.Format ("Net failure on {0}", DateTime.Now)){
+						Font = UIFont.SystemFontOfSize (14)
+					});
 					count = 1;
 				} else {
 					// If we find an overlapping value, the timeline is continous, otherwise, we offer to load more
@@ -158,7 +161,7 @@ namespace TweetStation {
 					long lastId = GetTableTweetId (insertPoint == 0 ? 0 : insertPoint-1) ?? 0;					
 					
 					continuous = false;
-					int newTweets = mainSection.Insert (insertPoint, UITableViewRowAnimation.None, FetchTweets (count, lastId, insertPoint));
+					mainSection.Insert (insertPoint, UITableViewRowAnimation.None, FetchTweets (count, lastId, insertPoint));
 					NavigationController.TabBarItem.BadgeValue = count.ToString ();
 
 					if (!continuous){

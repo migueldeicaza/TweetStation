@@ -1,4 +1,5 @@
 * Missing Stuff
+
 	Refresh user pictures when they change.  
 		Currently, once we download a pic, we never update it
 
@@ -22,7 +23,6 @@
 	composer:
 		Sending Direct Messages
 		Uploading pictures
-		Looking up the list of friends
 	TweetCell - Main Display
 		Show star info, geo info, and pic info?
 
@@ -56,10 +56,6 @@
 
 	Direct Messages special view
 		Grouped per user, blend conversation together
-
-	UserCell for "Go to user" cell to show Screenname, fullname, icon
-		This automatically makes a 3 things nicer
-
 
 	Pagination support for StreamedUserViewController and StreamedTimelineViewController
 

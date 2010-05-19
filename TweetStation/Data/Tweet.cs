@@ -245,8 +245,9 @@ namespace TweetStation
 		// searches have no relationship with the rest of the system
 		public static IEnumerable<Tweet> TweetsFromSearchResults (Stream stream)
 		{
+			// We pick a user ID large enough that it wont clash with actual users
+			long serial = 100000000000000;
 			JsonValue root;
-			long serial = 1;
 			
 			try {
 				root = JsonValue.Load (stream);
@@ -264,7 +265,7 @@ namespace TweetStation
 						Id = (long) result ["id"],
 						Text = ParseText (result),
 						Source = Util.StripHtml (result ["source"] ?? ""),
-						UserId = -(serial++),
+						UserId = serial++,
 						Screename = (string) result ["from_user"],
 						PicUrl = (string) result ["profile_image_url"]
 					};

@@ -1,6 +1,7 @@
 using System;
 using System.Drawing;
 using MonoTouch.Dialog;
+using MonoTouch.CoreGraphics;
 using MonoTouch.Foundation;
 using MonoTouch.UIKit;
 
@@ -18,6 +19,7 @@ namespace TweetStation
 		static UIFont followerFont = UIFont.SystemFontOfSize (followerSize);
 		static UIFont locationFont = UIFont.SystemFontOfSize (locationSize);
 		static UIFont urlFont = UIFont.BoldSystemFontOfSize (urlSize);
+		static CGPath borderPath = Graphics.MakeRoundedPath (75);
 		
 		UIImageView profilePic;
 		UIButton url;
@@ -34,10 +36,10 @@ namespace TweetStation
 			}
 			
 			// Pics are 73x73, but we will add a border.
-			profilePic = new UIImageView (new RectangleF (10, 10, 75, 75));
+			profilePic = new UIImageView (new RectangleF (10, 10, 73, 73));
 			profilePic.BackgroundColor = UIColor.Clear;
 			
-			profilePic.Image = ImageStore.RequestProfilePicture (userId, user.PicUrl, this);
+			profilePic.Image = ImageStore.RequestProfilePicture (-userId, user.PicUrl, this);
 			AddSubview (profilePic);
 			
 			url = UIButton.FromType (UIButtonType.Custom);
@@ -104,16 +106,22 @@ namespace TweetStation
 			UIColor.DarkGray.SetColor ();
 			DrawString (user.FollowersCount + " followers", new RectangleF (TextX, 34, w, followerSize), followerFont);
 
-			context.RestoreState ();
 			//url.Draw (rect);
+			
+			// Spicy border around the picture
+			context.RestoreState ();
+			
+			context.TranslateCTM (9, 9);
+			context.AddPath (borderPath);
+			context.SetRGBStrokeColor (0.5f, 0.5f, 0.5f, 1);
+			context.SetLineWidth (0.5f);
+			context.StrokePath ();
 		}
 
 		#region IImageUpdated implementation
 		public void UpdatedImage (long id)
 		{
-			var pic = ImageStore.GetLocalProfilePicture (id);
-			if (pic != null)
-				profilePic.Image = pic;
+			profilePic.Image = ImageStore.GetLocalProfilePicture (id);
 		}
 		#endregion
 	}

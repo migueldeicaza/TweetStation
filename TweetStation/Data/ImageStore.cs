@@ -22,7 +22,7 @@ namespace TweetStation
 	public static class ImageStore
 	{
 		const int MaxRequests = 4;
-		static string PicDir, SmallPicDir, TmpDir, RoundedPicDir; 
+		static string PicDir, RoundedPicDir, LargeRoundedPicDir; 
 		public readonly static UIImage DefaultImage;
 		static LRUCache<long,UIImage> cache;
 		
@@ -39,19 +39,18 @@ namespace TweetStation
 		
 		static ImageStore ()
 		{
-			PicDir = Path.Combine (Util.BaseDir, "Library/Caches/Pictures");
-			TmpDir = Path.Combine (Util.BaseDir, "tmp/downloads/");
-			SmallPicDir = Path.Combine (PicDir, "Scaled/");
+			PicDir = Path.Combine (Util.BaseDir, "Library/Caches/Pictures/");
 			RoundedPicDir = Path.Combine (PicDir, "Rounded/");
+			LargeRoundedPicDir = Path.Combine (PicDir, "LargeRounded/");
 			
-			if (!Directory.Exists (SmallPicDir))
-				Directory.CreateDirectory (SmallPicDir);
-			
-			if (!Directory.Exists (TmpDir))
-				Directory.CreateDirectory (TmpDir);
+			if (!Directory.Exists (PicDir))
+				Directory.CreateDirectory (PicDir);
 			
 			if (!Directory.Exists (RoundedPicDir))
 				Directory.CreateDirectory (RoundedPicDir);
+
+			if (!Directory.Exists (LargeRoundedPicDir))
+				Directory.CreateDirectory (LargeRoundedPicDir);
 
 			DefaultImage = UIImage.FromFile ("Images/default_profile_4_normal.png");
 			cache = new LRUCache<long,UIImage> (200);
@@ -60,6 +59,7 @@ namespace TweetStation
 			requestQueue = new Queue<long> ();
 		}
 		
+		// Negative numbers are medium size pictures
 		public static UIImage GetLocalProfilePicture (long id)
 		{
 			UIImage ret;
@@ -72,17 +72,25 @@ namespace TweetStation
 			
 			if (pendingRequests.ContainsKey (id))
 				return null;
+
+			string picfile;
+			if (id >= 0)
+				picfile = RoundedPicDir + id + ".png";
+			else
+				picfile = LargeRoundedPicDir + id + ".png";
 			
-			string picfile = RoundedPicDir + id + ".png";			
 			if (File.Exists (picfile)){
 				ret = UIImage.FromFileUncached (picfile);
 				lock (cache)
 					cache [id] = ret;
 				return ret;
-			} if (File.Exists (SmallPicDir + id + ".jpg"))
-				return RoundedPic (id);
-			else
-				return null;
+			} 
+			
+			picfile = PicDir + id + ".png";
+			if (File.Exists (PicDir + id + ".png"))
+				return RoundedPic (picfile, id);
+
+			return null;
 		}
 		
 		public static UIImage GetLocalProfilePicture (string screenname)
@@ -98,14 +106,20 @@ namespace TweetStation
 		{
 			var pic = GetLocalProfilePicture (id);
 			if (pic == null){
-				QueueRequestForPicture (id, optionalUrl, notify);
+				QueueRequestForPicture (id, optionalUrl, notify); 
+				
+				if (id < 0)
+					pic = GetLocalProfilePicture (-id);
+				if (pic != null)
+					return pic;
+				
 				return DefaultImage;
 			}
 			
 			return pic;
 		}
 		
-		public static Uri GetPicUrlFromId (long id, string optionalUrl)
+		static Uri GetPicUrlFromId (long id, string optionalUrl)
 		{
 			Uri url;
 			
@@ -115,6 +129,12 @@ namespace TweetStation
 					return null;
 				optionalUrl = user.PicUrl;
 			}
+			if (id < 0){
+				int _normalIdx = optionalUrl.LastIndexOf ("_normal");	
+				if (_normalIdx != -1)
+					optionalUrl = optionalUrl.Substring (0, _normalIdx) + optionalUrl.Substring (optionalUrl.Length-4);
+			}
+			
 			if (!Uri.TryCreate (optionalUrl, UriKind.Absolute, out url))
 				return null;
 			
@@ -136,7 +156,6 @@ namespace TweetStation
 			if (notify == null)
 				throw new ArgumentNullException ("notify");
 			
-			Console.WriteLine ("Requesting Pic: {0} at {1}", id, optionalUrl);
 			Uri url = GetPicUrlFromId (id, optionalUrl);
 			if (url == null)
 				return;
@@ -166,8 +185,7 @@ namespace TweetStation
 		{
 			do {
 				var buffer = new byte [4*1024];
-				
-				using (var file = new FileStream (SmallPicDir+ id + ".jpg", FileMode.Create, FileAccess.Write, FileShare.Read)) {
+				using (var file = new FileStream (PicDir + id + ".png", FileMode.Create, FileAccess.Write, FileShare.Read)) {
 	                	var req = WebRequest.Create (url) as HttpWebRequest;
 					
 	                using (var resp = req.GetResponse()) {
@@ -226,19 +244,21 @@ namespace TweetStation
 			         
 		}
 		
-		static UIImage RoundedPic (long id)
+		static UIImage RoundedPic (string picfile, long id)
 		{
-			lock (cache){
-				string smallpic = SmallPicDir + id + ".jpg";
-				
-				using (var pic = UIImage.FromFileUncached (smallpic)){
+			lock (cache){				
+				using (var pic = UIImage.FromFileUncached (picfile)){
 					if (pic == null)
 						return null;
 					
-					var cute = Graphics.RemoveSharpEdges (pic);
+					UIImage cute;
+					if (id > 0)
+						cute = Graphics.RemoveSharpEdges (pic);
+					else
+						cute = Graphics.PrepareForProfileView (pic);
 					var bytes = cute.AsPNG ();
 					NSError err;
-					bytes.Save (RoundedPicDir + id + ".png", false, out err);
+					bytes.Save ((id > 0 ? RoundedPicDir : LargeRoundedPicDir) + id + ".png", false, out err);
 					
 					// we might as well add it to the cache
 					cache [id] = cute;
