@@ -21,7 +21,6 @@
 
 	Nearby tweets
 	composer:
-		Sending Direct Messages
 		Uploading pictures
 	TweetCell - Main Display
 		Show star info, geo info, and pic info?

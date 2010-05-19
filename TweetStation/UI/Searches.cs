@@ -84,10 +84,8 @@ namespace TweetStation
 		public override void OnSearchTextChanged (string text)
 		{
 			base.OnSearchTextChanged (text);
-			if (SearchMirror != null){
-				SearchMirror.Text = text;
-				TableView.SetNeedsDisplay ();
-			}
+			SearchMirror.Text = text;
+			TableView.SetNeedsDisplay ();
 		}
 
 		public abstract SearchMirrorElement MakeMirror ();
@@ -96,9 +94,9 @@ namespace TweetStation
 			base.ViewWillAppear (animated);
 			
 			SearchMirror = MakeMirror ();
-			Section entries = new Section ();
-			if (SearchMirror != null)
-				entries.Add (SearchMirror);
+			Section entries = new Section () {
+				SearchMirror
+			};
 
 			PopulateSearch (entries);
 			
@@ -168,8 +166,10 @@ namespace TweetStation
 		
 		public override void Selected (NSIndexPath indexPath)
 		{
-			DismissModalViewControllerAnimated (true);
-			userSelected (GetItemText (indexPath));
+			var text = GetItemText (indexPath);
+			DismissModalViewControllerAnimated (false);
+			
+			userSelected (text);
 		}
 		
 		public override void FinishSearch ()

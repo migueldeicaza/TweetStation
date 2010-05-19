@@ -14,6 +14,7 @@ namespace TweetStation {
 	
 	public abstract class BaseTimelineViewController : DialogViewController
 	{
+		UserSelector selector;
 		TwitterAccount account;
 		protected TweetKind kind;
 		
@@ -35,7 +36,10 @@ namespace TweetStation {
 						if (e.ButtonIndex == 0)
 							Composer.Main.NewTweet (this);
 						else {
-							var selector = new UserSelector (name => { Composer.Main.Direct (this, name); });
+							selector = new UserSelector (name => { 
+								Composer.Main.Direct (this, name); 
+								selector = null;
+							});
 							PresentModalViewController (selector, true);
 						}
 					};
