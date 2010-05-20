@@ -27,8 +27,6 @@
 
 	Remove old tweets from the database, 2 week old tweets?
 	Showing User Pictures
-	Loading medium sized picture
-	Add picture shadow
 	Chicken noises for reload
 	Music for composing
 	Turning a search into a saved search
@@ -50,6 +48,38 @@
 	Remember last tab
 	FullProfileView
 		Needs an animating element while loading data from the network,
+
+	URL Shortening
+
+* Settings:
+
+	display name
+	date format 
+	Font size
+	Image quality
+	Sounds effects
+
+	Image service
+	Video service
+	URL shorter
+	Read Later
+	
+	User svcs:
+	     tweet blocker
+	     follow cost
+	     favstar.fm
+	     overlapr
+	     favrd
+	     tweetorites
+
+	Manual
+	About
+		Version
+		@migueldeicaza
+		@tweetstation
+		Legal	    
+		
+	Advanced
 
 * Post 1.0:
 

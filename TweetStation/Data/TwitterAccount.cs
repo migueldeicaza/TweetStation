@@ -153,7 +153,6 @@ namespace TweetStation
 		
 		WebClient GetClient ()
 		{
-			System.Net.ServicePointManager.Expect100Continue = false;
 			return new AuthenticatedWebClient (){
 				Credentials = new NetworkCredential (Username, Password),
 			};

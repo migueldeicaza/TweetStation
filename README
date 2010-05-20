@@ -17,6 +17,22 @@ TweetStation
 Design Goals
 ============
 
+   The Murray Hill Style
+
+	For years researchers from Bell Labs at Murray Hill published
+	various computer books on C, Unix, compilers and design that
+	were incredibly succinct.   They were amazing pieces of code
+	that were short and concise.  I call this style of code the
+	Murray Hill style.
+
+	The TweetStation code was not designed to be incredibly
+	extensible or reusable as-is.   I wrote this code to be succinct
+	and short, if it is reusable for other projects it is an 
+	unintended side effect.
+
+	If you want to reuse code from TweetStation, you will likely
+	want to alter it to suit your needs.
+
    Exceptions
 
 	The code uses try/catch extensively in the code in areas that
@@ -39,6 +55,14 @@ Design Goals
 	(Tweet parsing for example), so I just recycle some instances
 	sometimes.
 
+	The ImageStore is also specialized for Twitter use, for instance
+	the keys kept in the cache and on the file system are keyed by
+	a long value and not by the URL, so we are not forced to keep
+	the strings for the Urls in memory.
+
+	A general purpose image downloader/cache would use URLs or
+	something else.
+
    Singletons
 
 	There are a handful of singleton classes as well, I tend to
@@ -55,3 +79,21 @@ Design Goals
 	This is used both to post tweets and favorite posts, allowing
 	the settings to take place right away, even if there is no
 	network connectivity
+
+OAuth and xAuth
+===============
+
+	TweetStation supports both OAuth and xAuth authentication from
+	twitter.   Currently the source code is hardcoded to the values
+	that I obtained by registering my app at:
+
+		http://dev.twitter.com/apps
+
+	It uses OAuth by default and it does this by opening an embedded
+	UIWebView to let the user enter their login and password and 
+	granting the user authorization over at Twitter's site.
+
+	To improve the experience, Twitter offers access to xAuth, but
+	this requires application developers to request from Twitter
+	special access, you can enable this for your code if you
+	negotiate this.

@@ -148,8 +148,8 @@ namespace TweetStation {
 		
 		void DownloadTweets (int insertPoint, long? since, long? max_id)
 		{
-			if (kind != TweetKind.Home)
-				return;
+			//if (kind != TweetKind.Home)
+			//	return;
 			
 			Account.ReloadTimeline (kind, since, max_id, count => {
 				if (count == -1){
