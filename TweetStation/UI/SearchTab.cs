@@ -195,9 +195,9 @@ namespace TweetStation
 				string url = String.Format ("http://api.twitter.com/1/{0}/lists{1}.json?name={2}&mode={3}{4}", 
 				                            TwitterAccount.CurrentAccount.Username,
 				                            originalName == null ? "" : "/" + originalName,
-				                            HttpUtility.UrlEncode (name.Value),
+				                            OAuth.PercentEncode (name.Value),
 				                            privacy.RadioSelected == 0 ? "public" : "private",
-				                            description.Value == null ? "" : "&description=" + HttpUtility.UrlEncode (description.Value));
+				                            description.Value == null ? "" : "&description=" + OAuth.PercentEncode (description.Value));
 				TwitterAccount.CurrentAccount.Post (url, "");
 				
 			}), false);

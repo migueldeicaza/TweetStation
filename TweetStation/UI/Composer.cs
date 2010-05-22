@@ -313,13 +313,13 @@ namespace TweetStation
 			var account = TwitterAccount.CurrentAccount;
 			
 			if (directRecipient == null){
-				content.AppendFormat ("status={0}&source=TweetStation", HttpUtility.UrlEncode (composerView.Text));
+				content.AppendFormat ("status={0}", OAuth.PercentEncode (composerView.Text));
 				AppendLocation (content);
 				if (InReplyTo != 0)
 					content.AppendFormat ("&in_reply_to_status_id={0}", InReplyTo);	
 				account.Post ("http://twitter.com/statuses/update.json", content.ToString ());
 			} else {
-				content.AppendFormat ("text={0}&user={1}", HttpUtility.UrlEncode (composerView.Text), HttpUtility.UrlEncode (directRecipient));
+				content.AppendFormat ("text={0}&user={1}", OAuth.PercentEncode (composerView.Text), OAuth.PercentEncode (directRecipient));
 				AppendLocation (content);
 				account.Post ("http://twitter.com/direct_messages/new.json", content.ToString ());
 			}

@@ -97,7 +97,7 @@ namespace TweetStation
 			
 			string url = String.Format ("http://api.twitter.com/1/friendships/show.json?target_id={0}&source_screen_name={1}",
 			                            user.Id, 
-			                            HttpUtility.UrlEncode (TwitterAccount.CurrentAccount.Username));
+			                            OAuth.PercentEncode (TwitterAccount.CurrentAccount.Username));
 			TwitterAccount.CurrentAccount.Download (url, res => {
 				TableView.BeginUpdates ();
 				Root.Remove (sfollow);

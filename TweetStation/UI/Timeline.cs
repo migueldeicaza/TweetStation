@@ -165,7 +165,7 @@ namespace TweetStation {
 					long lastId = GetTableTweetId (insertPoint == 0 ? 0 : insertPoint-1) ?? 0;					
 					
 					continuous = false;
-					mainSection.Insert (insertPoint, UITableViewRowAnimation.None, FetchTweets (count, lastId, insertPoint));
+					int inserted = mainSection.Insert (insertPoint, UITableViewRowAnimation.None, FetchTweets (count, lastId, insertPoint));
 					NavigationController.TabBarItem.BadgeValue = count.ToString ();
 
 					if (!continuous){
@@ -176,6 +176,7 @@ namespace TweetStation {
 						});
 						mainSection.Insert (insertPoint+count, UITableViewRowAnimation.None, more);
 					}
+					
 				}
 				ReloadComplete ();
 				

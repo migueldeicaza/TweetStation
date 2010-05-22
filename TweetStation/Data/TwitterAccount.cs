@@ -254,21 +254,30 @@ namespace TweetStation
 			while ((n = source.Read (buffer, 0, buffer.Length)) != 0)
 				dest.Write (buffer, 0, n);
 		}
+
+		static void AddPart (Stream target, string boundary, bool newline, string header, string value)
+		{
+			if (newline)
+				target.Write (new byte [] { 13, 10 }, 0, 2);
 			
+			var enc = Encoding.UTF8.GetBytes (String.Format ("--{0}\r\n{1}\r\n\r\n", boundary, header));
+			target.Write (enc, 0, enc.Length);
+			if (value != null){
+				enc = Encoding.UTF8.GetBytes (value);
+				target.Write (enc, 0, enc.Length);
+			}
+		}
+		
 		//
-		// Creates the TwitPic form to upload the image
+		// Creates the YFrog form to upload the image
 		//
-		static Stream GenerateTwitPicForm (string boundary, Stream source)
+		static Stream GenerateYFrogFrom (string boundary, Stream source, string username)
 		{
 			var dest = new MemoryStream ();
-			var h1 = Encoding.UTF8.GetBytes (String.Format ("--{1}\r\nContent-Disposition: form-data; name=\"key\"\r\n\r\n{0}\r\n--{1}\r\n", OAuthConfig.TwitPicKey, boundary));
-			dest.Write (h1, 0, h1.Length);
-			
-			h1 = Encoding.UTF8.GetBytes ("Content-Disposition: form-data; name=\"media\"; filename=\"foo.png\"\r\nContent-Type: application/octet-stream\r\n\r\n");
-			dest.Write (h1, 0, h1.Length);
+			AddPart (dest, boundary, false, "Content-Disposition: form-data; name=\"media\"; filename=\"none.png\"\r\nContent-Type: application/octet-stream", null);
 			Copy (source, dest);
-			
-			var bbytes = Encoding.ASCII.GetBytes (String.Format ("--{0}--", boundary));
+			AddPart (dest, boundary, true, "Content-Disposition: form-data; name=\"username\"", username);
+			var bbytes = Encoding.ASCII.GetBytes (String.Format ("\r\n--{0}--", boundary));
 			dest.Write (bbytes, 0, bbytes.Length);
 
 			return dest;
@@ -278,13 +287,14 @@ namespace TweetStation
 		{
 			var boundary = "###" + Guid.NewGuid ().ToString () + "###";
 						
-			var url = new Uri ("http://api.twitpic.com/2/upload.json");
+			//var url = new Uri ("http://api.twitpic.com/2/upload.json");
+			var url = new Uri ("http://yfrog.com/api/upload");
 			var req = (HttpWebRequest) WebRequest.Create (url);
 			req.Method = "POST";
 			req.ContentType = "multipart/form-data; boundary=" + boundary;
 			OAuthAuthorizer.AuthorizeTwitPic (OAuthConfig, req, OAuthToken, OAuthTokenSecret);
 
-			Stream upload = GenerateTwitPicForm (boundary, source);
+			Stream upload = GenerateYFrogFrom (boundary, source, Username);
 			req.ContentLength = upload.Length;
 			using (var rs = req.GetRequestStream ())
 				Copy (upload, rs);
