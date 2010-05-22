@@ -8,6 +8,8 @@ using SQLite;
 using MonoTouch.UIKit;
 using MonoTouch.Foundation;
 using System.Text;
+using System.Collections.Specialized;
+using System.Json;
 
 namespace TweetStation
 {
@@ -20,6 +22,17 @@ namespace TweetStation
 	
 	public class TwitterAccount
 	{
+		// The OAuth configuration for TweetStation
+		public static OAuthConfig OAuthConfig = new OAuthConfig () {
+			ConsumerKey = "VSemGxR6ZNpo5IWY3dS8uQ",
+			TwitPicKey = "e66f585ed2c8be83be12a8f2be9a5981",
+			Callback = "http://tirania.org/tweetstation/oauth",
+			ConsumerSecret = "MEONRf8QqJDotJWioW1v1sSZVhXlOsTI85xu9eZfJf8",
+			RequestTokenUrl = "https://api.twitter.com/oauth/request_token", 
+			AccessTokenUrl = "https://twitter.com/oauth/access_token", 
+			AuthorizeUrl = "https://twitter.com/oauth/authorize"
+		};
+		
 		const string timelineUri = "http://api.twitter.com/1/statuses/home_timeline.json";
 		const string mentionsUri = "http://api.twitter.com/1/statuses/mentions.json";
 		const string directUri = "http://api.twitter.com/1/direct_messages.json";
@@ -32,7 +45,8 @@ namespace TweetStation
 		public long AccountId { get; set; }
 		public long LastLoaded { get; set; }
 		public string Username { get; set; }
-		public string Password { get; set; }
+		public string OAuthToken { get; set; }
+		public string OAuthTokenSecret { get; set; }
 		
 		static NSString invoker = new NSString ("");
 		
@@ -51,10 +65,25 @@ namespace TweetStation
 			return account;
 		}
 		
+		public static TwitterAccount Create (OAuthAuthorizer oauth)
+		{
+			var account = new TwitterAccount () {
+				Username = oauth.AccessScreenname,
+				AccountId = oauth.AccessId,
+				OAuthToken = oauth.AccessToken,
+				OAuthTokenSecret = oauth.AccessTokenSecret
+			};
+			Database.Main.Insert (account);
+			accounts [account.LocalAccountId] = account;
+			
+			return account;
+		}
+		
 		public static TwitterAccount CurrentAccount { get; set; }
 		
 		public static TwitterAccount GetDefaultAccount ()
-		{			
+		{		
+#if false
 			if (File.Exists ("/Users/miguel/tpass")){
 				using (var f = System.IO.File.OpenText ("/Users/miguel/tpass")){
 					var ta = new TwitterAccount () { 
@@ -70,10 +99,19 @@ namespace TweetStation
 					return ta;
 				}
 			}
-			
+#endif	
 			var account = FromId (Util.Defaults.IntForKey (DEFAULT_ACCOUNT));
+			if (account == null || string.IsNullOrEmpty (account.OAuthToken))
+				return null;
+			
 			CurrentAccount = account;
+			
 			return account;
+		}
+		
+		public static void SetDefault (TwitterAccount account)
+		{
+			Util.Defaults.SetInt (account.LocalAccountId, DEFAULT_ACCOUNT);
 		}
 
 		public void ReloadTimeline (TweetKind kind, long? since, long? max_id, Action<int> done)
@@ -87,10 +125,10 @@ namespace TweetStation
 			case TweetKind.Direct:
 				uri = directUri; break;
 			}
-			var req = new Uri (uri + "?count=200" + 
-			                   (since.HasValue ? "&since_id=" + since.Value : "") +
-			                   (max_id.HasValue ? "&max_id=" + max_id.Value : ""));
-			
+			var req = uri + "?count=200" + 
+				(since.HasValue ? "&since_id=" + since.Value : "") +
+				(max_id.HasValue ? "&max_id=" + max_id.Value : "");
+				
 			Download (req, result => {
 				if (result == null)
 					done (-1);
@@ -107,10 +145,10 @@ namespace TweetStation
 		}
 		
 		internal struct Request {
-			public Uri Url;
+			public string Url;
 			public Action<byte []> Callback;
 			
-			public Request (Uri url, Action<byte []> callback)
+			public Request (string url, Action<byte []> callback)
 			{
 				Url = url;
 				Callback = callback;
@@ -125,7 +163,7 @@ namespace TweetStation
 		///   Throttled data download from the specified url and invokes the callback with
 		///   the resulting data on the main UIKit thread.
 		/// </summary>
-		public void Download (Uri url, Action<byte []> callback)
+		public void Download (string url, Action<byte []> callback)
 		{
 			lock (queue){				
 				pending++;
@@ -153,12 +191,23 @@ namespace TweetStation
 		
 		WebClient GetClient ()
 		{
-			return new AuthenticatedWebClient (){
-				Credentials = new NetworkCredential (Username, Password),
-			};
+			if (OAuthTokenSecret != null)
+				return new WebClient (); 
+			return null;
+#if false
+			// In the future, for connecting to non-OAuth twitter sites
+			else 
+				return new AuthenticatedWebClient () {
+					Credentials = new NetworkCredentials (login, pass);
+			}
+#endif
 		}
 		
-		void Launch (Uri url, Action<byte []> callback)
+		public void AddOAuthHeader (string operation, string url, string data)
+		{
+		}
+		
+		void Launch (string url, Action<byte []> callback)
 		{
 			var client = GetClient ();
 	
@@ -186,13 +235,74 @@ namespace TweetStation
 				}
 			};
 			Util.PushNetworkActive ();
-			Console.WriteLine ("Fetching: {0}", url);
-			client.DownloadDataAsync (url);
+			Uri uri = new Uri (url);
+			OAuthAuthorizer.AuthorizeRequest (OAuthConfig, client, OAuthToken, OAuthTokenSecret, "GET", uri, null);
+			client.DownloadDataAsync (uri);
 		}
 		
 		public void SetDefaultAccount ()
 		{
 			NSUserDefaults.StandardUserDefaults.SetInt (LocalAccountId, DEFAULT_ACCOUNT); 
+		}
+
+		static void Copy (Stream source, Stream dest)
+		{
+			var buffer = new byte [4096];
+			int n = 0;
+
+			source.Position = 0;
+			while ((n = source.Read (buffer, 0, buffer.Length)) != 0)
+				dest.Write (buffer, 0, n);
+		}
+			
+		//
+		// Creates the TwitPic form to upload the image
+		//
+		static Stream GenerateTwitPicForm (string boundary, Stream source)
+		{
+			var dest = new MemoryStream ();
+			var h1 = Encoding.UTF8.GetBytes (String.Format ("--{1}\r\nContent-Disposition: form-data; name=\"key\"\r\n\r\n{0}\r\n--{1}\r\n", OAuthConfig.TwitPicKey, boundary));
+			dest.Write (h1, 0, h1.Length);
+			
+			h1 = Encoding.UTF8.GetBytes ("Content-Disposition: form-data; name=\"media\"; filename=\"foo.png\"\r\nContent-Type: application/octet-stream\r\n\r\n");
+			dest.Write (h1, 0, h1.Length);
+			Copy (source, dest);
+			
+			var bbytes = Encoding.ASCII.GetBytes (String.Format ("--{0}--", boundary));
+			dest.Write (bbytes, 0, bbytes.Length);
+
+			return dest;
+		}
+		
+		public void UploadPicture (Stream source, Action<string> completed)
+		{
+			var boundary = "###" + Guid.NewGuid ().ToString () + "###";
+						
+			var url = new Uri ("http://api.twitpic.com/2/upload.json");
+			var req = (HttpWebRequest) WebRequest.Create (url);
+			req.Method = "POST";
+			req.ContentType = "multipart/form-data; boundary=" + boundary;
+			OAuthAuthorizer.AuthorizeTwitPic (OAuthConfig, req, OAuthToken, OAuthTokenSecret);
+
+			Stream upload = GenerateTwitPicForm (boundary, source);
+			req.ContentLength = upload.Length;
+			using (var rs = req.GetRequestStream ())
+				Copy (upload, rs);
+
+			ThreadPool.QueueUserWorkItem (delegate {
+				string urlToPic = null;
+				try {
+					var response = (HttpWebResponse) req.GetResponse  ();
+					
+					var stream = response.GetResponseStream ();
+					var jresponse = JsonValue.Load (stream);
+					Console.WriteLine (jresponse.ToString ());
+					stream.Close ();
+				} catch (Exception e){
+					Console.WriteLine (e);
+				}
+				invoker.BeginInvokeOnMainThread (delegate { completed (urlToPic); });
+			});
 		}
 		
 		// 

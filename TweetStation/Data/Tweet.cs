@@ -349,7 +349,7 @@ namespace TweetStation
 		
 		public static void LoadFullTweet (long id, LoadCallback callback)
 		{
-			TwitterAccount.CurrentAccount.Download (new Uri ("http://api.twitter.com/1/statuses/show.json?id="+id), result => {
+			TwitterAccount.CurrentAccount.Download ("http://api.twitter.com/1/statuses/show.json?id="+id, result => {
 				if (result == null)
 					callback (null);
 				

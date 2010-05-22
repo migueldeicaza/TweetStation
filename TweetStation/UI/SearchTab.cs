@@ -76,7 +76,7 @@ namespace TweetStation
 				InsertCachedSearchResults ();
 				FetchTrends ();
 			} else {
-				account.Download (new Uri ("http://api.twitter.com/1/saved_searches.json"), result => {
+				account.Download ("http://api.twitter.com/1/saved_searches.json", result => {
 					if (result != null)
 						LoadSearches (result);
 				});
@@ -122,7 +122,7 @@ namespace TweetStation
 		//
 		void FetchTrends ()
 		{
-			account.Download (new Uri ("http://search.twitter.com/trends/current.json"), result => {
+			account.Download ("http://search.twitter.com/trends/current.json", result => {
 				try {
 					var json = JsonValue.Load (new MemoryStream (result));
 					var jroot = (JsonObject) json ["trends"];
@@ -145,7 +145,7 @@ namespace TweetStation
 		//
 		void FetchLists ()
 		{
-			account.Download (new Uri ("http://api.twitter.com/1/" + account.Username + "/lists.json"), res => {
+			account.Download ("http://api.twitter.com/1/" + account.Username + "/lists.json", res => {
 				if (res == null)
 					return;
 				

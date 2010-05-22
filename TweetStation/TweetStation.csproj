@@ -28,6 +28,7 @@
     <MtouchExtraArgs>-i18n=west</MtouchExtraArgs>
     <MtouchSdkVersion>3.2</MtouchSdkVersion>
     <MtouchI18n />
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhoneSimulator' ">
     <DebugType>none</DebugType>
@@ -38,6 +39,7 @@
     <MtouchLink>None</MtouchLink>
     <MtouchDebug>False</MtouchDebug>
     <MtouchSdkVersion>3.0</MtouchSdkVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|iPhone' ">
     <DebugSymbols>true</DebugSymbols>
@@ -50,6 +52,7 @@
     <CodesignKey>iPhone Developer</CodesignKey>
     <MtouchDebug>True</MtouchDebug>
     <MtouchSdkVersion>3.0</MtouchSdkVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhone' ">
     <DebugType>none</DebugType>
@@ -60,6 +63,7 @@
     <CodesignKey>iPhone Developer: Miguel de Icaza (6YW2BSTNRQ)</CodesignKey>
     <MtouchDebug>False</MtouchDebug>
     <MtouchSdkVersion>3.0</MtouchSdkVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -100,7 +104,8 @@
     <Compile Include="UI\Searches.cs" />
     <Compile Include="UI\User.cs" />
     <Compile Include="Dialogs\Settings.cs" />
-    <Compile Include="Utilities\OAuth.cs" />
+    <Compile Include="Utilities\OAuthAuthorizer.cs" />
+    <Compile Include="UI\Camera.cs" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="MainWindow.xib" />

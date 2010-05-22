@@ -7,6 +7,7 @@ using System.Json;
 using MonoTouch.Foundation;
 using MonoTouch.UIKit;
 using MonoTouch.Dialog;
+using System.Drawing;
 
 namespace TweetStation
 {
@@ -31,12 +32,20 @@ namespace TweetStation
 		
 		public override bool FinishedLaunching (UIApplication app, NSDictionary options)
 		{
-			System.Net.ServicePointManager.Expect100Continue = false;
-			
-			CreatePhoneGui ();
+			window.MakeKeyAndVisible ();
 			if (options != null){
 				var url = options.ObjectForKey (UIApplication.LaunchOptionsUrlKey) as NSUrl;
 				Console.WriteLine ("The url was: {0}", url.AbsoluteUrl);
+			}
+
+			System.Net.ServicePointManager.Expect100Continue = false;
+			
+			var defaultAccount = TwitterAccount.GetDefaultAccount ();
+			if (defaultAccount == null)
+				CreateDefaultAccount ();
+			else {
+				CreatePhoneGui ();
+				Account = defaultAccount;
 			}
 			return true;
 		}
@@ -50,7 +59,7 @@ namespace TweetStation
 			mentions = new TimelineViewController ("Mentions", TweetKind.Replies, false); 
 			messages = new TimelineViewController ("Messages", TweetKind.Direct, false);
 			searches = new SearchesViewController ();
-			favorites = new StreamedTimelineViewController ("Favorites", new Uri ("http://api.twitter.com/version/favorites.json"));
+			favorites = new StreamedTimelineViewController ("Favorites", "http://api.twitter.com/version/favorites.json");
 			
 			navigationRoots = new UINavigationController [5] {
 				new UINavigationController (main) {
@@ -97,14 +106,6 @@ namespace TweetStation
 			}
 #endif
 			tabbarController.SetViewControllers (navigationRoots, false);
-			window.MakeKeyAndVisible ();
-
-			var defaultAccount = TwitterAccount.GetDefaultAccount ();
-			if (defaultAccount == null){
-				var editor = new EditAccount (this, null, false);
-				tabbarController.PresentModalViewController (editor, false);
-			}
-			Account = defaultAccount;
 		}
 		
 		public TwitterAccount Account { 
@@ -140,5 +141,45 @@ namespace TweetStation
 				WebViewController.OpenUrl (controller, data);
 		}
 
+		//
+		// Creates the default account using OAuth
+		//
+		void CreateDefaultAccount ()
+		{
+			DialogViewController dvc = null;
+			
+			var root = new RootElement (Locale.GetText ("Login to Twitter")){
+				new Section (Locale.GetText ("\n\n\n" +
+				                             "Welcome to TweetStation!\n\n" +
+				                             "To get started, authorize\n" +
+				                             "TweetStation to get access\n" +  
+				                             "to your twitter account.\n\n")){
+					new StringElement ("Login to Twitter", delegate { StartLogin (dvc); })
+				}
+			};
+			
+			dvc = new DialogViewController (UITableViewStyle.Grouped, root);
+			window.AddSubview (dvc.View);
+		}
+		
+		void StartLogin (DialogViewController dvc)
+		{
+			var oauth = new OAuthAuthorizer (TwitterAccount.OAuthConfig);
+
+			if (oauth.AcquireRequestToken ()){
+				oauth.AuthorizeUser (dvc, delegate {
+					dvc.View.RemoveFromSuperview ();
+					CreatePhoneGui ();
+					SetDefaultAccount (oauth);
+				});
+			}
+		}
+		
+		public void SetDefaultAccount (OAuthAuthorizer oauth)
+		{
+			var newAccount = TwitterAccount.Create (oauth);
+			TwitterAccount.SetDefault (newAccount);
+			Account = newAccount;
+		}
 	}
 }

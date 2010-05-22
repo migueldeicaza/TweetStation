@@ -12,6 +12,7 @@ using MonoTouch.Foundation;
 using MonoTouch.UIKit;
 using MonoTouch.CoreLocation;
 using SQLite;
+using System.IO;
 
 namespace TweetStation
 {
@@ -23,6 +24,7 @@ namespace TweetStation
 		UILabel charsLeft;
 		internal UIBarButtonItem GpsButtonItem;
 		public event NSAction LookupUserRequested;
+		public NSDictionary PictureDict;
 		
 		public ComposerView (RectangleF bounds, Composer composer) : base (bounds)
 		{
@@ -46,7 +48,7 @@ namespace TweetStation
 				new UIBarButtonItem (UIBarButtonSystemItem.Trash, delegate { textView.Text = ""; } ) { Style = style },
 				new UIBarButtonItem (UIBarButtonSystemItem.FlexibleSpace, null),
 				new UIBarButtonItem (UIBarButtonSystemItem.Search, delegate { if (LookupUserRequested != null) LookupUserRequested (); }) { Style = style },
-				new UIBarButtonItem (UIBarButtonSystemItem.Camera, null, null) { Style = style },
+				new UIBarButtonItem (UIBarButtonSystemItem.Camera, delegate { TakePicture (); } ) { Style = style },
 				GpsButtonItem }, false);	
 
 			AddSubview (toolbar);
@@ -108,6 +110,45 @@ namespace TweetStation
 				textView.Text = value;
 			}
 		}
+		
+
+		void TakePicture ()
+		{
+			if (!UIImagePickerController.IsSourceTypeAvailable (UIImagePickerControllerSourceType.Camera)){
+				Camera.SelectPicture (composer, PictureSelected);
+				return;
+			}
+			
+			var sheet = new UIActionSheet ("");
+			sheet.AddButton (Locale.GetText ("Take a photo or video"));
+			sheet.AddButton (Locale.GetText ("From Album"));
+			sheet.AddButton (Locale.GetText ("Cancel"));
+			
+			sheet.CancelButtonIndex = 2;
+			sheet.Clicked += delegate(object sender, UIButtonEventArgs e) {
+				if (e.ButtonIndex == 2)
+					return;
+				
+				if (e.ButtonIndex == 0)
+					Camera.TakePicture (composer, PictureSelected);
+				else
+					Camera.SelectPicture (composer, PictureSelected);
+			};
+			sheet.ShowInView (Util.MainAppDelegate.MainView);
+		}
+		
+		void PictureSelected (NSDictionary dict)
+		{
+			PictureDict = dict;
+		}
+		
+		public void ReleaseResources ()
+		{
+			if (PictureDict == null)
+				return;
+			PictureDict.Dispose ();
+			PictureDict = null;
+		}
 	}
 	
 	/// <summary>
@@ -136,7 +177,7 @@ namespace TweetStation
 			navItem = new UINavigationItem ("");
 			var close = new UIBarButtonItem ("Close", UIBarButtonItemStyle.Plain, CloseComposer);
 			navItem.LeftBarButtonItem = close;
-			sendItem = new UIBarButtonItem ("Send", UIBarButtonItemStyle.Plain, Post);
+			sendItem = new UIBarButtonItem ("Send", UIBarButtonItemStyle.Plain, PostCallback);
 			navItem.RightBarButtonItem = sendItem;
 
 			navigationBar.PushNavigationItem (navItem, false);
@@ -215,7 +256,34 @@ namespace TweetStation
 			content.AppendFormat ("&lat={0}&long={1}", location.Coordinate.Latitude, location.Coordinate.Longitude);
 		}
 		
-		void Post (object sender, EventArgs a)
+		void PostCallback (object sender, EventArgs a)
+		{
+			var pictureDict = composerView.PictureDict;
+			if (pictureDict == null)
+				Post ();
+			
+			if ((pictureDict [UIImagePickerController.MediaType] as NSString) == "public.image"){
+				var img = pictureDict [UIImagePickerController.EditedImage] as UIImage;
+				if (img == null)
+					img = pictureDict [UIImagePickerController.OriginalImage] as UIImage;
+				
+				var jpeg = img.AsJPEG ();
+				Stream stream;
+				unsafe { stream = new UnmanagedMemoryStream ((byte*) jpeg.Bytes, jpeg.Length); }
+				TwitterAccount.CurrentAccount.UploadPicture (stream, PicUploadComplete);
+				Console.WriteLine (img);
+				Console.WriteLine (img);
+			} else {
+				NSUrl movieUrl = pictureDict [UIImagePickerController.MediaURL] as NSUrl;
+			}
+		}
+		
+		void PicUploadComplete (string name)
+		{
+			Console.WriteLine ("Here");
+		}
+		
+		void Post ()
 		{
 			var content = new StringBuilder ();
 			var account = TwitterAccount.CurrentAccount;
@@ -231,7 +299,7 @@ namespace TweetStation
 				AppendLocation (content);
 				account.Post ("http://twitter.com/direct_messages/new.json", content.ToString ());
 			}
-			CloseComposer (sender, a);
+			CloseComposer (this, EventArgs.Empty);
 		}
 		
 		void KeyboardWillShow (NSNotification notification)

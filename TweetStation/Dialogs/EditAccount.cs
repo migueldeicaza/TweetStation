@@ -51,7 +51,7 @@ namespace TweetStation
 				account = new TwitterAccount ();
 			else {
 				info.Login = account.Username;
-				info.Password = account.Password;
+				//info.Password = account.Password;
 			}
 			
 			var bc = new BindingContext (this, info, "Edit Account");
@@ -68,7 +68,7 @@ namespace TweetStation
 
 					if (errorMessage == null){
 						account.Username = info.Login;
-						account.Password = info.Password;
+						//account.Password = info.Password;
 						
 						if (newAccount)
 							Database.Main.Insert (account);

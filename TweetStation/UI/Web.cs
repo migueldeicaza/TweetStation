@@ -54,9 +54,8 @@ namespace TweetStation
 		public override void ViewWillAppear (bool animated)
 		{
 			base.ViewWillAppear (animated);
-			Console.WriteLine ("Frame: {0}", View.Frame);
 			toolbar.Frame =  new RectangleF (0, View.Frame.Height-44, View.Frame.Width, 44);
-			WebView.Frame = new RectangleF (0, 44, View.Frame.Width, View.Frame.Height-44);
+			WebView.Frame = new RectangleF (0, 0, View.Frame.Width, View.Frame.Height-44);
 		}
 		
 		public static void OpenUrl (DialogViewController parent, string url)

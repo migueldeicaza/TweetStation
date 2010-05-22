@@ -40,7 +40,7 @@ namespace TweetStation
 		
 		public override void ReloadTimeline ()
 		{
-			TwitterAccount.CurrentAccount.Download (new Uri ("http://search.twitter.com/search.json?q=" + HttpUtility.UrlEncode (search)), res => {
+			TwitterAccount.CurrentAccount.Download ("http://search.twitter.com/search.json?q=" + HttpUtility.UrlEncode (search), res => {
 				if (res == null){
 					Root = Util.MakeError ("search");
 					return;

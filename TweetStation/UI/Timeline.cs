@@ -213,10 +213,10 @@ namespace TweetStation {
 		protected User ReferenceUser;
 		protected string Title;
 		ShortProfileView shortProfileView;
-		Uri url;
+		string url;
 		bool loaded;
 		
-		public StreamedViewController (string title, Uri url, User reference) : base (true)
+		public StreamedViewController (string title, string url, User reference) : base (true)
 		{
 			this.url = url;
 			this.Title = title;
@@ -226,7 +226,7 @@ namespace TweetStation {
 			EnableSearch = true;
 		}
 		
-		public StreamedViewController (string title, Uri url) : this (title, url, null)
+		public StreamedViewController (string title, string url) : this (title, url, null)
 		{
 		}		
 		
@@ -276,11 +276,11 @@ namespace TweetStation {
 	}
 	
 	public class StreamedTimelineViewController : StreamedViewController {
-		public StreamedTimelineViewController (string title, Uri url, User reference) : base (title, url, reference)
+		public StreamedTimelineViewController (string title, string url, User reference) : base (title, url, reference)
 		{
 		}
 		
-		public StreamedTimelineViewController (string title, Uri url) : this (title, url, null)
+		public StreamedTimelineViewController (string title, string url) : this (title, url, null)
 		{
 		}		
 
@@ -297,7 +297,7 @@ namespace TweetStation {
 	}
 
 	public class StreamedUserViewController : StreamedViewController {
-		public StreamedUserViewController (string title, Uri url, User reference) : base (title, url, reference)
+		public StreamedUserViewController (string title, string url, User reference) : base (title, url, reference)
 		{
 		}
 
@@ -327,7 +327,7 @@ namespace TweetStation {
 		
 		protected override UIViewController MakeViewController ()
 		{						
-			return new StreamedTimelineViewController (nestedCaption, new Uri (url), reference) {
+			return new StreamedTimelineViewController (nestedCaption, url, reference) {
 				Account = TwitterAccount.CurrentAccount
 			};
 		}
@@ -345,7 +345,7 @@ namespace TweetStation {
 		
 		protected override UIViewController MakeViewController ()
 		{
-			return new StreamedUserViewController (reference.Screenname, new Uri (url), reference) {
+			return new StreamedUserViewController (reference.Screenname, url, reference) {
 				Account = TwitterAccount.CurrentAccount
 			};
 		}
