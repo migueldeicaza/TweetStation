@@ -111,7 +111,6 @@ namespace TweetStation
 			}
 		}
 		
-
 		void TakePicture ()
 		{
 			if (!UIImagePickerController.IsSourceTypeAvailable (UIImagePickerControllerSourceType.Camera)){
@@ -259,8 +258,10 @@ namespace TweetStation
 		void PostCallback (object sender, EventArgs a)
 		{
 			var pictureDict = composerView.PictureDict;
-			if (pictureDict == null)
+			if (pictureDict == null){
 				Post ();
+				return;
+			}
 			
 			if ((pictureDict [UIImagePickerController.MediaType] as NSString) == "public.image"){
 				var img = pictureDict [UIImagePickerController.EditedImage] as UIImage;
@@ -271,16 +272,39 @@ namespace TweetStation
 				Stream stream;
 				unsafe { stream = new UnmanagedMemoryStream ((byte*) jpeg.Bytes, jpeg.Length); }
 				TwitterAccount.CurrentAccount.UploadPicture (stream, PicUploadComplete);
-				Console.WriteLine (img);
-				Console.WriteLine (img);
 			} else {
-				NSUrl movieUrl = pictureDict [UIImagePickerController.MediaURL] as NSUrl;
+				//NSUrl movieUrl = pictureDict [UIImagePickerController.MediaURL] as NSUrl;
+				
+				// Future use, when we find a video host that does not require your Twitter login/password
 			}
 		}
 		
 		void PicUploadComplete (string name)
 		{
-			Console.WriteLine ("Here");
+			if (name == null){
+				var alert = new UIAlertView (Locale.GetText ("Error"), 
+	                Locale.GetText ("There was an error uploading the media, do you want to post without it?"), null, 
+                    Locale.GetText ("Cancel Post"), Locale.GetText ("Post"));
+				
+				alert.Clicked += delegate(object sender, UIButtonEventArgs e) {
+					if (e.ButtonIndex == 1)
+						Post ();
+				};
+				alert.Show ();
+			} else {
+				var text = composerView.Text.Trim ();
+				if (text.Length + name.Length > 140){
+					var alert = new UIAlertView ("Error",
+						Locale.GetText ("Message is too long"), null, null, "Ok");
+					alert.Show ();
+				} else {
+					text = text + " " + name;
+					if (text.Length > 140)
+						text = text.Trim ();
+					composerView.Text = text;
+					Post ();
+				}
+			}
 		}
 		
 		void Post ()

@@ -1,4 +1,6 @@
 * Missing Stuff
+	
+	Progress widget to overlay for some tasks?
 
 	Refresh user pictures when they change.  
 		Currently, once we download a pic, we never update it
