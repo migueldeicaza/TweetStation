@@ -83,7 +83,7 @@ namespace TweetStation
 		
 		void Reply (object sender, EventArgs args)
 		{
-			Composer.Main.ReplyTo (this, tweet);
+			Util.MainAppDelegate.Reply (this, tweet);
 		}
 		
 		void Direct (object sender, EventArgs args)
@@ -103,13 +103,14 @@ namespace TweetStation
 		}
 	}
 	
-	public class DetailTweetView : UIView {
+	public class DetailTweetView : UIView, IImageUpdated {
 		static UIImage off = UIImage.FromFileUncached ("Images/star-off.png");
 		static UIImage on = UIImage.FromFileUncached ("Images/star-on.png");
 		const int PadY = 4;
 		const int smallSize = 12;
 		TweetView tweetView;
 		UIButton buttonView;
+		UIImageView imageView;
 		
 		public DetailTweetView (RectangleF rect, Tweet tweet, TweetView.TappedEvent handler) : base (rect)
 		{
@@ -124,18 +125,30 @@ namespace TweetStation
 				tweetView.Tapped += handler;
 			
 			AddSubview (tweetView);
+			float y = tweetView.Frame.Height + PadY;
 			
-			rect.Y = tweetView.Frame.Height + PadY;
+			string thumbUrl;
+			var picUrl = FindPicUrl (tweet.Text, out thumbUrl);
+			if (picUrl != null){
+				imageView = new UIImageView (new RectangleF (0, y, 78, 78));
+				y += 90;
+				//image.AddTarget (delegate { Util.MainAppDelegate.Open (}, UIControlEvent.TouchUpInside);
+				AddSubview (imageView);
+				ImageStore.QueueRequestForPicture (serial++, thumbUrl, this);
+			} 
+			
+			rect.Y = y;
 			rect.Height = smallSize;
 			AddSubview (new UILabel (rect) {
 				Text = Util.FormatTime (new TimeSpan (DateTime.UtcNow.Ticks - tweet.CreatedAt)) + " ago from " + tweet.Source,
 				TextColor = UIColor.Gray,
 				Font = UIFont.SystemFontOfSize (smallSize)
 			});
-			
+			y += PadY;
+				
 			var f = Frame;
 			f.Y += PadY;
-			f.Height = tweetView.Frame.Height + PadY * 2 + smallSize + 2;
+			f.Height = y + PadY + smallSize + 2;
 			Frame = f;
 
 			if (tweet.Kind != TweetKind.Direct){
@@ -162,5 +175,39 @@ namespace TweetStation
 			buttonView.SetImage (image, UIControlState.Normal);
 			buttonView.SetImage (image, UIControlState.Selected);
 		}
+				
+		//
+		// Detects picture urls, returns the picture url, and if possible
+		// the thumbnail url
+		//
+		static string FindPicUrl (string text, out string thumbUrl)
+		{
+			const string prefix = "http://twitpic.com/";
+
+			int p = text.IndexOf (prefix);
+			if (p != -1){
+				string picUrl;
+				
+				var last = text.IndexOf (' ', p);
+				if (last == -1)
+					picUrl = text.Substring (p);
+				else
+					picUrl = text.Substring (p, last-p);
+				
+				thumbUrl = prefix + "show/thumb/" + picUrl.Substring (prefix.Length);
+				return picUrl;
+			}
+			thumbUrl = null;
+			return null;
+		}
+		
+		#region IImageUpdated implementation
+		// Fake user ID to take advantage of the queue system
+		static long serial = 200000000000000;
+		public void UpdatedImage (long id)
+		{
+			imageView.Image = ImageStore.GetLocalProfilePicture (id);
+		}
+		#endregion
 	}
 }

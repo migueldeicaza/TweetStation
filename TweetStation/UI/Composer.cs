@@ -361,9 +361,9 @@ namespace TweetStation
 			Activate (parent);
 		}
 		
-		public void ReplyTo (UIViewController parent, Tweet source)
+		public void ReplyTo (UIViewController parent, Tweet source, bool replyAll)
 		{
-			ResetComposer (Locale.GetText ("Reply Tweet"), "@" + source.Screename + " ");
+			ResetComposer (Locale.GetText ("Reply Tweet"), replyAll ? source.GetRecipients () : '@' + source.Screename + ' ');
 			InReplyTo = source.Id;
 			directRecipient = null;
 			

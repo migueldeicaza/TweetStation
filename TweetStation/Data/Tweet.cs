@@ -5,6 +5,7 @@ using System.IO;
 using System.Json;
 using System.Linq;
 using SQLite;
+using System.Text;
 
 namespace TweetStation
 {
@@ -237,7 +238,10 @@ namespace TweetStation
 					yield return tweet;
 			}
 		}
-
+		
+		// We pick a user ID large enough that it wont clash with actual users
+		static long serial = 100000000000000;
+		
 		// Returns an IEnumerable of tweets when parsing search
 		// results from twitter.   The returned Tweet objects are
 		// not really complete and have the UserId busted (negative
@@ -245,8 +249,6 @@ namespace TweetStation
 		// searches have no relationship with the rest of the system
 		public static IEnumerable<Tweet> TweetsFromSearchResults (Stream stream)
 		{
-			// We pick a user ID large enough that it wont clash with actual users
-			long serial = 100000000000000;
 			JsonValue root;
 			
 			try {
@@ -360,6 +362,30 @@ namespace TweetStation
 				callback (tweet);
 			});
 		}
+		
+		// Gets the recipients from this tweet
+		public string GetRecipients ()
+		{
+			string text = Text;
+			if (text.IndexOf ('@') == -1)
+				return '@' + Screename;
+			
+			var recipients = new List<string> ();
+
+			recipients.Add (Screename);
+			for (int i = 0; i < text.Length; i++){
+				if (text [i] != '@')
+					continue;
+				
+				var res = new StringBuilder ();
+				for (i++; i < text.Length && Char.IsLetterOrDigit (text [i]); i++){
+					res.Append (text [i]);
+				}
+				recipients.Add (res.ToString ());
+			}
+			return "@" + String.Join (" @", recipients.ToArray ()) + " ";
+		}
+		
 		
 		public override string ToString ()
 		{

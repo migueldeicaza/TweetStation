@@ -12,32 +12,30 @@ namespace TweetStation
 	///   and urls
 	/// </summary>
 	public class TweetView : UIView {
-		const int fontHeight = 17;
+		public float Height { get; private set; }
+
 		UIFont regular = UIFont.SystemFontOfSize (fontHeight);
 		UIFont bold = UIFont.BoldSystemFontOfSize (fontHeight);
 		
 		string text;
 		RectangleF lastRect;
 		List<Block> blocks;
-		public float Height { get; private set; }
 		Block highlighted = null;
+
+		const int fontHeight = 17;
 		
 		public TweetView (RectangleF frame, string text) : base (frame)
 		{
 			blocks = new List<Block> ();
-
-			Update (text);
 			lastRect = RectangleF.Empty;
+
+			this.text = text;
+			Height = Layout ();
 			
+			// Update our Frame size
 			var f = Frame;
 			f.Height = Height;
 			Frame = f;
-		}
-		
-		public void Update (string text)
-		{
-			this.text = text;
-			Height = Layout ();
 		}
 		
 		class Block {
@@ -213,6 +211,5 @@ namespace TweetStation
 		{
 			Track ((touches.AnyObject as UITouch).LocationInView (this));
 		}
-
 	}
 }

@@ -140,7 +140,42 @@ namespace TweetStation
 			} else 
 				WebViewController.OpenUrl (controller, data);
 		}
-
+		
+		// Replies to a tweet
+		public void Reply (UIViewController controller, Tweet tweet)
+		{
+			int p = tweet.Text.IndexOf ('@');
+			if (p == -1){
+				Composer.Main.ReplyTo (controller, tweet, false);
+				return;
+			}
+			
+			// If we have a '@' make sure it is not just @user
+			// but someone else is included
+			if (tweet.Text.Substring (p+1).StartsWith (TwitterAccount.CurrentAccount.Username)){
+				p = tweet.Text.IndexOf ('@', p + 1 + TwitterAccount.CurrentAccount.Username.Length);
+				if (p == -1){
+					Composer.Main.ReplyTo (controller, tweet, false);
+					return;
+				}
+			}
+			
+			var sheet = new UIActionSheet ("");
+			sheet.AddButton (Locale.GetText ("Reply"));
+			sheet.AddButton (Locale.GetText ("Reply All"));
+			sheet.AddButton (Locale.GetText ("Cancel"));
+			sheet.CancelButtonIndex = 2;
+			
+			sheet.Clicked += delegate(object s, UIButtonEventArgs e) {
+				if (e.ButtonIndex == 0)
+					Composer.Main.ReplyTo (controller, tweet, false);
+				else if (e.ButtonIndex == 1){
+					Composer.Main.ReplyTo (controller, tweet, true);
+				}
+			};
+			sheet.ShowInView (Util.MainAppDelegate.MainView);
+		}
+		
 		//
 		// Creates the default account using OAuth
 		//
