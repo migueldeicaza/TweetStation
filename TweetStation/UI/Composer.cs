@@ -341,6 +341,12 @@ namespace TweetStation
 			return new RectangleF (0, nav.Height, view.Width, view.Height-kbdBounds.Height-nav.Height);
 		}
 		
+		public override void ViewWillAppear (bool animated)
+		{
+			base.ViewWillAppear (animated);
+			composerView.textView.BecomeFirstResponder ();
+		}
+		
 		void Activate (UIViewController parent)
 		{
 			previousController = parent;

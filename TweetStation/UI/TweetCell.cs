@@ -126,7 +126,7 @@ namespace TweetStation
 		public TweetCell (UITableViewCellStyle style, NSString ident, Tweet tweet) : base (style, ident)
 		{
 			this.tweet = tweet;
-			SelectionStyle = UITableViewCellSelectionStyle.Blue; //None;
+			SelectionStyle = UITableViewCellSelectionStyle.Blue;
 			
 			imageView = new UIImageView (new RectangleF (PicXPad, PicYPad, PicSize, PicSize));
 			retweetView = new UIImageView (new RectangleF (PicXPad + 30, PicYPad + 30, 23, 23));
@@ -269,13 +269,9 @@ namespace TweetStation
 
 		public override bool Matches (string text)
 		{
-			try {
-			return Tweet.Screename.IndexOf (text, StringComparison.CurrentCultureIgnoreCase) != -1 || 
-				Tweet.Text.IndexOf (text, StringComparison.InvariantCultureIgnoreCase) != -1 || 
-				Tweet.Retweeter != null ? Tweet.Retweeter.IndexOf (text, StringComparison.CurrentCultureIgnoreCase) != -1 : false;
-			} catch {
-				return false;
-			}
+			return (Tweet.Screename.IndexOf (text, StringComparison.CurrentCultureIgnoreCase) != -1) || 
+				(Tweet.Text.IndexOf (text, StringComparison.InvariantCultureIgnoreCase) != -1) || 
+				(Tweet.Retweeter != null ? Tweet.Retweeter.IndexOf (text, StringComparison.CurrentCultureIgnoreCase) != -1 : false);
 		}
 		
 		#region IElementSizing implementation
