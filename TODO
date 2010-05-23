@@ -1,6 +1,27 @@
+* Usage Observations
+
+	Scrolling seems slow, perhaps because of the animation
+	for the images?   Seems to be because we are loading
+	a lot of images at once, once loaded it seems fine.
+
+	Searching is broken when searching for text.
+	Only Load More tweets is shown
+
+	Number of recent tweets stays there, we should make those
+	go away when we reach the top cell.
+
+	On the Composer, if you select a user and come back the
+	keyboard is gone, probably with camera too
+
+	Gradients on top and bottom of a tweet cell
+
 *  Missing Stuff
 	
 	Progress widget to overlay for some tasks?
+
+	When I post, the icon should be on right?
+
+	Include "themes" for rendering the bubbles?
 
 	Refresh user pictures when they change.  
 		Currently, once we download a pic, we never update it
@@ -89,6 +110,8 @@
 		Grouped per user, blend conversation together
 
 	Pagination support for StreamedUserViewController and StreamedTimelineViewController
+
+	Cell "themes"
 
 * Wanted
 

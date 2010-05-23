@@ -166,11 +166,11 @@ namespace TweetStation {
 					
 					continuous = false;
 					int inserted = mainSection.Insert (insertPoint, UITableViewRowAnimation.None, FetchTweets (count, lastId, insertPoint));
-					NavigationController.TabBarItem.BadgeValue = count.ToString ();
+					NavigationController.TabBarItem.BadgeValue = (count > 1) ? (count-1).ToString () : null;
 
 					if (!continuous){
 						Element more = null;
-						more = new StringElement ("Load more tweets", delegate {
+						more = new StringElement (Locale.GetText ("Load more tweets"), delegate {
 							DownloadTweets (insertPoint + count, null, GetTableTweetId (insertPoint + count-1)-1);
 							mainSection.Remove (more);
 						});

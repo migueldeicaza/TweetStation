@@ -38,7 +38,9 @@ namespace TweetStation
 			shortProfileView.UrlTapped += delegate { WebViewController.OpenUrl (this, User.FromId (tweet.UserId).Url); };
 			
 			var main = new Section (shortProfileView){
-					new DetailTweetView (detailRect, tweet, ContentHandler)
+				new UIViewElement (null, new DetailTweetView (detailRect, tweet, ContentHandler), false) { 
+					Flags = UIViewElement.CellFlags.DisableSelection 
+				}
 			};			
 			if (tweet.InReplyToStatus != 0){
 				var in_reply = new ConversationRootElement (Locale.Format ("In reply to: {0}", tweet.InReplyToUserName), tweet);

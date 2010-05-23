@@ -38,8 +38,9 @@
     <WarningLevel>4</WarningLevel>
     <MtouchLink>None</MtouchLink>
     <MtouchDebug>False</MtouchDebug>
-    <MtouchSdkVersion>3.0</MtouchSdkVersion>
+    <MtouchSdkVersion>3.2</MtouchSdkVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <MtouchI18n />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|iPhone' ">
     <DebugSymbols>true</DebugSymbols>
@@ -62,8 +63,9 @@
     <WarningLevel>4</WarningLevel>
     <CodesignKey>iPhone Developer: Miguel de Icaza (6YW2BSTNRQ)</CodesignKey>
     <MtouchDebug>False</MtouchDebug>
-    <MtouchSdkVersion>3.0</MtouchSdkVersion>
+    <MtouchSdkVersion>3.2</MtouchSdkVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <MtouchI18n />
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />

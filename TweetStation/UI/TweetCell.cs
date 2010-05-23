@@ -249,7 +249,7 @@ namespace TweetStation
 			return Tweet.Screename.IndexOf (text, StringComparison.CurrentCultureIgnoreCase) != -1 || 
 				Tweet.Text.IndexOf (text, StringComparison.InvariantCultureIgnoreCase) != -1 || 
 				Tweet.Retweeter != null ? Tweet.Retweeter.IndexOf (text, StringComparison.CurrentCultureIgnoreCase) != -1 : false;
-			} catch (Exception e){
+			} catch {
 				return false;
 			}
 		}

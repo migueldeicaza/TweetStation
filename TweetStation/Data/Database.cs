@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using SQLite;
 
 namespace TweetStation
@@ -16,7 +17,7 @@ namespace TweetStation
 		{
 			// For debugging
 			//System.IO.File.Delete ("tweets.db");
-			Main = new Database ("tweets.db");
+			Main = new Database (Util.BaseDir + "/Documents/tweets.db");
 		}
 		
 		static public Database Main { get; private set; }
