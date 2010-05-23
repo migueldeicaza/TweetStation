@@ -181,7 +181,7 @@ namespace TweetStation {
 				ReloadComplete ();
 				
 				// Only scroll to last unread if this was not an intermediate "Load more tweets"
-				if (insertPoint == 0)
+				if (insertPoint == 0 && count > 0)
 					TableView.ScrollToRow (NSIndexPath.FromRowSection (count-1, 0), UITableViewScrollPosition.Middle, false);
 			});
 		}

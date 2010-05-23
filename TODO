@@ -1,8 +1,6 @@
 * Usage Observations
 
-	Scrolling seems slow, perhaps because of the animation
-	for the images?   Seems to be because we are loading
-	a lot of images at once, once loaded it seems fine.
+	Chagne the button bar to have three options: Reply, Retweet, More
 
 	Searching is broken when searching for text.
 	Only Load More tweets is shown
@@ -14,6 +12,10 @@
 	keyboard is gone, probably with camera too
 
 	Gradients on top and bottom of a tweet cell
+
+	Activity Indicator has wrong proportions?
+
+	Retweets not working?
 
 *  Missing Stuff
 	
@@ -33,9 +35,6 @@
 		When favoriting/unfavoriting, we need to add those
 		tweets to Favorites tab, or recompute that tab
 		on demand.
-
-	TweetCell: Use only Draw calls?
-		The tweetie blog suggested so
 
 	On Load:
 		Custom control to show "Load more" with some better artwork
@@ -67,7 +66,6 @@
 		Show pictures if we recognize the url
 	 Account editor
 	New accont
-	Hooking up OAuth
 	Remember last tab
 	FullProfileView
 		Needs an animating element while loading data from the network,
@@ -112,6 +110,8 @@
 	Pagination support for StreamedUserViewController and StreamedTimelineViewController
 
 	Cell "themes"
+
+	Group user names by letter, and show the letter selector on right
 
 * Wanted
 

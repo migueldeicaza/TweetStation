@@ -11,6 +11,7 @@ using System;
 using System.Drawing;
 using MonoTouch.UIKit;
 using MonoTouch.Foundation;
+using MonoTouch.CoreGraphics;
 using MonoTouch.Dialog;
 
 namespace TweetStation
@@ -25,8 +26,7 @@ namespace TweetStation
 		// Do these as static to reuse across all instances
 		const int userSize = 14;
 		const int textSize = 15;
-		const int timeSize = 10;
-		
+		const int timeSize = 12;
 		
 		const int PicSize = 48;
 		const int PicXPad = 10;
@@ -42,11 +42,31 @@ namespace TweetStation
 		static UIFont userFont = UIFont.BoldSystemFontOfSize (userSize);
 		static UIFont textFont = UIFont.SystemFontOfSize (textSize);
 		static UIFont timeFont = UIFont.SystemFontOfSize (timeSize);
+		static UIColor textColor = UIColor.Black;
+		static UIColor timeColor = UIColor.FromRGB (147, 170, 204);
 		
 		Tweet tweet;
-		UILabel userLabel, textLabel, timeLabel;
 		UIImageView imageView;
 		UIImageView retweetView;
+		
+		string userText;
+		static CGGradient bottomGradient, topGradient;
+		
+		static TweetCell ()
+		{
+			using (var rgb = CGColorSpace.CreateDeviceRGB()){
+				float [] colorsBottom = {
+					1, 1, 1, 1f,
+					0.96f, 0.96f, 0.96f, 1f
+				};
+				bottomGradient = new CGGradient (rgb, colorsBottom, null);
+				float [] colorsTop = {
+					0.96f, 0.96f, 0.96f, 1,
+					1, 1, 1, 1
+				};
+				topGradient = new CGGradient (rgb, colorsTop, null);
+			}
+		}
 		
 		public TweetCell (IntPtr handle) : base (handle) {
 			Console.WriteLine (Environment.StackTrace);
@@ -58,30 +78,10 @@ namespace TweetStation
 			this.tweet = tweet;
 			SelectionStyle = UITableViewCellSelectionStyle.Blue;
 			
-			userLabel = new UILabel () {
-				TextAlignment = UITextAlignment.Left,
-				Font = userFont,
-			};
-			
-			textLabel = new UILabel () {
-				Font = textFont,
-				TextAlignment = UITextAlignment.Left,
-				Lines = 0,
-				LineBreakMode = UILineBreakMode.WordWrap
-			};
-			timeLabel = new UILabel () {
-				Font = timeFont,
-				TextColor = UIColor.LightGray,
-				TextAlignment = UITextAlignment.Right,
-				BackgroundColor = UIColor.Clear
-			};
 			imageView = new UIImageView (new RectangleF (PicXPad, PicYPad, PicSize, PicSize));
 			retweetView = new UIImageView (new RectangleF (PicXPad + 30, PicYPad + 30, 23, 23));
 			UpdateCell (tweet);
 			
-			ContentView.Add (userLabel);
-			ContentView.Add (textLabel);
-			ContentView.Add (timeLabel);
 			ContentView.Add (imageView);
 			ContentView.Add (retweetView);
 		}
@@ -93,25 +93,18 @@ namespace TweetStation
 		public void UpdateCell (Tweet tweet)
 		{
 			this.tweet = tweet;
-			
-			userLabel.Text = tweet.Retweeter == null ? tweet.Screename : tweet.Screename + "→" + tweet.Retweeter;
-			textLabel.Text = tweet.Text;
-			timeLabel.Text = Util.FormatTime (new TimeSpan (DateTime.UtcNow.Ticks - tweet.CreatedAt));
-			
-			var img = ImageStore.GetLocalProfilePicture (tweet.UserId);
+			userText = tweet.Retweeter == null ? tweet.Screename : tweet.Screename + "→" + tweet.Retweeter;
 			
 			// 
 			// For fake UserIDs (returned by the search), we try looking up by screename now
 			//
+			var img = ImageStore.GetLocalProfilePicture (tweet.UserId);
 			if (img == null)
 				img = ImageStore.GetLocalProfilePicture (tweet.Screename);
-			
-			
 			if (img == null)
 				ImageStore.QueueRequestForPicture (tweet.UserId, tweet.PicUrl, this);
 			else
 				tweet.PicUrl = null;
-			
 			imageView.Image = img == null ? ImageStore.DefaultImage : img;
 			
 			// If no retweet, hide our image.
@@ -143,35 +136,23 @@ namespace TweetStation
 			}
 		}
 		
-		// 
-		// Layouts the views, called before the cell is shown
-		//
-		
-		public override void LayoutSubviews ()
+		public override void Draw (RectangleF rect)
 		{
-			base.LayoutSubviews ();
-			var full = ContentView.Bounds;
-			var tmp = full;
-
-			tmp.Width -= TextLeftStart+TextHeightPadding+TimeWidth;
-			tmp.X = TextLeftStart;
-			tmp.Y = TextHeightPadding;
-			tmp.Height = userSize;
-			userLabel.Frame = tmp;
+	        var context = UIGraphics.GetCurrentContext ();
+		
+			var bounds = ContentView.Bounds;
+			var midx = bounds.X/2;
+			context.DrawLinearGradient (bottomGradient, new PointF (midx, bounds.Height-17), new PointF (midx, bounds.Height), 0);
+			context.DrawLinearGradient (topGradient, new PointF (midx, 1), new PointF (midx, 3), 0);
 			
-			tmp = full;
-			tmp.X = TextLeftStart;
-			tmp.Y = TextHeightPadding;
-			tmp.Height = timeSize;
-			tmp.Width -= TextLeftStart+TextHeightPadding;
-			timeLabel.Frame = tmp;
+			textColor.SetColor ();			
+			DrawString (userText, new RectangleF (TextLeftStart, TextHeightPadding, bounds.Width-TextLeftStart-TextHeightPadding-TimeWidth, userSize), userFont);
+			DrawString (tweet.Text, new RectangleF (TextLeftStart, bounds.Y + TextYOffset, bounds.Width-TextLeftStart-TextHeightPadding, bounds.Height-TextYOffset), textFont, UILineBreakMode.WordWrap);
 			
-			tmp = full;
-			tmp.Y += TextYOffset;
-			tmp.Height -= TextYOffset;
-			tmp.X = TextLeftStart;
-			tmp.Width -= TextLeftStart+TextHeightPadding;
-			textLabel.Frame = tmp;
+			timeColor.SetColor ();
+			DrawString (Util.FormatTime (new TimeSpan (DateTime.UtcNow.Ticks - tweet.CreatedAt)), new RectangleF (TextLeftStart, TextHeightPadding, bounds.Width-TextLeftStart-TextHeightPadding, timeSize),
+			            timeFont, UILineBreakMode.Clip, UITextAlignment.Right);
+			
 		}
 		
 		void IImageUpdated.UpdatedImage (long onId)
