@@ -2,16 +2,10 @@
 
 	Chagne the button bar to have three options: Reply, Retweet, More
 
-	Searching is broken when searching for text.
 	Only Load More tweets is shown
-
-	Number of recent tweets stays there, we should make those
-	go away when we reach the top cell.
 
 	On the Composer, if you select a user and come back the
 	keyboard is gone, probably with camera too
-
-	Gradients on top and bottom of a tweet cell
 
 	Activity Indicator has wrong proportions?
 

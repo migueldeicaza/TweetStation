@@ -83,7 +83,7 @@ namespace TweetStation {
 				Root.Dispose ();
 
 			ResetState ();
-		}
+		}		
 	}
 	
 	public class TimelineViewController : BaseTimelineViewController {
@@ -199,6 +199,34 @@ namespace TweetStation {
 			SearchPlaceholder = Locale.Format ("Search {0}", TimelineTitle);
 			if (Util.NeedsUpdate ("update" + kind, TimeSpan.FromSeconds (120)))
 				TriggerRefresh ();
+		}
+		
+		// 
+		// Override the default source so we can track when we reach the top
+		// and in that case, clear the badge value
+		//
+		public override Source CreateSizingSource (bool unevenRows)
+		{
+			// we are always uneven for TimelineViewControllers
+			return new ScrollTrackingSizingSource (this);
+		}
+		
+		class ScrollTrackingSizingSource : DialogViewController.SizingSource {
+			public ScrollTrackingSizingSource (DialogViewController dvc) : base (dvc)
+			{
+			}
+			
+			public override void Scrolled (UIScrollView scrollView)
+			{
+				var point = Container.TableView.ContentOffset;
+				
+				if (point.Y <= 10){
+					(Container as TimelineViewController).NavigationController.TabBarItem.BadgeValue = null;
+				}
+				
+				base.Scrolled (scrollView);
+			}
+			
 		}
 	}
 	
