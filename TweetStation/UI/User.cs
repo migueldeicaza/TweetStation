@@ -23,6 +23,7 @@ namespace TweetStation
 			TextLabel.Text = user.Screenname;
 			DetailTextLabel.Text = user.Name;
 			ImageView.Image = ImageStore.RequestProfilePicture (user.Id, user.PicUrl, this);
+			SetNeedsDisplay ();
 		}
 		
 		public void UpdatedImage (long id)
