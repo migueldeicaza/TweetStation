@@ -240,7 +240,7 @@ namespace TweetStation
 		}
 		
 		// We pick a user ID large enough that it wont clash with actual users
-		static long serial = 100000000000000;
+		static long serial = ImageStore.TempStartId;
 		
 		// Returns an IEnumerable of tweets when parsing search
 		// results from twitter.   The returned Tweet objects are

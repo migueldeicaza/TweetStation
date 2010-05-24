@@ -6,6 +6,7 @@ using System.IO;
 using System.Threading;
 using StreamingAudio;
 using MonoTouch.AudioToolbox;
+using MonoTouch.Foundation;
 
 namespace TweetStation
 {
@@ -49,9 +50,31 @@ namespace TweetStation
 		
 		public void Stop ()
 		{
+			// If we have not yet decoded enough data to play, return
+			var oqueue = player.OutputQueue;
+			if (oqueue == null)
+				return;
+			
+			// Slowly turn off the audio
+			NSTimer timer = null;
+			float volume = player.OutputQueue.Volume;
+			timer = NSTimer.CreateRepeatingScheduledTimer (TimeSpan.FromMilliseconds (100), delegate {
+				volume -= 0.05f;
+				player.OutputQueue.Volume = volume;
+				if (volume <= 0.1){
+					InternalStop ();
+					timer.Invalidate ();
+				}
+			});
+		}
+		
+		void InternalStop ()
+		{
+			// Stop the output queue, then tell the loop to stop processing data
 			player.Pause ();
 			stop = true;
 		}
+		
 	}
 }
 

@@ -22,7 +22,7 @@ namespace TweetStation
 	public static class ImageStore
 	{
 		const int MaxRequests = 4;
-		static string PicDir, RoundedPicDir, LargeRoundedPicDir; 
+		static string PicDir, RoundedPicDir, LargeRoundedPicDir, TmpDir; 
 		public readonly static UIImage DefaultImage;
 		static LRUCache<long,UIImage> cache;
 		
@@ -42,6 +42,7 @@ namespace TweetStation
 			PicDir = Path.Combine (Util.BaseDir, "Library/Caches/Pictures/");
 			RoundedPicDir = Path.Combine (PicDir, "Rounded/");
 			LargeRoundedPicDir = Path.Combine (PicDir, "LargeRounded/");
+			TmpDir = Path.Combine (Util.BaseDir, "tmp/");
 			
 			if (!Directory.Exists (PicDir))
 				Directory.CreateDirectory (PicDir);
@@ -74,7 +75,9 @@ namespace TweetStation
 				return null;
 
 			string picfile;
-			if (id >= 0)
+			if (id >= TempStartId)
+				picfile = TmpDir + id + ".png";
+			else if (id >= 0)
 				picfile = RoundedPicDir + id + ".png";
 			else
 				picfile = LargeRoundedPicDir + id + ".png";
@@ -181,11 +184,24 @@ namespace TweetStation
 			}
 		}
 				
+		public const long TempStartId = 100000000000000;
+		static bool TmpCleaned;
+		
 		static void StartPicDownload (long id, Uri url)
 		{
 			do {
 				var buffer = new byte [4*1024];
-				using (var file = new FileStream (PicDir + id + ".png", FileMode.Create, FileAccess.Write, FileShare.Read)) {
+				string picdir = PicDir;
+				
+				if (id >= TempStartId){
+					if (!TmpCleaned){
+						picdir = TmpDir;
+						File.Delete (TmpDir + "/*");
+						TmpCleaned = true;
+					}
+				}
+				
+				using (var file = new FileStream (picdir + id + ".png", FileMode.Create, FileAccess.Write, FileShare.Read)) {
 	                	var req = WebRequest.Create (url) as HttpWebRequest;
 					
 	                using (var resp = req.GetResponse()) {

@@ -110,6 +110,7 @@
     <Compile Include="UI\Camera.cs" />
     <Compile Include="Audio\StreamingPlayback.cs" />
     <Compile Include="Audio\AudioPlay.cs" />
+    <Compile Include="Utilities\PicDetect.cs" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="MainWindow.xib" />

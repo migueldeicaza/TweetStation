@@ -128,7 +128,7 @@ namespace TweetStation
 			float y = tweetView.Frame.Height + PadY;
 			
 			string thumbUrl;
-			var picUrl = FindPicUrl (tweet.Text, out thumbUrl);
+			var picUrl = PicDetect.FindPicUrl (tweet.Text, out thumbUrl);
 			if (picUrl != null){
 				imageView = new UIImageView (new RectangleF (0, y, 78, 78));
 				y += 90;
@@ -175,35 +175,10 @@ namespace TweetStation
 			buttonView.SetImage (image, UIControlState.Normal);
 			buttonView.SetImage (image, UIControlState.Selected);
 		}
-				
-		//
-		// Detects picture urls, returns the picture url, and if possible
-		// the thumbnail url
-		//
-		static string FindPicUrl (string text, out string thumbUrl)
-		{
-			const string prefix = "http://twitpic.com/";
 
-			int p = text.IndexOf (prefix);
-			if (p != -1){
-				string picUrl;
-				
-				var last = text.IndexOf (' ', p);
-				if (last == -1)
-					picUrl = text.Substring (p);
-				else
-					picUrl = text.Substring (p, last-p);
-				
-				thumbUrl = prefix + "show/thumb/" + picUrl.Substring (prefix.Length);
-				return picUrl;
-			}
-			thumbUrl = null;
-			return null;
-		}
-		
 		#region IImageUpdated implementation
 		// Fake user ID to take advantage of the queue system
-		static long serial = 200000000000000;
+		static long serial = ImageStore.TempStartId*2;
 		public void UpdatedImage (long id)
 		{
 			imageView.Image = ImageStore.GetLocalProfilePicture (id);
