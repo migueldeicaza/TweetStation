@@ -1,17 +1,14 @@
 * Usage Observations
 
-	Chagne the button bar to have three options: Reply, Retweet, More
-
 	Only Load More tweets is shown
-
-	On the Composer, if you select a user and come back the
-	keyboard is gone, probably with camera too
 
 	Activity Indicator has wrong proportions?
 
 	Retweets not working?
 
 *  Missing Stuff
+
+	Load 50 tweets, offer to load more DB storage
 	
 	Progress widget to overlay for some tasks?
 
@@ -43,8 +40,8 @@
 
 	Remove old tweets from the database, 2 week old tweets?
 	Showing User Pictures
+		Needs a custom image loader for user profiles and urls that we detect as pictures
 	Chicken noises for reload
-	Music for composing
 	Turning a search into a saved search
 	Lists:
 		Instead of managing lists, be able to "add user to list" in the UI in the profile view.
@@ -97,6 +94,10 @@
 	Advanced
 
 * Post 1.0:
+
+	Pondering feature:
+		Replace "Reply, Direct, Quote, Retwweet"
+		With something shroter
 
 	Direct Messages special view
 		Grouped per user, blend conversation together

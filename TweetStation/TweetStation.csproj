@@ -108,6 +108,8 @@
     <Compile Include="Dialogs\Settings.cs" />
     <Compile Include="Utilities\OAuthAuthorizer.cs" />
     <Compile Include="UI\Camera.cs" />
+    <Compile Include="Audio\StreamingPlayback.cs" />
+    <Compile Include="Audio\AudioPlay.cs" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="MainWindow.xib" />
@@ -126,6 +128,7 @@
     <Folder Include="UI\" />
     <Folder Include="Images\" />
     <Folder Include="x\" />
+    <Folder Include="Audio\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="home_timeline.json" />
@@ -140,6 +143,7 @@
     <Content Include="Images\star-off.png" />
     <Content Include="Images\star-on.png" />
     <Content Include="Images\fav.png" />
+    <Content Include="Audio\composeaudio.mp3" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\MonoTouch.Dialog\MonoTouch.Dialog\MonoTouch.Dialog.csproj">

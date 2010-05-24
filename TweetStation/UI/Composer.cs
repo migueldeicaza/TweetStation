@@ -166,6 +166,7 @@ namespace TweetStation
 		string directRecipient;
 		CLLocationManager locationManager;
 		CLLocation location;
+		AudioPlay player;
 		
 		public static readonly Composer Main = new Composer ();
 		
@@ -244,6 +245,7 @@ namespace TweetStation
 				locationManager.StartUpdatingLocation ();
 			
 			previousController.DismissModalViewControllerAnimated (true);
+			player.Stop ();
 		}
 		
 		void AppendLocation (StringBuilder content)
@@ -352,6 +354,12 @@ namespace TweetStation
 			previousController = parent;
 			composerView.textView.BecomeFirstResponder ();
 			parent.PresentModalViewController (this, true);
+			
+			try {
+				player = new AudioPlay ("Audio/composeaudio.mp3");
+			} catch (Exception e){
+				Console.WriteLine (e);
+			}
 		}
 		
 		public void NewTweet (UIViewController parent)

@@ -189,7 +189,7 @@ namespace TweetStation {
 		protected override void ResetState ()
 		{
 			mainSection = new Section () {
-				FetchTweets (200, 0, 0)
+				FetchTweets (80, 0, 0)
 			};
 
 			Root = new RootElement (timelineTitle) {
