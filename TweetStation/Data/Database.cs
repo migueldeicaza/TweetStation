@@ -7,10 +7,12 @@ namespace TweetStation
 	public class Database : SQLiteConnection {
 		internal Database (string file) : base (file)
 		{
+			Util.ReportTime ("Database init");
 			CreateTable<TwitterAccount> ();
 			CreateTable<TwitterAccount.QueuedTask> ();
 			CreateTable<Tweet> ();
 			CreateTable<User> ();
+			Util.ReportTime ("Database finish");
 		}
 		
 		static Database ()

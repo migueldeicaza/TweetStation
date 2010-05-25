@@ -19,8 +19,16 @@ namespace TweetStation
 	// Provides an interface to download pictures in the background
 	// and keep a local cache of the original files + rounded versions
 	//
+	// The IDs used here have the following meaning:
+	//   Positive numbers are the small profile pictures and correspond to a twitter ID
+	//   Negative numbers are medium size pictures for the same twitter ID
+	//   Numbers above TmpStartId are transient pictures, used because Twitter
+	//   search returns a *different* set of userIds on search results
+	// 
+
 	public static class ImageStore
 	{
+		public const long TempStartId = 100000000000000;
 		const int MaxRequests = 4;
 		static string PicDir, RoundedPicDir, LargeRoundedPicDir, TmpDir; 
 		public readonly static UIImage DefaultImage;
@@ -34,6 +42,9 @@ namespace TweetStation
 		
 		// A queue used to avoid flooding the network stack with HTTP requests
 		static Queue<long> requestQueue;
+		
+		// Keeps id -> url mappings around
+		static Dictionary<long, string> idToUrl;
 
 		static NSString nsDispatcher = new NSString ("x");
 		
@@ -56,11 +67,11 @@ namespace TweetStation
 			DefaultImage = UIImage.FromFile ("Images/default_profile_4_normal.png");
 			cache = new LRUCache<long,UIImage> (200);
 			pendingRequests = new Dictionary<long,List<IImageUpdated>> ();
+			idToUrl = new Dictionary<long,string> ();
 			queuedUpdates = new HashSet<long>();
 			requestQueue = new Queue<long> ();
 		}
 		
-		// Negative numbers are medium size pictures
 		public static UIImage GetLocalProfilePicture (long id)
 		{
 			UIImage ret;
@@ -75,9 +86,11 @@ namespace TweetStation
 				return null;
 
 			string picfile;
-			if (id >= TempStartId)
+			if (id >= TempStartId){
+				// Delay execution of this until the user does searches.
+				EnsureTmpIsClean ();
 				picfile = TmpDir + id + ".png";
-			else if (id >= 0)
+			} else if (id >= 0)
 				picfile = RoundedPicDir + id + ".png";
 			else
 				picfile = LargeRoundedPicDir + id + ".png";
@@ -104,7 +117,8 @@ namespace TweetStation
 			return GetLocalProfilePicture (user.Id);
 		}
 		
-		
+		//
+		// Fetches a profile picture, the ID is used internally 
 		public static UIImage RequestProfilePicture (long id, string optionalUrl, IImageUpdated notify)
 		{
 			var pic = GetLocalProfilePicture (id);
@@ -127,20 +141,22 @@ namespace TweetStation
 			Uri url;
 			
 			if (optionalUrl == null){
-				var user = User.FromId (id);
-				if (user == null)
-					return null;
-				optionalUrl = user.PicUrl;
+				if (!idToUrl.TryGetValue (id, out optionalUrl)){
+					var user = User.FromId (id);
+					if (user == null)
+						return null;
+					optionalUrl = user.PicUrl;
+				}
 			}
 			if (id < 0){
 				int _normalIdx = optionalUrl.LastIndexOf ("_normal");	
 				if (_normalIdx != -1)
 					optionalUrl = optionalUrl.Substring (0, _normalIdx) + optionalUrl.Substring (optionalUrl.Length-4);
 			}
-			
 			if (!Uri.TryCreate (optionalUrl, UriKind.Absolute, out url))
 				return null;
 			
+			idToUrl [id] = optionalUrl;
 			return url;
 		}
 		
@@ -159,7 +175,10 @@ namespace TweetStation
 			if (notify == null)
 				throw new ArgumentNullException ("notify");
 			
-			Uri url = GetPicUrlFromId (id, optionalUrl);
+			Uri url;
+			lock (requestQueue)
+				url = GetPicUrlFromId (id, optionalUrl);
+			
 			if (url == null)
 				return;
 
@@ -183,57 +202,72 @@ namespace TweetStation
 				});
 			}
 		}
-				
-		public const long TempStartId = 100000000000000;
+
+		static void EnsureTmpIsClean ()
+		{
+			if (TmpCleaned)
+				return;
+			
+			foreach (string f in Directory.GetFiles (TmpDir, "*.png"))
+				File.Delete (f);
+			TmpCleaned = true;
+		}
+		
 		static bool TmpCleaned;
 		
 		static void StartPicDownload (long id, Uri url)
 		{
 			do {
+				Console.WriteLine ("Starting {0}", id);
 				var buffer = new byte [4*1024];
-				string picdir = PicDir;
+				string picdir = id < TempStartId ? PicDir : TmpDir;
+				bool downloaded = false;
 				
-				if (id >= TempStartId){
-					if (!TmpCleaned){
-						picdir = TmpDir;
-						File.Delete (TmpDir + "/*");
-						TmpCleaned = true;
+				try {
+					using (var file = new FileStream (picdir + id + ".png", FileMode.Create, FileAccess.Write, FileShare.Read)) {
+		                	var req = WebRequest.Create (url) as HttpWebRequest;
+						
+		                using (var resp = req.GetResponse()) {
+							using (var s = resp.GetResponseStream()) {
+								int n;
+								while ((n = s.Read (buffer, 0, buffer.Length)) > 0){
+									file.Write (buffer, 0, n);
+		                        }
+							}
+		                }
+					}
+					downloaded = true;
+				} catch (Exception e) {
+					Console.WriteLine ("Error fetching picture for {0}", id);
+				}
+				Console.WriteLine ("Done with {0}",id);
+				// Cluster all updates together
+				bool doInvoke = false;
+				
+				lock (queuedUpdates){
+					if (downloaded){
+						queuedUpdates.Add (id);
+					
+						// If this is the first queued update, must notify
+						if (queuedUpdates.Count == 1)
+							doInvoke = true;
 					}
 				}
 				
-				using (var file = new FileStream (picdir + id + ".png", FileMode.Create, FileAccess.Write, FileShare.Read)) {
-	                	var req = WebRequest.Create (url) as HttpWebRequest;
-					
-	                using (var resp = req.GetResponse()) {
-						using (var s = resp.GetResponseStream()) {
-							int n;
-							while ((n = s.Read (buffer, 0, buffer.Length)) > 0){
-								file.Write (buffer, 0, n);
-	                        }
-						}
-	                }
-				}
-				
-				// Cluster all updates together
-				bool doInvoke = false;
-				lock (queuedUpdates){
-					queuedUpdates.Add (id);
-					
-					// If this is the first queued update, must notify
-					if (queuedUpdates.Count == 1)
-						doInvoke = true;
-				}
-				
-				// Try to get more jobs.
 				lock (requestQueue){
+					idToUrl.Remove (id);
+
+					// Try to get more jobs.
 					if (requestQueue.Count > 0){
 						id = requestQueue.Dequeue ();
 						url = GetPicUrlFromId (id, null);
-						if (url == null)
+						if (url == null){
+							pendingRequests.Remove (id);
 							id = -1;
+						}
 					} else
 						id = -1;
-				}				
+				}	
 				if (doInvoke)
 					nsDispatcher.BeginInvokeOnMainThread (NotifyImageListeners);
 			} while (id != -1);

@@ -20,6 +20,10 @@ namespace TweetStation {
 		
 		public BaseTimelineViewController (bool pushing) : base (null, pushing)
 		{			
+			RefreshRequested += delegate {
+				ReloadTimeline ();
+			};
+
 			Style = UITableViewStyle.Plain;
 			NavigationItem.RightBarButtonItem = new UIBarButtonItem (UIBarButtonSystemItem.Compose, delegate {
 				if (kind == TweetKind.Direct){
@@ -48,10 +52,6 @@ namespace TweetStation {
 					Composer.Main.NewTweet (this);
 				}
 			});
-
-			RefreshRequested += delegate {
-				ReloadTimeline ();
-			};
 		}
 
 		public TwitterAccount Account {
@@ -197,8 +197,14 @@ namespace TweetStation {
 			};
 			Root.Add (mainSection);
 			SearchPlaceholder = Locale.Format ("Search {0}", TimelineTitle);
-			if (Util.NeedsUpdate ("update" + kind, TimeSpan.FromSeconds (120)))
-				TriggerRefresh ();
+			Util.ReportTime ("Before trigger");
+			if (Util.NeedsUpdate ("update" + kind, TimeSpan.FromSeconds (120))){
+				// throttle
+				NSTimer.CreateScheduledTimer (TimeSpan.FromMilliseconds (200), delegate {				
+					TriggerRefresh ();
+				});
+			}
+			Util.ReportTime ("After trigger");
 		}
 		
 		// 

@@ -186,5 +186,14 @@ namespace TweetStation
 				}
 			};
 		}
+		
+		static long lastTime;
+		public static void ReportTime (string s)
+		{
+			long now = DateTime.UtcNow.Ticks;
+			
+			Console.WriteLine ("[{0}] ticks since last invoke: {1}", s, now-lastTime);
+			lastTime = now;
+		}
 	}
 }

@@ -80,6 +80,11 @@ namespace TweetStation
 			EnableSearch = true;
 			Style = UITableViewStyle.Plain;
 		}
+
+		public override void SearchButtonClicked (string text)
+		{
+			ActivateController (new SearchViewController (text) { Account = TwitterAccount.CurrentAccount });
+		}
 		
 		public override void OnSearchTextChanged (string text)
 		{

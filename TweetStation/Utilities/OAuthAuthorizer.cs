@@ -29,7 +29,7 @@ namespace TweetStation
 	//
 	public class OAuthConfig {
 		// keys, callbacks
-		public string ConsumerKey, Callback, ConsumerSecret, TwitPicKey;
+		public string ConsumerKey, Callback, ConsumerSecret, TwitPicKey, BitlyKey;
 		
 		// Urls
 		public string RequestTokenUrl, AccessTokenUrl, AuthorizeUrl;

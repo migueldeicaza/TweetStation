@@ -674,7 +674,7 @@ namespace SQLite
             throw SQLiteException.New(r, r.ToString());
 		}
 
-	public IEnumerable<T> ExecuteQuery<T> () where T : new()
+		public IEnumerable<T> ExecuteQuery<T> () where T : new()
 		{
 			return ExecuteQuery (_conn.GetMapping (typeof(T))).Cast<T> ();
 		}
@@ -793,20 +793,35 @@ namespace SQLite
 			if (type == SQLite3.ColType.Null) {
 				return null;
 			} else {
-				if (clrType == typeof(Byte) || clrType == typeof(UInt16) || clrType == typeof(SByte) || clrType == typeof(Int16) || clrType == typeof(Int32)) {
-					return Convert.ChangeType (SQLite3.ColumnInt (stmt, index), clrType);
-				} else if (clrType == typeof(Boolean)) {
-					return ((Byte)Convert.ChangeType (SQLite3.ColumnInt (stmt, index), typeof(Byte)) == 1);
-				} else if (clrType == typeof(UInt32) || clrType == typeof(Int64)) {
-					return Convert.ChangeType (SQLite3.ColumnInt64 (stmt, index), clrType);
-				} else if (clrType == typeof(Single) || clrType == typeof(Double) || clrType == typeof(Decimal)) {
-					return Convert.ChangeType (SQLite3.ColumnDouble (stmt, index), clrType);
-				} else if (clrType == typeof(String)) {
+				if (clrType == typeof(String)) {
 					var text = Marshal.PtrToStringUni (SQLite3.ColumnText16 (stmt, index));
 					return text;
-				} else if (clrType == typeof(DateTime)) {
+				}
+				if (clrType == typeof (Int64))
+					return SQLite3.ColumnInt64 (stmt, index);
+				if (clrType == typeof (Int32))
+					return (int) SQLite3.ColumnInt (stmt, index);
+				if (clrType == typeof (UInt32))
+					return (uint) SQLite3.ColumnInt64 (stmt, index);
+				if (clrType == typeof (Boolean))
+					return SQLite3.ColumnInt (stmt, index) == 1;
+				if (clrType == typeof (double))
+					return SQLite3.ColumnDouble (stmt, index);
+				if (clrType == typeof (float))
+					return (float) SQLite3.ColumnDouble (stmt, index);
+				if (clrType == typeof (decimal))
+					return (decimal) SQLite3.ColumnDouble (stmt, index);
+				if (clrType == typeof (Byte))
+					return (byte) SQLite3.ColumnInt (stmt, index);
+				if (clrType == typeof (UInt16))
+					return (ushort) SQLite3.ColumnInt (stmt, index);
+				if (clrType == typeof (Int16))
+					return (short) SQLite3.ColumnInt (stmt, index);
+				if (clrType == typeof (sbyte))
+					return (sbyte) SQLite3.ColumnInt (stmt, index);
+				if (clrType == typeof(DateTime)) {
 					var text = Marshal.PtrToStringUni (SQLite3.ColumnText16 (stmt, index));
-					return Convert.ChangeType (text, clrType);
+					return DateTime.Parse (text);
 				} else if (clrType.IsEnum) {
 					return SQLite3.ColumnInt (stmt, index);
 				} else {

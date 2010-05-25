@@ -32,6 +32,7 @@ namespace TweetStation
 		
 		public override bool FinishedLaunching (UIApplication app, NSDictionary options)
 		{
+			Util.ReportTime ("Entering Finished");
 			window.MakeKeyAndVisible ();
 			if (options != null){
 				var url = options.ObjectForKey (UIApplication.LaunchOptionsUrlKey) as NSUrl;
@@ -40,11 +41,16 @@ namespace TweetStation
 
 			System.Net.ServicePointManager.Expect100Continue = false;
 			
+			Util.ReportTime ("Before GetDefaultAccount");
 			var defaultAccount = TwitterAccount.GetDefaultAccount ();
+			Util.ReportTime ("After GetDefaultAccount");
 			if (defaultAccount == null)
 				CreateDefaultAccount ();
 			else {
+				Util.ReportTime ("Before UI Creation");
 				CreatePhoneGui ();
+				Util.ReportTime ("After UI Creation");
+				
 				Account = defaultAccount;
 			}
 			return true;
@@ -79,32 +85,6 @@ namespace TweetStation
 				}
 			};
 	
-#if false
-			TwitterOAuth oauth = new TwitterOAuth ();
-			if (File.Exists ("/Users/miguel/xauth")){
-				using (var config = File.OpenText ("/Users/miguel/xauth")){
-					oauth.ConsumerKey = config.ReadLine ();
-					oauth.ConsumerSecret = config.ReadLine ();
-					oauth.xAuthUsername = config.ReadLine ();
-					oauth.xAuthPassword = config.ReadLine ();
-				}
-			} else {
-				// Settings for Tweetstation Public, they require the web browser
-				oauth.ConsumerKey = "VSemGxR6ZNpo5IWY3dS8uQ";
-				oauth.Callback = "http://tirania.org/tweetstation/oauth";
-				oauth.ConsumerSecret = "MEONRf8QqJDotJWioW1v1sSZVhXlOsTI85xu9eZfJf8";
-			}
-			
-			if (oauth.xAuthUsername != null){
-				if (oauth.AcquireAccessToken ()){
-					oauth.xAuthPassword = null;
-				}
-			}
-			else {
-				if (oauth.AcquireRequestToken ())
-					oauth.AuthorizeUser (tabbarController);
-			}
-#endif
 			tabbarController.SetViewControllers (navigationRoots, false);
 		}
 		

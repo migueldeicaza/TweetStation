@@ -26,6 +26,7 @@ namespace TweetStation
 		public static OAuthConfig OAuthConfig = new OAuthConfig () {
 			ConsumerKey = "VSemGxR6ZNpo5IWY3dS8uQ",
 			TwitPicKey = "e66f585ed2c8be83be12a8f2be9a5981",
+			BitlyKey = "R_45898eef7a5772943c2ca54eea9877fd",
 			Callback = "http://tirania.org/tweetstation/oauth",
 			ConsumerSecret = "MEONRf8QqJDotJWioW1v1sSZVhXlOsTI85xu9eZfJf8",
 			RequestTokenUrl = "https://api.twitter.com/oauth/request_token", 
