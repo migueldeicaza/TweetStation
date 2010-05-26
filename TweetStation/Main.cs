@@ -177,7 +177,7 @@ namespace TweetStation
 			window.AddSubview (dvc.View);
 		}
 		
-		void StartLogin (DialogViewController dvc)
+		public void StartLogin (DialogViewController dvc)
 		{
 			var oauth = new OAuthAuthorizer (TwitterAccount.OAuthConfig);
 
@@ -186,6 +186,18 @@ namespace TweetStation
 					dvc.View.RemoveFromSuperview ();
 					CreatePhoneGui ();
 					SetDefaultAccount (oauth);
+				});
+			}
+		}
+
+		public void AddAccount (DialogViewController dvc, NSAction action)
+		{
+			var oauth = new OAuthAuthorizer (TwitterAccount.OAuthConfig);
+
+			if (oauth.AcquireRequestToken ()){
+				oauth.AuthorizeUser (dvc, delegate {
+					SetDefaultAccount (oauth);
+					action ();
 				});
 			}
 		}

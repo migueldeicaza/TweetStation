@@ -80,27 +80,28 @@ namespace TweetStation
 			return account;
 		}
 		
+		public static void Remove (TwitterAccount account)
+		{
+			var id = account.LocalAccountId;
+			bool pickNewDefault = id == Util.Defaults.IntForKey (DEFAULT_ACCOUNT);
+			
+			if (accounts.ContainsKey (id))
+				accounts.Remove (id);
+			
+			Database.Main.Execute ("DELETE FROM Tweet where LocalAccountId = ?", account.LocalAccountId);
+			Database.Main.Delete<TwitterAccount> (account);
+			
+			if (pickNewDefault){
+				var newDefault = Database.Main.Query<TwitterAccount> ("SELECT LocalAccountId FROM TwitterAccount WHERE OAuthToken != \"\"").FirstOrDefault ();
+				if (newDefault != null)
+					Util.Defaults.SetInt (newDefault.LocalAccountId, DEFAULT_ACCOUNT);
+			}
+		}
+		
 		public static TwitterAccount CurrentAccount { get; set; }
 		
 		public static TwitterAccount GetDefaultAccount ()
 		{		
-#if false
-			if (File.Exists ("/Users/miguel/tpass")){
-				using (var f = System.IO.File.OpenText ("/Users/miguel/tpass")){
-					var ta = new TwitterAccount () { 
-						Username = f.ReadLine (),
-						Password = f.ReadLine ()
-					};
-					Database.Main.Insert (ta, "OR IGNORE");
-					using (var f2 = File.OpenRead ("home_timeline.json")){
-						Tweet.LoadJson (f2, ta.LocalAccountId, TweetKind.Home);
-					}
-					accounts [ta.LocalAccountId] = ta;
-					CurrentAccount = ta;
-					return ta;
-				}
-			}
-#endif	
 			var account = FromId (Util.Defaults.IntForKey (DEFAULT_ACCOUNT));
 			if (account == null || string.IsNullOrEmpty (account.OAuthToken))
 				return null;
@@ -113,6 +114,7 @@ namespace TweetStation
 		public static void SetDefault (TwitterAccount account)
 		{
 			Util.Defaults.SetInt (account.LocalAccountId, DEFAULT_ACCOUNT);
+			CurrentAccount = account;
 		}
 
 		public void ReloadTimeline (TweetKind kind, long? since, long? max_id, Action<int> done)

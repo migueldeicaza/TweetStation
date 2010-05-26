@@ -46,9 +46,11 @@ namespace TweetStation
 		public override void ViewDidDisappear (bool animated)
 		{
 			base.ViewDidDisappear (animated);
-			WebView.RemoveFromSuperview ();
-			WebView.Dispose ();
-			WebView = null;
+			if (WebView != null){
+				WebView.RemoveFromSuperview ();
+				WebView.Dispose ();
+				WebView = null;
+			}
 		}
 		
 		public override void ViewWillAppear (bool animated)

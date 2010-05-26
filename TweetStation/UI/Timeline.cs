@@ -52,6 +52,10 @@ namespace TweetStation {
 					Composer.Main.NewTweet (this);
 				}
 			});
+			
+			NavigationItem.LeftBarButtonItem = new UIBarButtonItem (UIBarButtonSystemItem.Action, delegate {
+				PresentModalViewController (new UINavigationController (new Settings (this)), true);
+			});
 		}
 
 		public TwitterAccount Account {
@@ -63,6 +67,7 @@ namespace TweetStation {
 				if (account == value)
 					return;
 				
+				ReloadComplete ();
 				account = value;
 				ReloadAccount ();
 			}
@@ -79,9 +84,6 @@ namespace TweetStation {
 		
 		void ReloadAccount ()
 		{
-			if (Root != null)
-				Root.Dispose ();
-
 			ResetState ();
 		}		
 	}

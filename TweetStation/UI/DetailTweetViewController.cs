@@ -22,13 +22,12 @@ namespace TweetStation
 		static string [] buttons = new string [] { 
 			Locale.GetText ("Reply"), 
 			Locale.GetText ("Retweet"),
-			Locale.GetText ("Quote"), 
 			Locale.GetText ("Direct") };
 		
 		public DetailTweetViewController (Tweet tweet) : base (UITableViewStyle.Grouped, null, true)
 		{
 			this.tweet = tweet;
-			var handlers = new EventHandler [] { Reply, Retweet, Quote, Direct };
+			var handlers = new EventHandler [] { Reply, Retweet, Direct };
 			var profileRect = new RectangleF (PadX, 0, View.Bounds.Width-30-PadX*2, 100);
 			var detailRect = new RectangleF (PadX, 0, View.Bounds.Width-30-PadX*2, 0);
 			 
@@ -93,13 +92,20 @@ namespace TweetStation
 		
 		void Retweet (object sender, EventArgs args)
 		{
-			TwitterAccount.CurrentAccount.Post ("http://api.twitter.com/1/statuses/retweet/" + tweet.Id + ".json", "");
-			                                    
-		}
-		
-		void Quote (object sender, EventArgs args)
-		{
-			Composer.Main.Quote (this, tweet);
+			var sheet = new UIActionSheet (Locale.GetText ("Retweet"));
+			sheet.AddButton (Locale.GetText ("Retweet"));
+			sheet.AddButton (Locale.GetText ("Quote Retweet"));
+			sheet.AddButton (Locale.GetText ("Cancel"));
+			sheet.CancelButtonIndex = 2;
+			
+			sheet.Clicked += delegate(object s, UIButtonEventArgs e) {
+				if (e.ButtonIndex == 0)
+					TwitterAccount.CurrentAccount.Post ("http://api.twitter.com/1/statuses/retweet/" + tweet.Id + ".json", ""); 
+				else if (e.ButtonIndex == 1){
+					Composer.Main.Quote (this, tweet);
+				}
+			};
+			sheet.ShowInView (Util.MainAppDelegate.MainView);
 		}
 	}
 	

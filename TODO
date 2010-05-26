@@ -2,15 +2,11 @@
 
 	Only Load More tweets is shown
 
-	Activity Indicator has wrong proportions?
-
-	Retweets not working?
-
 	Drop the image blend animation, and show directly?
+		Perhaps move the shared code to TweetCellView that can render
+		Have two subclasses one with and one without views
 
 *  Missing Stuff
-
-	Searches need "Load more"
 
 	Load 50 tweets, offer to load more DB storage
 	
@@ -26,10 +22,6 @@
 	Protocol:
 		When posting a tweet, the POST data result should
 		be added to the main view.
-
-		When favoriting/unfavoriting, we need to add those
-		tweets to Favorites tab, or recompute that tab
-		on demand.
 
 	On Load:
 		Custom control to show "Load more" with some better artwork
@@ -58,9 +50,6 @@
 		Merge friends + followers in a single cell to save space?
 		Showing a map for the user profile
 		Show if the tweet is protected/user protected
-		Show pictures if we recognize the url
-	 Account editor
-	New accont
 	Remember last tab
 	FullProfileView
 		Needs an animating element while loading data from the network,
@@ -92,6 +81,11 @@
 	Advanced
 
 * Post 1.0:
+
+
+	When favoriting/unfavoriting, we need to add those
+	tweets to Favorites tab, or recompute that tab
+	on demand.
 
 	Pondering feature:
 		Replace "Reply, Direct, Quote, Retwweet"

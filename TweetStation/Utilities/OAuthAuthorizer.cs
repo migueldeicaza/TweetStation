@@ -279,7 +279,7 @@ namespace TweetStation
 				this.container = oauth;
 				this.callback = callback;
 				
-				NavigationItem.Title = "Login to Twitter";
+				NavigationItem.Title = Locale.GetText ("Login to Twitter");
 				NavigationItem.LeftBarButtonItem = new UIBarButtonItem (UIBarButtonSystemItem.Cancel, delegate {
 					DismissModalViewControllerAnimated (false);
 				});

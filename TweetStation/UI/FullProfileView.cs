@@ -156,7 +156,7 @@ namespace TweetStation
 				var source = root ["relationship"]["source"];
 				var blocking = (bool) source ["blocking"];
 				blockUnblockButton = new StyledStringElement (GetBlockText (blocking), ToggleBlock){
-					
+					Font = UIFont.BoldSystemFontOfSize (14),
 					Alignment = UITextAlignment.Center,
 					TextColor = UIColor.FromRGB (0x32, 0x4f, 0x85),
 				};

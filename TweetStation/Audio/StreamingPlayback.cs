@@ -36,7 +36,7 @@ namespace StreamingAudio
 		bool started;
 		IntPtr [] outputBuffers;			// The output buffers
 		volatile bool [] inuse;
-		const int bufferSize = 32 * 1024;
+		const int bufferSize = 8 * 1024;
 		int bytesFilled;
 		int fillBufferIndex;
 		int packetsFilled;
