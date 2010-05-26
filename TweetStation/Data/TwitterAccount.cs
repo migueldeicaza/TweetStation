@@ -133,10 +133,11 @@ namespace TweetStation
 				(since.HasValue ? "&since_id=" + since.Value : "") +
 				(max_id.HasValue ? "&max_id=" + max_id.Value : "");
 				
-			Download (req, result => {
-				if (result == null)
+			Download (req, true, result => {
+				if (result == null){
+					
 					done (-1);
-				else {
+				} else {
 					int count = -1;
 					try {
 						count = Tweet.LoadJson (new MemoryStream (result), LocalAccountId, kind);
@@ -151,11 +152,13 @@ namespace TweetStation
 		internal struct Request {
 			public string Url;
 			public Action<byte []> Callback;
+			public bool CallbackOnMainThread;
 			
-			public Request (string url, Action<byte []> callback)
+			public Request (string url, bool callbackOnMainThread, Action<byte []> callback)
 			{
 				Url = url;
 				Callback = callback;
+				CallbackOnMainThread = callbackOnMainThread;
 			}
 		}
 		
@@ -167,14 +170,21 @@ namespace TweetStation
 		///   Throttled data download from the specified url and invokes the callback with
 		///   the resulting data on the main UIKit thread.
 		/// </summary>
-		public void Download (string url, Action<byte []> callback)
+		/// 
+		/// 
+		public void Download (string url, Action<byte []> callback)		
+		{
+			Download (url, true, callback);
+		}
+		
+		public void Download (string url, bool callbackOnMainThread, Action<byte []> callback)
 		{
 			lock (queue){				
 				pending++;
 				if (pending++ < MaxPending)
-					Launch (url, callback);
+					Launch (url, callbackOnMainThread, callback);
 				else {
-					queue.Enqueue (new Request (url, callback));
+					queue.Enqueue (new Request (url, callbackOnMainThread, callback));
 					//Console.WriteLine ("Queued: {0}", url);
 				}
 			}
@@ -210,8 +220,19 @@ namespace TweetStation
 		public void AddOAuthHeader (string operation, string url, string data)
 		{
 		}
+
+		static void InvokeCallback (Action<byte []> callback, DownloadDataCompletedEventArgs e)
+		{
+			try {
+				if (e == null)
+					callback (null);
+				callback (e.Result);
+			} catch  (Exception ex){
+				Console.WriteLine (ex);
+			}
+		}
 		
-		void Launch (string url, Action<byte []> callback)
+		void Launch (string url, bool callbackOnMainThread, Action<byte []> callback)
 		{
 			var client = GetClient ();
 	
@@ -221,20 +242,15 @@ namespace TweetStation
 				
 				Util.PopNetworkActive ();
 				
-				invoker.BeginInvokeOnMainThread (delegate {
-					try {
-						if (e == null)
-							callback (null);
-						callback (e.Result);
-					} catch  (Exception ex){
-						Console.WriteLine (ex);
-					}
-				});
+				if (callbackOnMainThread)
+					invoker.BeginInvokeOnMainThread (delegate { InvokeCallback (callback, e);});
+				else
+					InvokeCallback (callback, e);
 				
 				lock (queue){
 					if (queue.Count > 0){
 						var request = queue.Dequeue ();
-						Launch (request.Url, request.Callback);
+						Launch (request.Url, request.CallbackOnMainThread, request.Callback);
 					}
 				}
 			};

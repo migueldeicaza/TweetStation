@@ -42,6 +42,8 @@ namespace TweetStation
 			}, null);
 		}
 		
+		UIAlertView dlg;
+		
 		public EditAccount (IAccountContainer container, TwitterAccount account, bool pushing)
 		{
 			var info = new AccountInfo ();
@@ -79,9 +81,8 @@ namespace TweetStation
 						DismissModalViewControllerAnimated (true);
 						container.Account = account;
 					} else {
-						using (var dlg = new UIAlertView ("Login error", errorMessage, null, "Close")){
-							dlg.Show ();
-						}
+						dlg = new UIAlertView ("Login error", errorMessage, null, "Close");
+						dlg.Show ();
 					}
 				});
 			});

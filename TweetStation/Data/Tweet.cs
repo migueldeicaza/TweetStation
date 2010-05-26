@@ -176,7 +176,10 @@ namespace TweetStation
 			var tweet = new Tweet () { Kind = kind, LocalAccountId = localAccount };
 			var user = new User ();
 			
+			var start = DateTime.UtcNow;
+			
 			var usersSeen = new HashSet<long> ();
+			Database.Main.Execute ("BEGIN");
 			foreach (JsonObject jentry in root){
 				var juser = jentry [userKey];
 				bool result;
@@ -199,9 +202,82 @@ namespace TweetStation
 				if (tweet.Retweeter != null)
 					ParseUser ((JsonObject)(jentry ["retweeted_status"]["user"]), user, usersSeen);
 			}
+			Database.Main.Execute ("COMMIT");
+			var end = DateTime.UtcNow;
+			Console.WriteLine ("With transactions: Spent {0} ticks in inserting {1} elements", (end-start).Ticks, count);
 			return count;
 		}
-		
+
+		// 
+		// Alternative version that just parses the users and tweets and returns them as lists
+		// I thought it would be useful, but it is not.   The JSon parsing is too fast, we
+		// only get bogged down with the actual sqlite insert
+		//
+		public static void ParseJson (Stream stream, int localAccount, TweetKind kind, out List<User> users, out List<Tweet> tweets)
+		{
+			JsonValue root;
+			string userKey;
+			
+			try {
+				root = JsonValue.Load (stream);
+				if (kind == TweetKind.Direct)
+					userKey = "sender";
+				else 
+					userKey = "user";
+			} catch (Exception e) {
+				Console.WriteLine (e);
+				tweets = null;
+				users = null;
+				return;
+			}
+
+			users = new List<User> (root.Count/4);
+			tweets = new List<Tweet> (root.Count);
+			
+			var start = DateTime.UtcNow;
+			
+			var usersSeen = new HashSet<long> ();
+			var user = new User ();
+			foreach (JsonObject jentry in root){
+				var juser = jentry [userKey];
+				bool result;
+				
+				try {
+					user.UpdateFromJson ((JsonObject) juser);
+					if (!usersSeen.Contains (user.Id)){
+						usersSeen.Add (user.Id);
+						users.Add (user);
+						user = new User ();
+					}
+				} catch {
+					continue;
+				}
+				
+				var tweet = new Tweet ();
+				if (kind == TweetKind.Direct)
+					result = tweet.TryPopulateDirect (jentry);
+				else
+					result = tweet.TryPopulate (jentry);
+				
+				if (result){
+					PopulateUser (tweet, user);
+					tweets.Add (tweet);
+				}	
+				
+				// Repeat user loading for the retweet info
+				if (tweet.Retweeter != null){
+					user.UpdateFromJson ((JsonObject)(jentry ["retweeted_status"]["user"]));
+					if (!usersSeen.Contains (user.Id)){
+						usersSeen.Add (user.Id);
+						users.Add (user);
+						user = new User ();
+					}
+				}
+			}
+			var end = DateTime.UtcNow;		
+			Console.WriteLine ("Parsing time for tweet stream: {0} for {1} tweets", end-start, tweets.Count);
+		}
+
 		/// <summary>
 		/// Creates an IEnumerable of the tweets, does not store in the database.
 		/// </summary>

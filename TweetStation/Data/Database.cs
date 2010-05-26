@@ -18,8 +18,9 @@ namespace TweetStation
 		static Database ()
 		{
 			// For debugging
-			//System.IO.File.Delete ("tweets.db");
-			Main = new Database (Util.BaseDir + "/Documents/tweets.db");
+			var tweetsdb = Util.BaseDir + "/Documents/tweets.db";
+			//System.IO.File.Delete (tweetsdb);
+			Main = new Database (tweetsdb);
 		}
 		
 		static public Database Main { get; private set; }

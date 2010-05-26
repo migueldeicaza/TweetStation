@@ -1,4 +1,11 @@
 * Usage Observations
+	
+	Swipe menu
+		Retweet
+		Reply
+		Star
+		Open (for links)
+		Quote
 
 	Only Load More tweets is shown
 
@@ -12,8 +19,6 @@
 	Sometimes when switch accounts the "Reloading" thing is still active
 
 *  Missing Stuff
-
-	Missing swipe menu
 
 	Load 50 tweets, offer to load more DB storage
 	

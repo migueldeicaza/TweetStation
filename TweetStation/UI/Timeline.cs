@@ -341,6 +341,7 @@ namespace TweetStation {
 
 		protected override void PopulateRootFrom (byte [] result)
 		{
+			Database.Main.Execute ("BEGIN");
 			var userStream = User.LoadUsers (new MemoryStream (result));
 			
 			Root = new RootElement (StreamedTitle){
@@ -348,6 +349,7 @@ namespace TweetStation {
 					from user in userStream select (Element) new UserElement (user)
 				}
 			};
+			Database.Main.Execute ("END");
 		}
 	}
 	

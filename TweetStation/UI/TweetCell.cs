@@ -101,8 +101,9 @@ namespace TweetStation
 					tweet.PicUrl = null;
 				tweetImage = img == null ? ImageStore.DefaultImage : img;
 				
-				// If no retweet, hide our image.
-				if (tweet.Retweeter != null){
+				if (tweet.Retweeter == null)
+					retweetImage = null;
+				else {
 					img = ImageStore.GetLocalProfilePicture (tweet.RetweeterId);
 					if (img == null)
 						ImageStore.QueueRequestForPicture (tweet.RetweeterId, tweet.RetweeterPicUrl, this);
