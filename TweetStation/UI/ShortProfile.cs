@@ -64,6 +64,7 @@ namespace TweetStation
 				var button = UIButton.FromType (UIButtonType.DetailDisclosure);
 				button.Frame = new RectangleF (290, 36, 20, 20);
 				AddSubview (button);
+				button.TouchDown += delegate { Tapped (); };
 			}
 		}
 		

@@ -181,7 +181,10 @@ namespace TweetStation
 				? Locale.Format ("Are you sure you want to unblock {0}", user.Screenname) 
 				: Locale.Format ("Are you sure you want to block {0}", user.Screenname);
 			
-			var sheet = new UIActionSheet (caption, null, Locale.GetText ("Cancel"), blocking ? Locale.GetText ("Unblock") : Locale.GetText ("Block"), null);
+			var sheet = Util.GetSheet (caption);
+			sheet.AddButton (blocking ? Locale.GetText ("Unblock") : Locale.GetText ("Block"));
+			sheet.AddButton (Locale.GetText ("Cancel"));
+			sheet.CancelButtonIndex = 1;
 			sheet.Clicked += delegate(object sender, UIButtonEventArgs e) {
 				if (e.ButtonIndex != 0)
 					return;

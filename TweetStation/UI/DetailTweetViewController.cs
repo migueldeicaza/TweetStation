@@ -90,9 +90,10 @@ namespace TweetStation
 			Composer.Main.Direct (this, tweet.Screename);
 		}
 		
+		UIActionSheet sheet;
 		void Retweet (object sender, EventArgs args)
 		{
-			var sheet = new UIActionSheet (Locale.GetText ("Retweet"));
+			sheet = Util.GetSheet (Locale.GetText ("Retweet"));
 			sheet.AddButton (Locale.GetText ("Retweet"));
 			sheet.AddButton (Locale.GetText ("Quote Retweet"));
 			sheet.AddButton (Locale.GetText ("Cancel"));

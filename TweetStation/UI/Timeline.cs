@@ -249,7 +249,7 @@ namespace TweetStation {
 	public abstract class StreamedViewController : BaseTimelineViewController {
 		const int PadX = 4;
 		protected User ReferenceUser;
-		protected string Title;
+		protected string StreamedTitle;
 		ShortProfileView shortProfileView;
 		string url;
 		bool loaded;
@@ -257,7 +257,7 @@ namespace TweetStation {
 		public StreamedViewController (string title, string url, User reference) : base (true)
 		{
 			this.url = url;
-			this.Title = title;
+			this.StreamedTitle = title;
 			this.ReferenceUser = reference;
 			
 			this.NavigationItem.Title = title;
@@ -268,7 +268,7 @@ namespace TweetStation {
 		{
 		}		
 		
-		protected override string TimelineTitle { get { return Title; } }
+		protected override string TimelineTitle { get { return StreamedTitle; } }
 		
 		protected override void ResetState ()
 		{
@@ -289,7 +289,7 @@ namespace TweetStation {
 				return;
 			SearchPlaceholder = "Search";
 			loaded = true;
-			Root = Util.MakeProgressRoot (Title);
+			Root = Util.MakeProgressRoot (StreamedTitle);
 			TriggerRefresh ();
 		}
 		
@@ -298,7 +298,7 @@ namespace TweetStation {
 		{
 			Account.Download (url, result => {
 				if (result == null){
-					Root = new RootElement (Title) {
+					Root = new RootElement (StreamedTitle) {
 						new Section () {
 							new StringElement ("Unable to download the timeline")
 						}
@@ -326,7 +326,7 @@ namespace TweetStation {
 		{
 			var tweetStream = Tweet.TweetsFromStream (new MemoryStream (result), ReferenceUser);
 			
-			Root = new RootElement (Title){
+			Root = new RootElement (StreamedTitle){
 				new Section () {
 					from tweet in tweetStream select (Element) new TweetElement (tweet)
 				}
@@ -343,7 +343,7 @@ namespace TweetStation {
 		{
 			var userStream = User.LoadUsers (new MemoryStream (result));
 			
-			Root = new RootElement (Title){
+			Root = new RootElement (StreamedTitle){
 				new Section () {
 					from user in userStream select (Element) new UserElement (user)
 				}

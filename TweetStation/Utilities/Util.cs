@@ -195,5 +195,12 @@ namespace TweetStation
 			Console.WriteLine ("[{0}] ticks since last invoke: {1}", s, now-lastTime);
 			lastTime = now;
 		}
+		
+		static UIActionSheet sheet;
+		public static UIActionSheet GetSheet (string title)
+		{
+			sheet = new UIActionSheet (title);
+			return sheet;
+		}
 	}
 }

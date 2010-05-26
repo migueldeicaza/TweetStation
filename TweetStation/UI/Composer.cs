@@ -118,7 +118,7 @@ namespace TweetStation
 				return;
 			}
 			
-			var sheet = new UIActionSheet ("");
+			var sheet = Util.GetSheet ("");
 			sheet.AddButton (Locale.GetText ("Take a photo or video"));
 			sheet.AddButton (Locale.GetText ("From Album"));
 			sheet.AddButton (Locale.GetText ("Cancel"));

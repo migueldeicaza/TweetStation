@@ -157,7 +157,7 @@ namespace TweetStation
 				}
 			}
 			
-			var sheet = new UIActionSheet ("");
+			var sheet = Util.GetSheet ("");
 			sheet.AddButton (Locale.GetText ("Reply"));
 			sheet.AddButton (Locale.GetText ("Reply All"));
 			sheet.AddButton (Locale.GetText ("Cancel"));

@@ -360,7 +360,7 @@ namespace TweetStation
 					OAuthAuthorizer.AuthorizeRequest (OAuthConfig, client, OAuthToken, OAuthTokenSecret, "POST", taskUri, task.PostData);
 					try {
 						client.UploadData (taskUri, "POST", Encoding.UTF8.GetBytes (task.PostData));
-					} catch (Exception e){
+					} catch (Exception){
 						// Can happen if we had already favorited this status
 					}
 					
