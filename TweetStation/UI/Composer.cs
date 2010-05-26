@@ -281,10 +281,11 @@ namespace TweetStation
 			}
 		}
 		
+		UIAlertView alert;
 		void PicUploadComplete (string name)
 		{
 			if (name == null){
-				var alert = new UIAlertView (Locale.GetText ("Error"), 
+				alert = new UIAlertView (Locale.GetText ("Error"), 
 	                Locale.GetText ("There was an error uploading the media, do you want to post without it?"), null, 
                     Locale.GetText ("Cancel Post"), Locale.GetText ("Post"));
 				
@@ -296,7 +297,7 @@ namespace TweetStation
 			} else {
 				var text = composerView.Text.Trim ();
 				if (text.Length + name.Length > 140){
-					var alert = new UIAlertView ("Error",
+					alert = new UIAlertView ("Error",
 						Locale.GetText ("Message is too long"), null, null, "Ok");
 					alert.Show ();
 				} else {

@@ -72,6 +72,7 @@
     <Reference Include="monotouch" />
     <Reference Include="System.Json" />
     <Reference Include="System.Web.Services" />
+    <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MainWindow.xib.designer.cs">

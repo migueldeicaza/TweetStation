@@ -10,6 +10,7 @@ using MonoTouch.Foundation;
 using System.Text;
 using System.Collections.Specialized;
 using System.Json;
+using System.Xml.Linq;
 
 namespace TweetStation
 {
@@ -291,7 +292,7 @@ namespace TweetStation
 			var boundary = "###" + Guid.NewGuid ().ToString () + "###";
 						
 			//var url = new Uri ("http://api.twitpic.com/2/upload.json");
-			var url = new Uri ("http://yfrog.com/api/upload");
+			var url = new Uri ("http://yfrog.com/api/xauth_upload");
 			var req = (HttpWebRequest) WebRequest.Create (url);
 			req.Method = "POST";
 			req.ContentType = "multipart/form-data; boundary=" + boundary;
@@ -306,10 +307,11 @@ namespace TweetStation
 				string urlToPic = null;
 				try {
 					var response = (HttpWebResponse) req.GetResponse  ();
-					
 					var stream = response.GetResponseStream ();
-					var jresponse = JsonValue.Load (stream);
-					Console.WriteLine (jresponse.ToString ());
+					var doc = XDocument.Load (stream);
+					if (doc.Element ("rsp").Attribute ("stat").Value == "ok"){
+						urlToPic = doc.Element ("rsp").Element ("mediaurl").Value;
+					}
 					stream.Close ();
 				} catch (Exception e){
 					Console.WriteLine (e);

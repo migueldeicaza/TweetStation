@@ -2,7 +2,18 @@
 
 	Only Load More tweets is shown
 
+	TaskQueue should be bound to the accountid
+
+	If the picture has been posted, do not bother trying to post it again
+
+	Send needs to put some feedback about what is going on during the upload
+	of a picture
+
+	Sometimes when switch accounts the "Reloading" thing is still active
+
 *  Missing Stuff
+
+	Missing swipe menu
 
 	Load 50 tweets, offer to load more DB storage
 	
