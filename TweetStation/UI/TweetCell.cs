@@ -22,7 +22,7 @@ namespace TweetStation
 	// for the iPad we probably should just use TweetViews that do the
 	// highlighting of url-like things
 	//
-	public class TweetCell : UITableViewCell, IImageUpdated {
+	public class TweetCell : UITableViewCell {
 		// Do these as static to reuse across all instances
 		const int userSize = 14;
 		const int textSize = 15;
@@ -46,8 +46,6 @@ namespace TweetStation
 		
 		Tweet tweet;
 		TweetCellView tweetView;
-		UIImageView imageView;
-		UIImageView retweetView;
 		
 		static CGGradient bottomGradient, topGradient;
 		
@@ -72,9 +70,11 @@ namespace TweetStation
 			Console.WriteLine (Environment.StackTrace);
 		}
 		
-		public class TweetCellView : UIView {
+		public class TweetCellView : UIView, IImageUpdated {
+			static UIImage star = UIImage.FromFile ("Images/mini-star-on.png");	
 			Tweet tweet;
 			string userText;
+			UIImage tweetImage, retweetImage;
 			
 			public TweetCellView (Tweet tweet) : base ()
 			{
@@ -87,6 +87,30 @@ namespace TweetStation
 			{
 				this.tweet = tweet;
 				userText = tweet.Retweeter == null ? tweet.Screename : tweet.Screename + "→" + tweet.Retweeter;
+
+				
+				// 
+				// For fake UserIDs (returned by the search), we try looking up by screename now
+				//
+				var img = ImageStore.GetLocalProfilePicture (tweet.UserId);
+				if (img == null)
+					img = ImageStore.GetLocalProfilePicture (tweet.Screename);
+				if (img == null)
+					ImageStore.QueueRequestForPicture (tweet.UserId, tweet.PicUrl, this);
+				else
+					tweet.PicUrl = null;
+				tweetImage = img == null ? ImageStore.DefaultImage : img;
+				
+				// If no retweet, hide our image.
+				if (tweet.Retweeter != null){
+					img = ImageStore.GetLocalProfilePicture (tweet.RetweeterId);
+					if (img == null)
+						ImageStore.QueueRequestForPicture (tweet.RetweeterId, tweet.RetweeterPicUrl, this);
+					else 
+						tweet.RetweeterPicUrl = null;
+					
+					retweetImage = img == null ? ImageStore.DefaultImage : img;
+				}
 				SetNeedsDisplay ();
 			}
 			
@@ -117,8 +141,38 @@ namespace TweetStation
 				DrawString (tweet.Text, new RectangleF (TextLeftStart, bounds.Y + TextYOffset, bounds.Width-TextLeftStart-TextHeightPadding, bounds.Height-TextYOffset), textFont, UILineBreakMode.WordWrap);
 				
 				timeColor.SetColor ();
-				DrawString (Util.FormatTime (new TimeSpan (DateTime.UtcNow.Ticks - tweet.CreatedAt)), new RectangleF (TextLeftStart, TextHeightPadding, bounds.Width-TextLeftStart-TextHeightPadding, timeSize),
+				string time = Util.FormatTime (new TimeSpan (DateTime.UtcNow.Ticks - tweet.CreatedAt));
+				if (tweet.Favorited){
+					using (var nss = new NSString (time)){
+						var size = nss.StringSize (timeFont);
+						
+						star.Draw (new RectangleF (bounds.Width-6-size.Width-size.Height, TextHeightPadding, size.Height, size.Height));
+					}
+				}
+				DrawString (time, new RectangleF (TextLeftStart, TextHeightPadding, bounds.Width-TextLeftStart-TextHeightPadding, timeSize),
 				            timeFont, UILineBreakMode.Clip, UITextAlignment.Right);
+
+				tweetImage.Draw (new RectangleF (PicXPad, PicYPad, PicSize, PicSize));
+				
+				if (retweetImage != null)
+					retweetImage.Draw (new RectangleF (PicXPad+30, PicYPad+30, 23, 23));
+			}
+
+			void IImageUpdated.UpdatedImage (long onId)
+			{
+				// Discard notifications that might have been queued for an old cell
+				if (tweet == null || (tweet.UserId != onId && tweet.RetweeterId != onId))
+					return;
+				
+				// Discard the url string once the image is loaded, we wont be using it.
+				if (onId == tweet.UserId){
+					tweetImage = ImageStore.GetLocalProfilePicture (onId);
+					tweet.PicUrl = null;
+				} else {
+					retweetImage = ImageStore.GetLocalProfilePicture (onId);
+					tweet.RetweeterPicUrl = null;
+				}
+				SetNeedsDisplay ();
 			}
 		}
 		
@@ -128,15 +182,9 @@ namespace TweetStation
 			this.tweet = tweet;
 			SelectionStyle = UITableViewCellSelectionStyle.Blue;
 			
-			imageView = new UIImageView (new RectangleF (PicXPad, PicYPad, PicSize, PicSize));
-			retweetView = new UIImageView (new RectangleF (PicXPad + 30, PicYPad + 30, 23, 23));
 			tweetView = new TweetCellView (tweet);
-
 			UpdateCell (tweet);
-
 			ContentView.Add (tweetView);
-			ContentView.Add (imageView);
-			ContentView.Add (retweetView);
 		}
 
 		// 
@@ -148,32 +196,6 @@ namespace TweetStation
 			this.tweet = tweet;
 			
 			tweetView.Update (tweet);
-			tweetView.SetNeedsDisplay ();
-			// 
-			// For fake UserIDs (returned by the search), we try looking up by screename now
-			//
-			var img = ImageStore.GetLocalProfilePicture (tweet.UserId);
-			if (img == null)
-				img = ImageStore.GetLocalProfilePicture (tweet.Screename);
-			if (img == null)
-				ImageStore.QueueRequestForPicture (tweet.UserId, tweet.PicUrl, this);
-			else
-				tweet.PicUrl = null;
-			imageView.Image = img == null ? ImageStore.DefaultImage : img;
-			
-			// If no retweet, hide our image.
-			if (tweet.Retweeter == null)
-				retweetView.Alpha = 0;
-			else {
-				retweetView.Alpha = 1;
-				img = ImageStore.GetLocalProfilePicture (tweet.RetweeterId);
-				if (img == null)
-					ImageStore.QueueRequestForPicture (tweet.RetweeterId, tweet.RetweeterPicUrl, this);
-				else
-					tweet.RetweeterPicUrl = null;
-				
-				retweetView.Image = img == null ? ImageStore.DefaultImage : img;
-			}
 			SetNeedsDisplay ();
 		}
 
@@ -196,29 +218,6 @@ namespace TweetStation
 			base.LayoutSubviews ();
 			
 			tweetView.Frame = ContentView.Bounds;
-		}
-	
-		void IImageUpdated.UpdatedImage (long onId)
-		{
-			// Discard notifications that might have been queued for an old cell
-			if (tweet == null || (tweet.UserId != onId && tweet.RetweeterId != onId))
-				return;
-			
-			imageView.Alpha = 0;
-			// Discard the url string once the image is loaded, we wont be using it.
-			if (onId == tweet.UserId){
-				imageView.Image = ImageStore.GetLocalProfilePicture (onId);
-				tweet.PicUrl = null;
-			} else {
-				retweetView.Image = ImageStore.GetLocalProfilePicture (onId);
-				tweet.RetweeterPicUrl = null;
-			}
-
-			UIView.BeginAnimations (null, IntPtr.Zero);
-			UIView.SetAnimationDuration (0.5);
-			
-			imageView.Alpha = 1;
-			UIView.CommitAnimations ();
 		}
 	}
 	

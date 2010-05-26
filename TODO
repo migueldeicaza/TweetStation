@@ -2,10 +2,6 @@
 
 	Only Load More tweets is shown
 
-	Drop the image blend animation, and show directly?
-		Perhaps move the shared code to TweetCellView that can render
-		Have two subclasses one with and one without views
-
 *  Missing Stuff
 
 	Load 50 tweets, offer to load more DB storage
@@ -32,9 +28,8 @@
 	composer:
 		Uploading pictures
 	TweetCell - Main Display
-		Show star info, geo info, and pic info?
+		geo info, and pic info?
 
-	Remove old tweets from the database, 2 week old tweets?
 	Showing User Pictures
 		Needs a custom image loader for user profiles and urls that we detect as pictures
 	Chicken noises for reload

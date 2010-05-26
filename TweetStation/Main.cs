@@ -85,7 +85,24 @@ namespace TweetStation
 				}
 			};
 	
+			CheckDatabase ();
 			tabbarController.SetViewControllers (navigationRoots, false);
+		}
+
+		void CheckDatabase ()
+		{
+			int last = Util.Defaults.IntForKey ("LastUpdate");
+
+			int today = new TimeSpan (DateTime.UtcNow.Ticks).Days;
+			if (last == 0) 
+				Util.Defaults.SetInt (today, "LastUpdate");
+			else {
+				if (today-last > 15){
+					long cutoff = (DateTime.UtcNow-TimeSpan.FromDays (15)).Ticks;
+					Database.Main.Execute ("DELETE from Tweet WHERE CreatedAt < " + cutoff);
+					Util.Defaults.SetInt (today, "LastUpdate");
+				}
+			}
 		}
 		
 		public TwitterAccount Account { 
@@ -169,7 +186,7 @@ namespace TweetStation
 				                             "To get started, authorize\n" +
 				                             "TweetStation to get access\n" +  
 				                             "to your twitter account.\n\n")){
-					new StringElement ("Login to Twitter", delegate { StartLogin (dvc); })
+					new StringElement ("Login to Twitter", delegate { StartLogin (loginDialog); })
 				}
 			};
 			

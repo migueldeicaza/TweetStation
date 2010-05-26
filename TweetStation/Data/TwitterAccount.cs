@@ -358,7 +358,12 @@ namespace TweetStation
 				foreach (var task in tasks){
 					Uri taskUri = new Uri (task.Url);
 					OAuthAuthorizer.AuthorizeRequest (OAuthConfig, client, OAuthToken, OAuthTokenSecret, "POST", taskUri, task.PostData);
-					client.UploadData (taskUri, "POST", Encoding.UTF8.GetBytes (task.PostData));
+					try {
+						client.UploadData (taskUri, "POST", Encoding.UTF8.GetBytes (task.PostData));
+					} catch (Exception e){
+						// Can happen if we had already favorited this status
+					}
+					
 					invoker.BeginInvokeOnMainThread (delegate {
 						try {
 							Database.Main.Execute ("DELETE FROM QueuedTask WHERE TaskId = ?", task.TaskId);

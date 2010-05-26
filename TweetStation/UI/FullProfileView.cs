@@ -143,7 +143,7 @@ namespace TweetStation
 				followButton = new StyledStringElement (GetFollowText (following), ToggleFollow){
 					Alignment = UITextAlignment.Center,
 					TextColor = UIColor.FromRGB (0x32, 0x4f, 0x85),
-					Font = UIFont.BoldSystemFontOfSize (14)
+					Font = UIFont.BoldSystemFontOfSize (16)
 				};
 
 				var following_me = (bool) target ["following"];
@@ -156,7 +156,7 @@ namespace TweetStation
 				var source = root ["relationship"]["source"];
 				var blocking = (bool) source ["blocking"];
 				blockUnblockButton = new StyledStringElement (GetBlockText (blocking), ToggleBlock){
-					Font = UIFont.BoldSystemFontOfSize (14),
+					Font = UIFont.BoldSystemFontOfSize (16),
 					Alignment = UITextAlignment.Center,
 					TextColor = UIColor.FromRGB (0x32, 0x4f, 0x85),
 				};

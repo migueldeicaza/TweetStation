@@ -111,7 +111,7 @@ namespace TweetStation
 	
 	public class DetailTweetView : UIView, IImageUpdated {
 		static UIImage off = UIImage.FromFileUncached ("Images/star-off.png");
-		static UIImage on = UIImage.FromFileUncached ("Images/star-on.png");
+		public static UIImage on = UIImage.FromFileUncached ("Images/star-on.png");
 		const int PadY = 4;
 		const int smallSize = 12;
 		TweetView tweetView;
@@ -165,7 +165,7 @@ namespace TweetStation
 
 				buttonView.TouchDown += delegate {
 					tweet.Favorited = !tweet.Favorited;
-					TwitterAccount.CurrentAccount.Post (String.Format ("http://api.twitter.com/1/favorites/{0}/{1}.json", tweet.Favorited ? "create" : "destroy", tweet.Id),"");
+					TwitterAccount.CurrentAccount.Post (String.Format ("http://api.twitter.com/1/1favorites/{0}/{1}.json", tweet.Favorited ? "create" : "destroy", tweet.Id),"");
 					UpdateButtonImage (tweet);
 					tweet.Replace (Database.Main);
 				};

@@ -51,11 +51,7 @@ namespace TweetStation {
 				} else {
 					Composer.Main.NewTweet (this);
 				}
-			});
-			
-			NavigationItem.LeftBarButtonItem = new UIBarButtonItem (UIBarButtonSystemItem.Action, delegate {
-				PresentModalViewController (new UINavigationController (new Settings (this)), true);
-			});
+			});			
 		}
 
 		public TwitterAccount Account {
@@ -91,12 +87,17 @@ namespace TweetStation {
 	public class TimelineViewController : BaseTimelineViewController {
 		Section mainSection;
 		string timelineTitle;
+		static UIImage settingsImage = UIImage.FromFile ("Images/settings.png");
 		
 		public TimelineViewController (string title, TweetKind kind, bool pushing) : base (pushing)
 		{
 			timelineTitle = title;
 			this.kind = kind;
 			EnableSearch = true;
+			
+			NavigationItem.LeftBarButtonItem = new UIBarButtonItem (settingsImage, UIBarButtonItemStyle.Plain, delegate {
+				PresentModalViewController (new UINavigationController (new Settings (this)), true);
+			});
 		}
 		
 		protected override string TimelineTitle {
@@ -167,7 +168,7 @@ namespace TweetStation {
 					long lastId = GetTableTweetId (insertPoint == 0 ? 0 : insertPoint-1) ?? 0;					
 					
 					continuous = false;
-					int inserted = mainSection.Insert (insertPoint, UITableViewRowAnimation.None, FetchTweets (count, lastId, insertPoint));
+					mainSection.Insert (insertPoint, UITableViewRowAnimation.None, FetchTweets (count, lastId, insertPoint));
 					NavigationController.TabBarItem.BadgeValue = (count > 1) ? (count-1).ToString () : null;
 
 					if (!continuous){
@@ -201,7 +202,7 @@ namespace TweetStation {
 			SearchPlaceholder = Locale.Format ("Search {0}", TimelineTitle);
 			Util.ReportTime ("Before trigger");
 			if (Util.NeedsUpdate ("update" + kind, TimeSpan.FromSeconds (120))){
-				// throttle
+				// throttle, just to let the UI startup
 				NSTimer.CreateScheduledTimer (TimeSpan.FromMilliseconds (200), delegate {				
 					TriggerRefresh ();
 				});
