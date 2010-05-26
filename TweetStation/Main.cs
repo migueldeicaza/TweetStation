@@ -155,14 +155,14 @@ namespace TweetStation
 			};
 			sheet.ShowInView (Util.MainAppDelegate.MainView);
 		}
-		
+			
+		DialogViewController loginDialog = null;
+					
 		//
 		// Creates the default account using OAuth
 		//
 		void CreateDefaultAccount ()
 		{
-			DialogViewController dvc = null;
-			
 			var root = new RootElement (Locale.GetText ("Login to Twitter")){
 				new Section (Locale.GetText ("\n\n\n" +
 				                             "Welcome to TweetStation!\n\n" +
@@ -173,8 +173,8 @@ namespace TweetStation
 				}
 			};
 			
-			dvc = new DialogViewController (UITableViewStyle.Grouped, root);
-			window.AddSubview (dvc.View);
+			loginDialog = new DialogViewController (UITableViewStyle.Grouped, root);
+			window.AddSubview (loginDialog.View);
 		}
 		
 		public void StartLogin (DialogViewController dvc)
@@ -186,6 +186,7 @@ namespace TweetStation
 					dvc.View.RemoveFromSuperview ();
 					CreatePhoneGui ();
 					SetDefaultAccount (oauth);
+					loginDialog = null;
 				});
 			}
 		}
