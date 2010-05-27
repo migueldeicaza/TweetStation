@@ -15,82 +15,19 @@ using System.Linq;
 
 namespace TweetStation
 {
-	// 
-	// A view controller that performs a search
-	//
-	public class SearchViewController : BaseTimelineViewController {
-		string search;
-		Section searchSection;
-		
-		public SearchViewController (string search) : base (true)
+	public class SearchViewController : StreamedTimelineViewController {
+		public SearchViewController (string search) :
+			base (search, "http://search.twitter.com/search.json?q=" + OAuth.PercentEncode (search), "rpp=", 50, "since_id=", "page=", null)
 		{
-			this.search = search;
-			
-		}
-
-		protected override string TimelineTitle {
-			get {
-				return search;
-			}
 		}
 		
-		protected override void ResetState ()
+		protected override IEnumerable<Tweet> GetTweetStream (byte[] result)
 		{
-			Root = Util.MakeProgressRoot (search);
-			TriggerRefresh ();
+			return Tweet.TweetsFromSearchResults (new MemoryStream (result));
 		}
 		
-		public override void ReloadTimeline ()
-		{
-			searchSection = null;
-			loadMore = null;
-			Root = new RootElement (search) { UnevenRows = true };
-			SearchTwitter (1);
-		}
-		
-		Element loadMore;
-		Element MakeGetMoreElements (int page)
-		{
-			loadMore = new LoadMoreElement (Locale.GetText ("Load more"), Locale.GetText ("Loading"), delegate {
-				SearchTwitter (page);
-			}, UIFont.BoldSystemFontOfSize (14), UIColor.Black);
-			return loadMore;
-		}
-		
-		public void SearchTwitter (int page)
-		{
-			const int requested = 50;
-			
-			TwitterAccount.CurrentAccount.Download ("http://search.twitter.com/search.json?rpp=" + requested + "&q=" + OAuth.PercentEncode (search) + "&page=" + page, res => {
-				if (res == null){
-					Root = Util.MakeError ("search");
-					return;
-				}
-				var tweetStream = Tweet.TweetsFromSearchResults (new MemoryStream (res));
-				
-				if (loadMore != null){
-					searchSection.Remove (loadMore);
-					loadMore = null;
-				}
-
-				var root = page == 1 ? new RootElement (search) {UnevenRows = true } : Root;
-						
-				if (searchSection == null){
-					searchSection = new Section ();
-					root.Add (searchSection);
-				}
-				
-				int n = searchSection.Add (from tweet in tweetStream select (Element) new TweetElement (tweet));
-
-				if (n == requested)
-					searchSection.Add (MakeGetMoreElements (page+1));
-				
-				Root = root;
-				ReloadComplete ();
-			});
-		}
 	}
-	
+
 	public class SearchElement : RootElement {
 		string query;
 		

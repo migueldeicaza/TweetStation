@@ -25,7 +25,7 @@ namespace TweetStation
 		TwitterAccount account;
 		TimelineViewController main, mentions, messages;
 		SearchesViewController searches;
-		StreamedViewController favorites;
+		StreamedTimelineViewController favorites;
 		public UIView MainView;
 		
 		UINavigationController [] navigationRoots;
@@ -65,7 +65,7 @@ namespace TweetStation
 			mentions = new TimelineViewController ("Mentions", TweetKind.Replies, false); 
 			messages = new TimelineViewController ("Messages", TweetKind.Direct, false);
 			searches = new SearchesViewController ();
-			favorites = new StreamedTimelineViewController ("Favorites", "http://api.twitter.com/version/favorites.json");
+			favorites = StreamedTimelineViewController.MakeFavorites ("http://api.twitter.com/1/favorites.json");
 			
 			navigationRoots = new UINavigationController [5] {
 				new UINavigationController (main) {

@@ -57,7 +57,7 @@ namespace TweetStation
 				main,
 				replySection,
 				new Section () {
-					new TimelineRootElement (tweet.Screename, Locale.GetText ("User's timeline"), "http://api.twitter.com/1/statuses/user_timeline.json?skip_user=true&id=" + tweet.UserId, User.FromId (tweet.UserId))
+					TimelineRootElement.MakeTimeline (tweet.Screename, Locale.GetText ("User's timeline"), "http://api.twitter.com/1/statuses/user_timeline.json?skip_user=true&id=" + tweet.UserId, User.FromId (tweet.UserId))
 				}
 			};
 		}

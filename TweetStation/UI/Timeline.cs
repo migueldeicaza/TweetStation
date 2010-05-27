@@ -9,6 +9,7 @@ using MonoTouch.Dialog;
 using System.Drawing;
 using System.IO;
 using MonoTouch.Foundation;
+using System.Text;
 
 namespace TweetStation {
 	
@@ -249,24 +250,21 @@ namespace TweetStation {
 	public abstract class StreamedViewController : BaseTimelineViewController {
 		const int PadX = 4;
 		protected User ReferenceUser;
-		protected string StreamedTitle;
+		protected string StreamedTitle;		
 		ShortProfileView shortProfileView;
-		string url;
+		protected string url;
 		bool loaded;
 		
 		public StreamedViewController (string title, string url, User reference) : base (true)
 		{
 			this.url = url;
+			
 			this.StreamedTitle = title;
 			this.ReferenceUser = reference;
 			
 			this.NavigationItem.Title = title;
 			EnableSearch = true;
 		}
-		
-		public StreamedViewController (string title, string url) : this (title, url, null)
-		{
-		}		
 		
 		protected override string TimelineTitle { get { return StreamedTitle; } }
 		
@@ -310,86 +308,161 @@ namespace TweetStation {
 			});
 		}
 		
-		protected abstract void PopulateRootFrom (byte [] data);
+		protected virtual void PopulateRootFrom (byte [] data) {}
 	}
 	
+	// 
+	// This version does pagination by having a bunch of parameters passed,
+	// sadly, twitter is a mess when it comes to this
+	// lists/statuses: since_id, page, per_page
+	// statuses/user_timeline: since_id, count
+	// favorites: page with hardcoded count to 20
+	// searches: page, since_id and "rpp" is used as "count"
+	//s
 	public class StreamedTimelineViewController : StreamedViewController {
-		public StreamedTimelineViewController (string title, string url, User reference) : base (title, url, reference)
+		LoadMoreElement loadMore;
+		string countStr, sinceStr, pageStr;
+		int expectedCount;
+		long last_id;
+		
+		public StreamedTimelineViewController (string title, string url, string countStr, int count, string sinceStr, string pageStr, User reference) : base (title, url, reference)
 		{
+			this.countStr = countStr;
+			this.sinceStr = sinceStr;
+			this.pageStr = pageStr;
+			this.expectedCount = count;
 		}
 		
-		public StreamedTimelineViewController (string title, string url) : this (title, url, null)
+		// Reloads data from the server
+		public override void ReloadTimeline ()
 		{
-		}		
-
-		protected override void PopulateRootFrom (byte [] result)
+			Load (1, last_id);
+		}
+		
+		protected virtual IEnumerable<Tweet> GetTweetStream (byte [] result)
 		{
-			var tweetStream = Tweet.TweetsFromStream (new MemoryStream (result), ReferenceUser);
+			return Tweet.TweetsFromStream (new MemoryStream (result), ReferenceUser);
+		}
 			
-			Root = new RootElement (StreamedTitle){
-				new Section () {
-					from tweet in tweetStream select (Element) new TweetElement (tweet)
+		void Load (int page, long since_id)
+		{
+			var fullUrl = BuildUrl (page, since_id);
+			TwitterAccount.CurrentAccount.Download (fullUrl, res => {
+				if (res == null){
+					Root = Util.MakeError (TimelineTitle);
+					return;
 				}
-			};
+				var tweetStream = GetTweetStream (res);
+				
+				Section section;
+				if (since_id == 0){
+					if (page == 1){
+						// If we are the first batch of data being loaded, not load more, or refresh
+						var root = new RootElement (StreamedTitle) { UnevenRows = true };
+						section = new Section ();
+						root.Add (section);
+						Root = root;
+					} else { 
+						section = Root [0];
+						section.Remove (loadMore);
+					}
+					
+					int n = section.Add (from tweet in tweetStream select (Element) new TweetElement (tweet));
+					
+					if (n == expectedCount){
+						loadMore = new LoadMoreElement (Locale.GetText ("Load more"), Locale.GetText ("Loading"), delegate {
+							Load (page+1, 0);
+						}, UIFont.BoldSystemFontOfSize (14), UIColor.Black);
+					
+						section.Add (loadMore);
+					}
+				} else {
+					section = Root [0];
+					section.Insert (0, UITableViewRowAnimation.None, from tweet in tweetStream select (Element) new TweetElement (tweet));
+				}
+				if (sinceStr != null && section.Count > 0)
+					last_id = (section [0] as TweetElement).Tweet.Id;
+
+				ReloadComplete ();
+			});
+		}
+		
+		string BuildUrl (int page, long since_id)
+		{
+			Uri uri = new Uri (url);
+			string query = uri.Query;
+			
+			var newUri = new StringBuilder (url);
+			char next = query == "" ? '?' : '&';
+			
+			if (pageStr != null) {
+				newUri.Append (next);
+				newUri.Append (pageStr + page);
+				next = '&';
+			}
+			if (countStr != null){
+				newUri.Append (next);
+				newUri.Append (countStr + expectedCount);
+				next = '&';
+			}
+			if (sinceStr != null && since_id != 0){
+				newUri.Append (next);
+				newUri.Append (sinceStr + since_id);
+			}
+			return newUri.ToString ();
+		}
+		
+		public static StreamedTimelineViewController MakeFavorites (string url)
+		{
+			return new StreamedTimelineViewController (Locale.GetText ("Favorites"), url, null, 20, null, "page=", null);
+		}
+		
+		public static StreamedTimelineViewController MakeUserTimeline (string url)
+		{
+			return new StreamedTimelineViewController (Locale.GetText ("User's timeline"), url, "count=", 50, "since_id=", null, null);
 		}
 	}
 
-	public class StreamedUserViewController : StreamedViewController {
-		public StreamedUserViewController (string title, string url, User reference) : base (title, url, reference)
-		{
-		}
-
-		protected override void PopulateRootFrom (byte [] result)
-		{
-			Database.Main.Execute ("BEGIN");
-			var userStream = User.LoadUsers (new MemoryStream (result));
-			
-			Root = new RootElement (StreamedTitle){
-				new Section () {
-					from user in userStream select (Element) new UserElement (user)
-				}
-			};
-			Database.Main.Execute ("END");
-		}
-	}
-	
+	// 
+	// A MonoTouch.Dialog Element that can be inserted in dialogs
+	//
 	public class TimelineRootElement : RootElement {
 		User reference;
 		string nestedCaption;
-		string url;
+		string url, countStr, pageStr, sinceStr;
+		int count;
 		
-		public TimelineRootElement (string nestedCaption, string caption, string url, User reference) : base (caption)
+		public TimelineRootElement (string nestedCaption, string caption, string url, string countStr, int count, string sinceStr, string pageStr, User reference) : base (caption)
 		{
 			this.nestedCaption = nestedCaption;
 			this.reference = reference;
 			this.url = url;
+			this.pageStr = pageStr;
+			this.countStr = countStr;
+			this.sinceStr = sinceStr;
+			this.count = count;
+		}
+		
+		public static TimelineRootElement MakeTimeline (string nestedCaption, string caption, string url, User reference)
+		{
+			return new TimelineRootElement (nestedCaption, caption, url, "count=", 50, "since_id=", null, reference);
+		}
+		
+		public static TimelineRootElement MakeFavorites (string nestedCaption, string caption, string url, User reference)
+		{
+			return new TimelineRootElement (nestedCaption, caption, url, null, 20, null, "page=", reference);
+		}
+		
+		public static TimelineRootElement MakeList (string nestedCaption, string caption, string url)
+		{
+			return new TimelineRootElement (nestedCaption, caption, url, "per_page=", 20, "since_id", "page=", null);
 		}
 		
 		protected override UIViewController MakeViewController ()
 		{						
-			return new StreamedTimelineViewController (nestedCaption, url, reference) {
-				Account = TwitterAccount.CurrentAccount
-			};
-		}
-	}
-	
-	public class UserRootElement : RootElement {
-		User reference;
-		string url;
-		
-		public UserRootElement (User reference, string caption, string url) : base (caption)
-		{
-			this.reference = reference;
-			this.url = url;
-		}
-		
-		protected override UIViewController MakeViewController ()
-		{
-			return new StreamedUserViewController (reference.Screenname, url, reference) {
+			return new StreamedTimelineViewController (nestedCaption, url, countStr, count, sinceStr, pageStr, reference) {
 				Account = TwitterAccount.CurrentAccount
 			};
 		}
 	}
 }
-
-

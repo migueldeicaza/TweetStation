@@ -157,7 +157,7 @@ namespace TweetStation
 						string name = list ["full_name"];
 						string listname = list ["name"];
 						string url = "http://api.twitter.com/1/" + account.Username + "/lists/" + listname + "/statuses.json";
-						lists.Insert (pos++, UITableViewRowAnimation.Fade, new TimelineRootElement (name, name, url, null));
+						lists.Insert (pos++, UITableViewRowAnimation.Fade, TimelineRootElement.MakeList (name, listname, url));
 					}
 				} catch (Exception e){
 					Console.WriteLine (e);

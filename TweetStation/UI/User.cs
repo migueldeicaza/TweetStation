@@ -2,6 +2,8 @@
 // User.cs: UserElement for now, eventually, the complete UI to render users
 //
 using System;
+using System.IO;
+using System.Linq;
 using MonoTouch.Foundation;
 using MonoTouch.UIKit;
 using MonoTouch.Dialog;
@@ -62,5 +64,44 @@ namespace TweetStation
 			dvc.ActivateController (new FullProfileView (Caption));
 		}
 	}
-}
 
+	// 
+	// A progressive loader for user results
+	//
+	public class StreamedUserViewController : StreamedViewController {
+		public StreamedUserViewController (string title, string url, User reference) : base (title, url, reference)
+		{
+		}
+
+		protected override void PopulateRootFrom (byte [] result)
+		{
+			Database.Main.Execute ("BEGIN");
+			var userStream = User.LoadUsers (new MemoryStream (result));
+			
+			Root = new RootElement (StreamedTitle){
+				new Section () {
+					from user in userStream select (Element) new UserElement (user)
+				}
+			};
+			Database.Main.Execute ("END");
+		}
+	}
+	
+	public class UserRootElement : RootElement {
+		User reference;
+		string url;
+		
+		public UserRootElement (User reference, string caption, string url) : base (caption)
+		{
+			this.reference = reference;
+			this.url = url;
+		}
+		
+		protected override UIViewController MakeViewController ()
+		{
+			return new StreamedUserViewController (reference.Screenname, url, reference) {
+				Account = TwitterAccount.CurrentAccount
+			};
+		}
+	}
+}
