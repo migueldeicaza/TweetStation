@@ -182,7 +182,7 @@ namespace TweetStation
 		{
 			return new RootElement ("Error"){
 				new Section ("Error"){
-					new MultilineElement ("Unable to retrieve the information for " + diagMsg)
+					new MultilineElement ("Unable to retrieve the information")
 				}
 			};
 		}

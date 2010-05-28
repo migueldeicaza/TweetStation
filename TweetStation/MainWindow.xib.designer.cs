@@ -17,8 +17,6 @@ namespace TweetStation {
 		
 		private MonoTouch.UIKit.UIWindow __mt_window;
 		
-		private MonoTouch.UIKit.UITabBarController __mt_tabbarController;
-		
 		#pragma warning disable 0169
 		[MonoTouch.Foundation.Connect("window")]
 		private MonoTouch.UIKit.UIWindow window {
@@ -29,18 +27,6 @@ namespace TweetStation {
 			set {
 				this.__mt_window = value;
 				this.SetNativeField("window", value);
-			}
-		}
-		
-		[MonoTouch.Foundation.Connect("tabbarController")]
-		private MonoTouch.UIKit.UITabBarController tabbarController {
-			get {
-				this.__mt_tabbarController = ((MonoTouch.UIKit.UITabBarController)(this.GetNativeField("tabbarController")));
-				return this.__mt_tabbarController;
-			}
-			set {
-				this.__mt_tabbarController = value;
-				this.SetNativeField("tabbarController", value);
 			}
 		}
 	}

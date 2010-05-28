@@ -18,7 +18,10 @@ namespace TweetStation
 
 		protected WebViewController ()
 		{
-			toolbar = new UIToolbar ();
+			toolbar = new UIToolbar () {
+				AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleBottomMargin
+			};
+			
 			items = new UIBarButtonItem [] {
 				new UIBarButtonItem (Locale.GetText ("Back"), UIBarButtonItemStyle.Bordered, (o, e) => { WebView.GoBack (); }),
 				new UIBarButtonItem (Locale.GetText ("Forward"), UIBarButtonItemStyle.Bordered, (o, e) => { WebView.GoForward (); }),
@@ -34,13 +37,19 @@ namespace TweetStation
 		public void SetupWeb ()
 		{
 			WebView = new UIWebView (){
-				ScalesPageToFit = true
+				ScalesPageToFit = true,
+				AutoresizingMask = UIViewAutoresizing.FlexibleHeight|UIViewAutoresizing.FlexibleWidth
 			};
 			WebView.LoadStarted += delegate { Util.PushNetworkActive (); };
 			WebView.LoadFinished += delegate { Util.PopNetworkActive (); };
 			
 			//webView.SizeToFit ();
 			View.AddSubview (WebView);
+		}
+		
+		public override bool ShouldAutorotateToInterfaceOrientation (UIInterfaceOrientation toInterfaceOrientation)
+		{
+			return true;
 		}
 		
 		public override void ViewDidDisappear (bool animated)
@@ -66,7 +75,9 @@ namespace TweetStation
 			Main.HidesBottomBarWhenPushed = true;
 			Main.SetupWeb ();
 			Main.WebView.LoadRequest (new NSUrlRequest (new NSUrl (url)));
+			
 			parent.ActivateController (Main);
+
 			UIView.CommitAnimations ();
 		}
 	}

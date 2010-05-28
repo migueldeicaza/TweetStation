@@ -22,6 +22,7 @@ namespace TweetStation {
 		
 		public BaseTimelineViewController (bool pushing) : base (null, pushing)
 		{			
+			Autorotate = true;
 			RefreshRequested += delegate {
 				ReloadTimeline ();
 			};

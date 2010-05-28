@@ -73,8 +73,11 @@ namespace TweetStation
 			return true;
 		}
 		
+		UITabBarController tabbarController;
+		
 		void CreatePhoneGui ()
 		{
+			tabbarController = new RotatingTabBar ();
 			MainView = tabbarController.View;
 			window.AddSubview (MainView);
 
@@ -341,5 +344,17 @@ namespace TweetStation
 			TwitterAccount.SetDefault (newAccount);
 			Account = newAccount;
 		}
+		
+		public class RotatingTabBar : UITabBarController {
+			public RotatingTabBar () : base ()
+			{
+			}
+			
+			public override bool ShouldAutorotateToInterfaceOrientation (UIInterfaceOrientation toInterfaceOrientation)
+			{
+				return true;
+			}
+		}
+		
 	}
 }
