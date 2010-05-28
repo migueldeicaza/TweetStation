@@ -95,14 +95,26 @@ namespace TweetStation
 				SetupLeftItemEdit ();
 		}
 		
+		BooleanElement playMusic;
+		BooleanElement chicken;
+		
 		public Settings (DialogViewController parent) : base (UITableViewStyle.Grouped, null)
 		{
 			this.parent = parent;
 			Root = new RootElement (Locale.GetText ("Settings")){
 				MakeAccounts (),
 				new Section (){
-					new RootElement (Locale.GetText ("Display")),
-					new RootElement (Locale.GetText ("Services"))
+					new RootElement (Locale.GetText ("Inspiration")){
+						new Section (Locale.GetText ("Magic"), 
+						             Locale.GetText ("Twitter is best used when you are inspired\n" +
+						                             "to write the best possible tweets.  I picked\n" +
+						                             "music and audio that should inspire\n" +
+						                             "you to create clever tweets")){
+							(playMusic = new BooleanElement (Locale.GetText ("Music on Composer"), Util.Defaults.IntForKey ("disableMusic") == 0)),
+							(chicken = new BooleanElement (Locale.GetText ("Chicken noises"), Util.Defaults.IntForKey ("disableChickens") == 0)),
+						}
+					},
+					//new RootElement (Locale.GetText ("Services"))
 				},
 				new Section (){
 					new RootElement (Locale.GetText ("About")){
@@ -121,6 +133,14 @@ namespace TweetStation
 						}
 					}
 				}
+			};
+			playMusic.ValueChanged += delegate {
+				Util.Defaults.SetInt (playMusic.Value ? 0 : 1, "disableMusic");
+				Util.Defaults.Synchronize ();
+			};
+			chicken.ValueChanged += delegate {
+				Util.Defaults.SetInt (chicken.Value ? 0 : 1, "disableChickens");
+				Util.Defaults.Synchronize ();
 			};
 		}
 	}

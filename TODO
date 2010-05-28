@@ -19,29 +19,30 @@
 
 	Only Load More tweets is shown
 
-	If the picture has been posted, do not bother trying to post it again
-
 	Send needs to put some feedback about what is going on during the upload
 	of a picture
 
 	Sometimes when switch accounts the "Reloading" thing is still active
 
+	Sometimes the "reloading" becomes active on switching to
+	something, just dont remember what, need a test case.
+
+	Add a picture container badge, to make it look nicer
+
+	Self tweets on right?
+
 *  Missing Stuff
+
+	HUD display:
+		Compress URL
+		Upload picture
 
 	Load 50 tweets, offer to load more DB storage
 	
-	Progress widget to overlay for some tasks?
-
-	When I post, the icon should be on right?
-
-	Include "themes" for rendering the bubbles?
+	For my tweets rendered on the timeline, the icon should be on right?
 
 	Refresh user pictures when they change.  
 		Currently, once we download a pic, we never update it
-
-	Protocol:
-		When posting a tweet, the POST data result should
-		be added to the main view.
 
 	On Load:
 		Custom control to show "Load more" with some better artwork
@@ -49,10 +50,9 @@
 		to give a visual cue of what is happening.
 
 	Nearby tweets
-	composer:
-		Uploading pictures
 	TweetCell - Main Display
 		geo info, and pic info?
+		Replace foo -> bar in retweet with a bottom "Retweeted by"
 
 	Showing User Pictures
 		Needs a custom image loader for user profiles and urls that we detect as pictures
@@ -73,17 +73,17 @@
 	FullProfileView
 		Needs an animating element while loading data from the network,
 
-	URL Shortening
-
-* Settings:
+* Some settings that could be added
 
 	display name
 	date format 
 	Font size
 	Image quality
-	Sounds effects
 
-	Image service
+	Image service configurator
+		Most image uploaders require API keys and disable
+		commercial use, not worth the hassle
+
 	Video service
 	URL shorter
 	Read Later
@@ -100,6 +100,10 @@
 	Advanced
 
 * Post 1.0:
+
+	If the picture has been posted, do not bother trying to post it again
+
+	Remember where the song is after compose, or restart every time?
 
 	Add editing capability to searches to trim down the search list
 
@@ -123,6 +127,10 @@
 	Cell "themes"
 
 	Group user names by letter, and show the letter selector on right
+
+	Queue system: would be nice if the delayed POSTs can insert
+	data back into the main system.   Or alternatively make 
+	POST synchronous and only put in queue if it fails?
 
 * Wanted
 

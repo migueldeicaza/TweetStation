@@ -51,7 +51,9 @@ namespace TweetStation
 			if (tweet.Kind == TweetKind.Direct)
 				replySection.Add (new StringElement (Locale.GetText ("Direct Reply"), delegate { Direct (this, EventArgs.Empty); }));
 			else 
-				replySection.Add (new UIViewElement (null, new ButtonsView (buttons, handlers), true));
+				replySection.Add (new UIViewElement (null, new ButtonsView (buttons, handlers), true) {
+					Flags = UIViewElement.CellFlags.DisableSelection | UIViewElement.CellFlags.Transparent
+				});
 			
 			Root = new RootElement (tweet.Screename){
 				main,

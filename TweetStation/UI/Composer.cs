@@ -6,6 +6,7 @@
 //
 using System;
 using System.Drawing;
+using System.Linq;
 using System.Text;
 using System.Web;
 using MonoTouch.Foundation;
@@ -13,6 +14,7 @@ using MonoTouch.UIKit;
 using MonoTouch.CoreLocation;
 using SQLite;
 using System.IO;
+using System.Net;
 
 namespace TweetStation
 {
@@ -22,7 +24,7 @@ namespace TweetStation
 		Composer composer;
 		UIToolbar toolbar;
 		UILabel charsLeft;
-		internal UIBarButtonItem GpsButtonItem;
+		internal UIBarButtonItem GpsButtonItem, ShrinkItem;
 		public event NSAction LookupUserRequested;
 		public NSDictionary PictureDict;
 		
@@ -43,10 +45,12 @@ namespace TweetStation
 
 			toolbar = new UIToolbar (RectangleF.Empty);
 			GpsButtonItem = new UIBarButtonItem (UIImage.FromFile ("Images/gps.png"), style, InsertGeo);
+			ShrinkItem = new UIBarButtonItem (UIImage.FromFile ("Images/arrows.png"), style, OnShrinkTapped);
 			
 			toolbar.SetItems (new UIBarButtonItem [] {
 				new UIBarButtonItem (UIBarButtonSystemItem.Trash, delegate { textView.Text = ""; } ) { Style = style },
 				new UIBarButtonItem (UIBarButtonSystemItem.FlexibleSpace, null),
+				ShrinkItem,
 				new UIBarButtonItem (UIBarButtonSystemItem.Search, delegate { if (LookupUserRequested != null) LookupUserRequested (); }) { Style = style },
 				new UIBarButtonItem (UIBarButtonSystemItem.Camera, delegate { TakePicture (); } ) { Style = style },
 				GpsButtonItem }, false);	
@@ -71,6 +75,35 @@ namespace TweetStation
 				charsLeft.TextColor = UIColor.White;
 			
 			charsLeft.Text = (140-text.Length).ToString ();
+		}
+		
+		internal void OnShrinkTapped (object sender, EventArgs args)
+		{
+			var words = textView.Text.Split (new char [] { ' '}, StringSplitOptions.RemoveEmptyEntries);
+			bool hasUrls;
+			
+			foreach (var word in words)
+				if (word.StartsWith ("http://")){
+					ShrinkUrls (words);
+					break;
+				}
+			
+			textView.Text = String.Join (" ", words);
+		}
+
+		// Need HUD display here
+		void ShrinkUrls (string [] words)
+		{
+			var wc = new WebClient ();
+			for (int i = 0; i < words.Length; i++){
+				if (!words [i].StartsWith ("http://"))
+				    continue;
+				    
+				try {
+					words [i] = wc.DownloadString (new Uri ("http://is.gd/api.php?longurl=" + HttpUtility.UrlEncode (words [i])));
+				} catch {
+				}
+			}
 		}
 		
 		internal void InsertGeo (object sender, EventArgs args)
@@ -99,7 +132,7 @@ namespace TweetStation
 		{
 			textView.Frame = new RectangleF (0, 0, bounds.Width, bounds.Height-44);
 			toolbar.Frame = new RectangleF (0, bounds.Height-44, bounds.Width, 44);
-			charsLeft.Frame = new RectangleF (118, bounds.Height-44, 50, 44);
+			charsLeft.Frame = new RectangleF (64, bounds.Height-44, 50, 44);
 		}
 		
 		public string Text { 
@@ -355,6 +388,9 @@ namespace TweetStation
 			previousController = parent;
 			composerView.textView.BecomeFirstResponder ();
 			parent.PresentModalViewController (this, true);
+			
+			if (Util.Defaults.IntForKey ("disableMusic") != 0)
+				return;
 			
 			try {
 				player = new AudioPlay ("Audio/composeaudio.mp3");
