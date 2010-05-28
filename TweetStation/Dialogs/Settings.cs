@@ -101,11 +101,13 @@ namespace TweetStation
 		public Settings (DialogViewController parent) : base (UITableViewStyle.Grouped, null)
 		{
 			this.parent = parent;
+			var aboutUrl = NSUrl.FromFilename ("about.html");
+			
 			Root = new RootElement (Locale.GetText ("Settings")){
 				MakeAccounts (),
 				new Section (){
-					new RootElement (Locale.GetText ("Inspiration")){
-						new Section (Locale.GetText ("Magic"), 
+					new RootElement (Locale.GetText ("Settings")){
+						new Section (Locale.GetText ("Inspiration"), 
 						             Locale.GetText ("Twitter is best used when you are inspired\n" +
 						                             "to write the best possible tweets.  I picked\n" +
 						                             "music and audio that should inspire\n" +
@@ -116,20 +118,19 @@ namespace TweetStation
 					},
 					//new RootElement (Locale.GetText ("Services"))
 				},
+				
 				new Section (){
 					new RootElement (Locale.GetText ("About")){
 						new Section (){
-							new StringElement (Locale.GetText ("Version"))
+							new HtmlElement (Locale.GetText ("About and Credits"), aboutUrl),
+							new HtmlElement (Locale.GetText ("Web site"), "http://tirania.org/tweetstation")
 						},
 						new Section (){
 							new RootElement ("@migueldeicaza", delegate { return new FullProfileView ("migueldeicaza"); }),
-							new RootElement ("@icluck", delegate { return new FullProfileView ("icluck"); }),
-						},
-						new Section (){
-							new StringElement (Locale.GetText ("Credits"))
+							new RootElement ("@itweetstation", delegate { return new FullProfileView ("icluck"); }),
+							new RootElement ("@kmacleod", delegate { return new FullProfileView ("kmacleod"); })
 						},
 						new Section () {
-							new HtmlElement (Locale.GetText ("Web site"), "http://tirania.org/tweetstation")
 						}
 					}
 				}
