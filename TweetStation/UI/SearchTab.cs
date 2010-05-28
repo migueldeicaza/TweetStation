@@ -59,7 +59,7 @@ namespace TweetStation
 		bool SearchResultsAreRecent {
 			get {
 				long lastTime;
-				return Int64.TryParse (Util.Defaults.StringForKey ("searchLoadedTime"), out lastTime) && (DateTime.UtcNow.Ticks - lastTime) < TimeSpan.FromMinutes (30).Ticks;
+				return Int64.TryParse (Util.Defaults.StringForKey ("searchLoadedTime"), out lastTime) && (DateTime.UtcNow.Ticks - lastTime) < TimeSpan.FromHours (24).Ticks;
 			}
 		}
 		
