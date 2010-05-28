@@ -157,19 +157,17 @@ namespace TweetStation
 	
 	public class TwitterTextSearch : SearchDialog {
 		public TwitterTextSearch () {}
-		List<string> terms = new List<string> ();
+		List<string> terms;
 		
 		public override void PopulateSearch (Section entries)
 		{
 			int n = Util.Defaults.IntForKey ("searches");
+
+			terms = (from idx in Enumerable.Range (0, n)
+			              let value = Util.Defaults.StringForKey ("u-" + idx)
+			              where value != null select value).Distinct ().ToList ();
 			
-			for (int i = 0; i < n; i++){
-				var value = Util.Defaults.StringForKey ("u-" + i);
-				if (value == null)
-					continue;
-				terms.Add (value);
-				entries.Add (new StringElement (value));
-			}
+			entries.Add (from term in terms select (Element) new StringElement (term));
 		}
 		
 		public override SearchMirrorElement MakeMirror ()
