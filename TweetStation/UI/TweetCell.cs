@@ -219,6 +219,7 @@ namespace TweetStation
 			base.LayoutSubviews ();
 			
 			tweetView.Frame = ContentView.Bounds;
+			tweetView.SetNeedsDisplay ();
 		}
 	}
 	

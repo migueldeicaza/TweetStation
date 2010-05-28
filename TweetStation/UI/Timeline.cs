@@ -242,7 +242,6 @@ namespace TweetStation {
 				
 				base.Scrolled (scrollView);
 			}
-			
 		}
 	}
 	
