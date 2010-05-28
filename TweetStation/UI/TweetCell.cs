@@ -249,7 +249,7 @@ namespace TweetStation
 		public override void Selected (DialogViewController dvc, UITableView tableView, NSIndexPath path)
 		{
 			// For partial tweets we need to load the full tweet
-			if (Tweet.UserId < 0)
+			if (Tweet.IsSearchResult)
 				Tweet.LoadFullTweet (Tweet.Id, t => {
 					if (t == null)
 						return;

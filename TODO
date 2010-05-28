@@ -1,16 +1,16 @@
+* Re-QA when we have more data:
+
+	Usability of "Load more tweets" on main timeline when there are 
+	tweet gaps.   It should now only remove it whne the data is loaded,
+	not immediately
+
 * Usage Observations
 
 	Jumping when the thing starts to search
 
-	Usability of "Load more tweets" on main timeline is terrible
-
 	Profiels can not be seen from search tab, they show an error
 
 	Profiles have no user on searches.
-
-	Develop the XAuth login process.
-
-	Reloading on first login to show what is going on (twitter authorization)
 
 	Swipe menu
 		Retweet
@@ -104,6 +104,8 @@
 	Advanced
 
 * Post 1.0:
+
+	Add editing capability to searches to trim down the search list
 
 	Nearby tweets on a map
 

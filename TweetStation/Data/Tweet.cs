@@ -318,6 +318,12 @@ namespace TweetStation
 		// We pick a user ID large enough that it wont clash with actual users
 		static long serial = ImageStore.TempStartId;
 		
+		public bool IsSearchResult {
+			get {
+				return (UserId >= ImageStore.TempStartId);
+			}
+		}
+		
 		// Returns an IEnumerable of tweets when parsing search
 		// results from twitter.   The returned Tweet objects are
 		// not really complete and have the UserId busted (negative
