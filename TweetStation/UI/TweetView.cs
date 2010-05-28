@@ -80,6 +80,7 @@ namespace TweetStation
 							Value = line,
 							Font = lastFont ?? font,
 						});
+						lastFont = font;
 						y += lineHeight;
 						lastx = 0;
 					}
