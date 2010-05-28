@@ -148,15 +148,16 @@ namespace TweetStation {
 				since = res.Id - 1;
 			}
 			
-			DownloadTweets (0, since, null);
+			DownloadTweets (0, since, null, null);
 		}
 		
-		void DownloadTweets (int insertPoint, long? since, long? max_id)
+		void DownloadTweets (int insertPoint, long? since, long? max_id, Element removeOnInsert)
 		{
 			//if (kind != TweetKind.Home)
 			//	return;
 			
 			Account.ReloadTimeline (kind, since, max_id, count => {
+				mainSection.Remove (removeOnInsert);
 				if (count == -1){
 					mainSection.Insert (insertPoint, new StyledStringElement (Locale.Format ("Net failure on {0}", DateTime.Now)){
 						Font = UIFont.SystemFontOfSize (14)
@@ -176,8 +177,7 @@ namespace TweetStation {
 					if (!continuous){
 						Element more = null;
 						more = new StringElement (Locale.GetText ("Load more tweets"), delegate {
-							DownloadTweets (insertPoint + nParsed, null, GetTableTweetId (insertPoint + count-1)-1);
-							mainSection.Remove (more);
+							DownloadTweets (insertPoint + nParsed, null, GetTableTweetId (insertPoint + count-1)-1, more);
 						});
 						try {
 							mainSection.Insert (insertPoint+nParsed, UITableViewRowAnimation.None, more);
