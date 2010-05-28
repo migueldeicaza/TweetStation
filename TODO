@@ -4,13 +4,11 @@
 	tweet gaps.   It should now only remove it whne the data is loaded,
 	not immediately
 
+	Make sure that clicking on a search result shows some activity indicator
+
 * Usage Observations
 
 	Jumping when the thing starts to search
-
-	Profiels can not be seen from search tab, they show an error
-
-	Profiles have no user on searches.
 
 	Swipe menu
 		Retweet
@@ -22,8 +20,6 @@
 	Only Load More tweets is shown
 
 	If the picture has been posted, do not bother trying to post it again
-
-	Need status for when the picture is being uploaded.
 
 	Send needs to put some feedback about what is going on during the upload
 	of a picture
