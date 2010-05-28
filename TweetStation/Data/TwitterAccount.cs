@@ -355,7 +355,7 @@ namespace TweetStation
 		
 		void FlushTasks ()
 		{
-			var tasks = Database.Main.Query<QueuedTask> ("SELECT * FROM QueuedTask ORDER BY TaskId DESC").ToArray ();	
+			var tasks = Database.Main.Query<QueuedTask> ("SELECT * FROM QueuedTask where AccountId = ? ORDER BY TaskId DESC", LocalAccountId).ToArray ();	
 			ThreadPool.QueueUserWorkItem (delegate { PostTask (tasks); });
 		}
 		

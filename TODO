@@ -1,9 +1,17 @@
 * Usage Observations
 
+	Jumping when the thing starts to search
+
+	Usability of "Load more tweets" on main timeline is terrible
+
+	Profiels can not be seen from search tab, they show an error
+
+	Profiles have no user on searches.
+
+	Develop the XAuth login process.
+
 	Reloading on first login to show what is going on (twitter authorization)
 
-	Error on favorite loading
-	
 	Swipe menu
 		Retweet
 		Reply
@@ -13,9 +21,9 @@
 
 	Only Load More tweets is shown
 
-	TaskQueue should be bound to the accountid
-
 	If the picture has been posted, do not bother trying to post it again
+
+	Need status for when the picture is being uploaded.
 
 	Send needs to put some feedback about what is going on during the upload
 	of a picture
@@ -97,14 +105,17 @@
 
 * Post 1.0:
 
+	Nearby tweets on a map
 
 	When favoriting/unfavoriting, we need to add those
 	tweets to Favorites tab, or recompute that tab
 	on demand.
 
-	Pondering feature:
-		Replace "Reply, Direct, Quote, Retwweet"
-		With something shroter
+	Themed cell renderers
+
+	Retweet rendering style
+
+	Direct messages style (grouped by recipient, by time)
 
 	Direct Messages special view
 		Grouped per user, blend conversation together

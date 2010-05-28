@@ -74,7 +74,6 @@ namespace TweetStation
 
 		static Random random = new Random ();
 		static DateTime UnixBaseTime = new DateTime (1970, 1, 1);
-		static HMACSHA1 hmacsha1 = new HMACSHA1 ();
 
 		// 16-byte lower-case or digit string
 		static string MakeNonce ()
@@ -157,7 +156,7 @@ namespace TweetStation
 		}
 		
 		// Invoked after the user has authorized us
-		bool AcquireAccessToken ()
+		public bool AcquireAccessToken ()
 		{
 			var headers = new Dictionary<string,string> () {
 				{ "oauth_consumer_key", config.ConsumerKey },

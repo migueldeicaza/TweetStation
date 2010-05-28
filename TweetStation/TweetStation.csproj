@@ -110,6 +110,7 @@
     <Compile Include="Audio\StreamingPlayback.cs" />
     <Compile Include="Audio\AudioPlay.cs" />
     <Compile Include="Utilities\PicDetect.cs" />
+    <Compile Include="UI\SwipeSupport.cs" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="MainWindow.xib" />

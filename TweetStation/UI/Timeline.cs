@@ -10,10 +10,11 @@ using System.Drawing;
 using System.IO;
 using MonoTouch.Foundation;
 using System.Text;
+using MonoTouch.ObjCRuntime;
 
 namespace TweetStation {
 	
-	public abstract class BaseTimelineViewController : DialogViewController
+	public abstract partial class BaseTimelineViewController : DialogViewController
 	{
 		UserSelector selector;
 		TwitterAccount account;
@@ -82,7 +83,7 @@ namespace TweetStation {
 		void ReloadAccount ()
 		{
 			ResetState ();
-		}		
+		}	
 	}
 	
 	public class TimelineViewController : BaseTimelineViewController {
@@ -169,18 +170,22 @@ namespace TweetStation {
 					long lastId = GetTableTweetId (insertPoint == 0 ? 0 : insertPoint-1) ?? 0;					
 					
 					continuous = false;
-					mainSection.Insert (insertPoint, UITableViewRowAnimation.None, FetchTweets (count, lastId, insertPoint));
+					int nParsed = mainSection.Insert (insertPoint, UITableViewRowAnimation.None, FetchTweets (count, lastId, insertPoint));
 					NavigationController.TabBarItem.BadgeValue = (count > 1) ? (count-1).ToString () : null;
 
 					if (!continuous){
 						Element more = null;
 						more = new StringElement (Locale.GetText ("Load more tweets"), delegate {
-							DownloadTweets (insertPoint + count, null, GetTableTweetId (insertPoint + count-1)-1);
+							DownloadTweets (insertPoint + nParsed, null, GetTableTweetId (insertPoint + count-1)-1);
 							mainSection.Remove (more);
 						});
-						mainSection.Insert (insertPoint+count, UITableViewRowAnimation.None, more);
+						try {
+							mainSection.Insert (insertPoint+nParsed, UITableViewRowAnimation.None, more);
+						} catch {
+							Console.WriteLine ("on {0} inserting at {1}+{2} section has {3}", kind, insertPoint, count, mainSection.Count);
+						}
 					}
-					
+					count = nParsed;
 				}
 				ReloadComplete ();
 				

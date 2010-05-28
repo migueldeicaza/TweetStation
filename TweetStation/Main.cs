@@ -8,6 +8,7 @@ using MonoTouch.Foundation;
 using MonoTouch.UIKit;
 using MonoTouch.Dialog;
 using System.Drawing;
+using System.Threading;
 
 namespace TweetStation
 {
@@ -22,6 +23,7 @@ namespace TweetStation
 	// The name AppDelegate is referenced in the MainWindow.xib file.
 	public partial class AppDelegate : UIApplicationDelegate, IAccountContainer
 	{
+		static bool useXauth;
 		TwitterAccount account;
 		TimelineViewController main, mentions, messages;
 		SearchesViewController searches;
@@ -40,13 +42,28 @@ namespace TweetStation
 			}
 
 			System.Net.ServicePointManager.Expect100Continue = false;
+
+			try {
+				if (File.Exists ("/Users/miguel/xauth")){
+					using (var f = File.OpenText ("/Users/miguel/xauth")){
+						var cfg = TwitterAccount.OAuthConfig;
+						cfg.ConsumerKey = f.ReadLine ();
+						cfg.ConsumerSecret = f.ReadLine ();
+						cfg.Callback = f.ReadLine ();
+						useXauth = true;
+					}
+				} 
+			} catch {}				
 			
 			Util.ReportTime ("Before GetDefaultAccount");
 			var defaultAccount = TwitterAccount.GetDefaultAccount ();
 			Util.ReportTime ("After GetDefaultAccount");
-			if (defaultAccount == null)
-				CreateDefaultAccount ();
-			else {
+			if (defaultAccount == null){
+				if (useXauth)
+					NewAccountXAuth (null, null);
+				else
+					CreateDefaultAccountWithOAuth ();
+			} else {
 				Util.ReportTime ("Before UI Creation");
 				CreatePhoneGui ();
 				Util.ReportTime ("After UI Creation");
@@ -172,51 +189,149 @@ namespace TweetStation
 			};
 			sheet.ShowInView (Util.MainAppDelegate.MainView);
 		}
-			
+		
+		UINavigationController loginRoot = null;
 		DialogViewController loginDialog = null;
-					
+
+		void MakeLoginDialog (DialogViewController parent, RootElement root)
+		{
+			loginDialog = new DialogViewController (UITableViewStyle.Grouped, root);
+			
+			if (parent == null){
+				loginRoot = new UINavigationController (loginDialog);
+				window.AddSubview (loginRoot.View);
+			} else
+				parent.ActivateController (loginDialog);
+		}
+		
+		void StartupAfterAuthorization (OAuthAuthorizer oauth)
+		{
+			loginRoot.View.RemoveFromSuperview ();
+			CreatePhoneGui ();
+			SetDefaultAccount (oauth);
+			loginDialog = null;
+			loginRoot = null;
+		}
+			
+		// Creates the login dialog using Xauth, this is a nicer
+		// user experience, but requires Twitter to approve your 
+		// app
+		void NewAccountXAuth (DialogViewController parent, NSAction callback)
+		{
+			var login = new EntryElement ("Username", "Your twitter username", "");
+			var password = new EntryElement ("Password", "Your password", "", true);
+			var root = new RootElement (Locale.GetText ("Login")){
+				new Section (){
+					login,
+					password
+				},
+				new Section (){
+					new LoadMoreElement ("Login to Twitter", "Contacting twitter", delegate {
+						StartXauthLogin (login.Value, password.Value, callback); 
+					}, UIFont.BoldSystemFontOfSize (16), UIColor.Black)
+				}
+			};
+			MakeLoginDialog (parent, root);
+		}
+		
+		UIAlertView loginAlert;
+		void StartXauthLogin (string user, string password, NSAction callback)
+		{
+			LoadMoreElement status = loginDialog.Root [1][0] as LoadMoreElement;
+			
+			// Spin off a thread to start the OAuth authentication process,
+			// let the GUI thread show the spinner. 
+			ThreadPool.QueueUserWorkItem (delegate {
+				var oauth = new OAuthAuthorizer (TwitterAccount.OAuthConfig, user, password);
+				
+				if (oauth.AcquireAccessToken ()){
+					BeginInvokeOnMainThread (delegate {
+						if (callback == null)
+							StartupAfterAuthorization (oauth);
+						else {
+							SetDefaultAccount (oauth);
+							callback ();
+						}
+					});	
+					return;
+				}
+				
+				BeginInvokeOnMainThread (delegate { 
+					status.Animating = false; 
+					loginAlert = new UIAlertView (Locale.GetText ("Error"), 
+					                             Locale.GetText ("Unable to login"), 
+					                             null, null, Locale.GetText ("Ok"));
+					loginAlert.Dismissed += delegate { loginAlert = null; };
+					loginAlert.Show ();
+				});
+			});			
+		}
+		
 		//
 		// Creates the default account using OAuth
 		//
-		void CreateDefaultAccount ()
+		void CreateDefaultAccountWithOAuth ()
 		{
-			var root = new RootElement (Locale.GetText ("Login to Twitter")){
-				new Section (Locale.GetText ("\n\n\n" +
-				                             "Welcome to TweetStation!\n\n" +
+			MakeLoginDialog (null, new RootElement (Locale.GetText ("Login to Twitter")){
+				new Section (Locale.GetText ("Welcome to TweetStation!\n\n" +
 				                             "To get started, authorize\n" +
 				                             "TweetStation to get access\n" +  
 				                             "to your twitter account.\n\n")){
 					new StringElement ("Login to Twitter", delegate { StartLogin (loginDialog); })
 				}
-			};
-			
-			loginDialog = new DialogViewController (UITableViewStyle.Grouped, root);
-			window.AddSubview (loginDialog.View);
+			});
 		}
 		
-		public void StartLogin (DialogViewController dvc)
+		void StartLogin (DialogViewController dvc)
 		{
-			var oauth = new OAuthAuthorizer (TwitterAccount.OAuthConfig);
-
-			if (oauth.AcquireRequestToken ()){
-				oauth.AuthorizeUser (dvc, delegate {
-					dvc.View.RemoveFromSuperview ();
-					CreatePhoneGui ();
-					SetDefaultAccount (oauth);
-					loginDialog = null;
-				});
-			}
+			dvc.Root.RemoveAt (1);
+			LoadMoreElement status;
+			
+			if (dvc.Root.Count == 1){
+				status = new LoadMoreElement (
+				Locale.GetText ("Could not authenticate with twitter"), 
+				Locale.GetText ("Contacting twitter"), null, UIFont.BoldSystemFontOfSize (16), UIColor.Black) {
+					Animating = true
+				};
+				dvc.Root.Add (new Section () { status });
+			} else
+				status = (LoadMoreElement) dvc.Root [1][0];
+			
+			// Spin off a thread to start the OAuth authentication process,
+			// let the GUI thread show the spinner. 
+			ThreadPool.QueueUserWorkItem (delegate {
+				var oauth = new OAuthAuthorizer (TwitterAccount.OAuthConfig);
+	
+				try {
+					if (oauth.AcquireRequestToken ()){
+						BeginInvokeOnMainThread (delegate {
+							oauth.AuthorizeUser (dvc, delegate {
+								StartupAfterAuthorization (oauth);
+							});
+						});
+						return;
+					} 
+				} catch (Exception e){
+					Console.WriteLine (e);
+				}
+				
+				BeginInvokeOnMainThread (delegate { status.Animating = false; });
+			});
 		}
 
 		public void AddAccount (DialogViewController dvc, NSAction action)
 		{
 			var oauth = new OAuthAuthorizer (TwitterAccount.OAuthConfig);
 
-			if (oauth.AcquireRequestToken ()){
-				oauth.AuthorizeUser (dvc, delegate {
-					SetDefaultAccount (oauth);
-					action ();
-				});
+			if (useXauth)
+				NewAccountXAuth (dvc, action);
+			else {
+				if (oauth.AcquireRequestToken ()){
+					oauth.AuthorizeUser (dvc, delegate {
+						SetDefaultAccount (oauth);
+						action ();
+					});
+				}
 			}
 		}
 		
