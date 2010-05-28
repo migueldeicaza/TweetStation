@@ -158,7 +158,7 @@ namespace TweetStation
 				}
 
 				// selected?
-				if (block == highlighted){					
+				if (block == highlighted && block.Font == bold){
 					context.FillRect (block.Bounds);
 					context.SetRGBFillColor (1, 1, 1, 1);
 					last = null;
@@ -176,13 +176,14 @@ namespace TweetStation
 
 		void Track (PointF pos)
 		{
+			var current = highlighted;
+			
 			foreach (var block in blocks){
 				if (!block.Bounds.Contains (pos))
 					continue;
 
 				highlighted = block;
 				SetNeedsDisplay ();
-				return;
 			}
 		}
 		
