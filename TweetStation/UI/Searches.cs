@@ -55,6 +55,11 @@ namespace TweetStation
 			      "rpp=", 50, "since_id=", "page=", null)
 		{
 		}
+
+		protected override IEnumerable<Tweet> GetTweetStream (byte[] result)
+		{
+			return Tweet.TweetsFromSearchResults (new MemoryStream (result));
+		}
 	}
 	
 	public class SearchElement : RootElement {
