@@ -48,6 +48,9 @@ namespace TweetStation
 		TweetCellView tweetView;
 		
 		static CGGradient bottomGradient, topGradient;
+		static CGPath badgePath = Graphics.MakeRoundedPath (48);
+		static CGPath smallBadgePath = Graphics.MakeRoundedPath (23);
+		
 		public static int CellStyle;
 		
 		static TweetCell ()
@@ -140,7 +143,7 @@ namespace TweetStation
 				
 				float xPic, xText;
 				
-				if (CellStyle == 0 && tweet.UserId == TwitterAccount.CurrentAccount.AccountId){
+				if ((CellStyle & 1) == 0 && tweet.UserId == TwitterAccount.CurrentAccount.AccountId){
 					xText = TextWidthPadding;
 					xPic = bounds.Width-PicAreaWidth+PicXPad;
 				} else {
@@ -164,6 +167,25 @@ namespace TweetStation
 				DrawString (time, new RectangleF (xText, TextHeightPadding, bounds.Width-PicAreaWidth-TextWidthPadding, timeSize),
 				            timeFont, UILineBreakMode.Clip, UITextAlignment.Right);
 
+				if ((CellStyle & 2) == 0){
+					// Cute touch
+					UIColor.Gray.SetColor ();
+					context.SaveState ();
+					context.TranslateCTM (xPic, PicYPad);
+					context.SetLineWidth (1);
+					context.SetShadowWithColor (new SizeF (0, 1), 3, UIColor.DarkGray.CGColor);
+					context.AddPath (badgePath);
+					context.FillPath ();
+					
+					if (retweetImage != null){
+						context.TranslateCTM (30, 30);
+						context.AddPath (smallBadgePath);
+						context.FillPath ();
+					}
+					
+					context.RestoreState ();
+				}
+				
 				tweetImage.Draw (new RectangleF (xPic, PicYPad, PicSize, PicSize));
 				
 				if (retweetImage != null)

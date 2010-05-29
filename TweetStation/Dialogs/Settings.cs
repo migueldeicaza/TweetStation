@@ -98,6 +98,7 @@ namespace TweetStation
 		BooleanElement playMusic;
 		BooleanElement chicken;
 		BooleanElement selfOnRight;
+		BooleanElement shadows;
 		
 		public override void ViewWillDisappear (bool animated)
 		{
@@ -106,7 +107,7 @@ namespace TweetStation
 			Util.Defaults.SetInt (playMusic.Value ? 0 : 1, "disableMusic");
 			Util.Defaults.SetInt (chicken.Value ? 0 : 1, "disableChickens");
 			
-			int style = selfOnRight.Value ? 0 : 1;
+			int style = (selfOnRight.Value ? 0 : 1) | (shadows.Value ? 0 : 2);
 			
 			Util.Defaults.SetInt (style, "cellStyle");
 			TweetCell.CellStyle = style;
@@ -120,13 +121,15 @@ namespace TweetStation
 		{
 			this.parent = parent;
 			var aboutUrl = NSUrl.FromFilename ("about.html");
+			int cellStyle = Util.Defaults.IntForKey ("cellStyle");
 			
 			Root = new RootElement (Locale.GetText ("Settings")){
 				MakeAccounts (),
 				new Section (){
 					new RootElement (Locale.GetText ("Settings")){
 						new Section (Locale.GetText ("Style")){
-							(selfOnRight = new BooleanElement (Locale.GetText ("My tweets on right"), Util.Defaults.IntForKey ("cellStyle") == 0)),
+							(selfOnRight = new BooleanElement (Locale.GetText ("My tweets on right"), (cellStyle & 1) == 0)),
+							(shadows = new BooleanElement (Locale.GetText ("Avatar shadows"), (cellStyle & 2) == 0)),
 						},
 						new Section (Locale.GetText ("Inspiration"), 
 						             Locale.GetText ("Twitter is best used when you are inspired\n" +
