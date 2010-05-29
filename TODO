@@ -33,8 +33,6 @@
 
 	Load 50 tweets, offer to load more DB storage
 	
-	For my tweets rendered on the timeline, the icon should be on right?
-
 	Refresh user pictures when they change.  
 		Currently, once we download a pic, we never update it
 
@@ -48,8 +46,6 @@
 		geo info, and pic info?
 		Replace foo -> bar in retweet with a bottom "Retweeted by"
 
-	Showing User Pictures
-		Needs a custom image loader for user profiles and urls that we detect as pictures
 	Chicken noises for reload
 	Turning a search into a saved search
 	Lists:
@@ -126,6 +122,9 @@
 	data back into the main system.   Or alternatively make 
 	POST synchronous and only put in queue if it fails?
 
+	Showing User Pictures
+		Needs a custom image loader for user profiles and urls that we detect as pictures
+
 * Wanted
 
 	ActivityElement to support a message in addition to the activity
@@ -156,24 +155,11 @@
 	Problem: we can only do this if a child is not currently
 	visible.
 
-* ImageStore:
-
-	Support downloading different kinds of image sizes
-	The 73x73 image for large views
-	The full version for full display
-
 * TweetDetail
 
 	Put a border around the image loaded.
-	Add support for loading twitpic images.
-
 
 * Application
 
 	Remember where we are (drilled down on a tweet? or search)
 
-* Accounts
-
-	Link to create account
-
-	Support OAuth
