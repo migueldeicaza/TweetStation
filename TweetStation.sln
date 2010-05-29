@@ -11,8 +11,11 @@ Global
 		Release|iPhoneSimulator = Release|iPhoneSimulator
 		Debug|iPhone = Debug|iPhone
 		Release|iPhone = Release|iPhone
+		AdHoc|iPhone = AdHoc|iPhone
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3FFBFFF8-5560-4EDE-82E5-3FFDFBBA8A50}.AdHoc|iPhone.ActiveCfg = AdHoc|iPhone
+		{3FFBFFF8-5560-4EDE-82E5-3FFDFBBA8A50}.AdHoc|iPhone.Build.0 = AdHoc|iPhone
 		{3FFBFFF8-5560-4EDE-82E5-3FFDFBBA8A50}.Debug|iPhone.ActiveCfg = Debug|iPhone
 		{3FFBFFF8-5560-4EDE-82E5-3FFDFBBA8A50}.Debug|iPhone.Build.0 = Debug|iPhone
 		{3FFBFFF8-5560-4EDE-82E5-3FFDFBBA8A50}.Debug|iPhoneSimulator.ActiveCfg = Debug|iPhoneSimulator
@@ -21,6 +24,8 @@ Global
 		{3FFBFFF8-5560-4EDE-82E5-3FFDFBBA8A50}.Release|iPhone.Build.0 = Release|iPhone
 		{3FFBFFF8-5560-4EDE-82E5-3FFDFBBA8A50}.Release|iPhoneSimulator.ActiveCfg = Release|iPhoneSimulator
 		{3FFBFFF8-5560-4EDE-82E5-3FFDFBBA8A50}.Release|iPhoneSimulator.Build.0 = Release|iPhoneSimulator
+		{7C7D3161-2DFB-4201-B70E-88ACD3976AA9}.AdHoc|iPhone.ActiveCfg = AdHoc|iPhone
+		{7C7D3161-2DFB-4201-B70E-88ACD3976AA9}.AdHoc|iPhone.Build.0 = AdHoc|iPhone
 		{7C7D3161-2DFB-4201-B70E-88ACD3976AA9}.Debug|iPhone.ActiveCfg = Debug|iPhone
 		{7C7D3161-2DFB-4201-B70E-88ACD3976AA9}.Debug|iPhone.Build.0 = Debug|iPhone
 		{7C7D3161-2DFB-4201-B70E-88ACD3976AA9}.Debug|iPhoneSimulator.ActiveCfg = Debug|iPhoneSimulator
