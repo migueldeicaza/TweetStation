@@ -1,14 +1,12 @@
 * Re-QA when we have more data:
 
-	Usability of "Load more tweets" on main timeline when there are 
-	tweet gaps.   It should now only remove it whne the data is loaded,
-	not immediately
-
 	Make sure that clicking on a search result shows some activity indicator
 
 * Usage Observations
 
-	Jumping when the thing starts to search
+	Load More Tweets needs to use a spinner while it loads more data.
+
+	Need to support "Load more" for user timelines.
 
 	Swipe menu
 		Retweet

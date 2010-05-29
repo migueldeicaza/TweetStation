@@ -63,6 +63,13 @@ namespace TweetStation
 				if (segment.Length == 0)
 					break;
 				
+				// if the word contains @ like ".@foo" or "foo@bar", split there as well
+				int aidx = segment.IndexOf ('@');
+				if (aidx > 0){
+					segment = segment.Substring (0, aidx);
+					sidx = p + segment.Length-aidx;
+				}
+				
 				var start = segment [0];
 				if (start == '@' || start == '#' || segment.StartsWith ("http://", StringComparison.Ordinal))
 					font = bold;
