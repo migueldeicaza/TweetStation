@@ -257,7 +257,7 @@ namespace TweetStation
 					}
 					downloaded = true;
 				} catch (Exception e) {
-					Console.WriteLine ("Error fetching picture for {0}", id);
+					Console.WriteLine ("{0} Error fetching picture for {1}", e, id);
 				}
 				Console.WriteLine ("Done with {0}",id);
 				// Cluster all updates together

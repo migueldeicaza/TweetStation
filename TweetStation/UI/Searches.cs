@@ -45,7 +45,18 @@ namespace TweetStation
 		}
 		
 	}
-
+	
+	public class SearchFromGeo : StreamedTimelineViewController {
+		public SearchFromGeo (MonoTouch.CoreLocation.CLLocation location) :
+			base (Locale.GetText ("Nearby Tweets"), 
+			      String.Format (Util.AmericanCulture, "http://search.twitter.com/search.json?geocode={0},{1},5km", 
+					location.Coordinate.Latitude,
+					location.Coordinate.Longitude),
+			      "rpp=", 50, "since_id=", "page=", null)
+		{
+		}
+	}
+	
 	public class SearchElement : RootElement {
 		string query;
 		

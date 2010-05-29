@@ -61,7 +61,6 @@ namespace TweetStation
 		static UIFont timeFont = UIFont.SystemFontOfSize (timeSize);
 		static UIColor timeColor = UIColor.FromRGB (147, 170, 204);
 		
-		Tweet tweet;
 		TweetCellView tweetView;
 		
 		static CGGradient bottomGradient, topGradient;
@@ -230,7 +229,6 @@ namespace TweetStation
 		// Create the UIViews that we will use here, layout happens in LayoutSubviews
 		public TweetCell (UITableViewCellStyle style, NSString ident, Tweet tweet) : base (style, ident)
 		{
-			this.tweet = tweet;
 			SelectionStyle = UITableViewCellSelectionStyle.Blue;
 			
 			tweetView = new TweetCellView (tweet);
@@ -244,8 +242,6 @@ namespace TweetStation
 		//
 		public void UpdateCell (Tweet tweet)
 		{
-			this.tweet = tweet;
-			
 			tweetView.Update (tweet);
 			SetNeedsDisplay ();
 		}

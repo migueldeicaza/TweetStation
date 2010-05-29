@@ -33,6 +33,7 @@ using MonoTouch.UIKit;
 using MonoTouch.Dialog;
 using System.Web;
 using System.Drawing;
+using MonoTouch.CoreLocation;
 
 namespace TweetStation
 {
@@ -69,13 +70,35 @@ namespace TweetStation
 			Root = new RootElement (Locale.GetText ("Search")) {
 				new Section () {
 					new RootElement (Locale.GetText ("Search"), x => new TwitterTextSearch ()),
-					new RootElement (Locale.GetText ("Nearby")),
+#if false
+					new LoadMoreElement (Locale.GetText ("Nearby"), Locale.GetText ("Finding your position"), x => StartGeoSearch (x)) {
+						Accessory = UITableViewCellAccessory.DisclosureIndicator,
+						Alignment = UITextAlignment.Left
+					},
+#endif
 					new RootElement (Locale.GetText ("Go to User"), x => new SearchUser ())
 				},
 				lists,
 			};
 		}
 
+		CLLocation location = null;
+		
+		void StartGeoSearch (LoadMoreElement loading)
+		{
+			if (location == null){
+				loading.Animating = true;
+				Util.RequestLocation (newLocation => {
+					loading.Animating = false;
+					if (newLocation != null){
+						location = newLocation;
+						ActivateController (new SearchFromGeo (location));
+					}
+				});
+			} else 
+				ActivateController (new SearchFromGeo (location));
+		}
+		
 		bool SearchResultsAreRecent {
 			get {
 				long lastTime;

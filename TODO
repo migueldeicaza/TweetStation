@@ -4,16 +4,12 @@
 
 * Usage Observations
 
-	Need to support "Load more" for user timelines.
-
 	Swipe menu
 		Retweet
 		Reply
 		Star
 		Open (for links)
 		Quote
-
-	Only Load More tweets is shown
 
 	Send needs to put some feedback about what is going on during the upload
 	of a picture
@@ -31,11 +27,6 @@
 	
 	Refresh user pictures when they change.  
 		Currently, once we download a pic, we never update it
-
-	On Load:
-		Custom control to show "Load more" with some better artwork
-		Support removal of the control on load, instead than on tap,
-		to give a visual cue of what is happening.
 
 	Nearby tweets
 	TweetCell - Main Display

@@ -39,13 +39,10 @@ namespace TweetStation
 	//
 	public class ConversationViewController : DialogViewController
 	{
-		Tweet source;
 		Section convSection;
 		
 		public ConversationViewController (Tweet source) : base (null, true)
 		{
-			this.source = source;
-		
 			convSection = new Section ();
 			ProcessConversation (source);
 			Root = new RootElement ("Conversation") {

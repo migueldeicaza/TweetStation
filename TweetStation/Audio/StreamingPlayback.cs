@@ -191,9 +191,6 @@ namespace StreamingAudio
 			started = true;
 		}
 		
-		// Raised when we are done.
-		public event EventHandler Finished;
-			
 		void AudioPropertyFound (object sender, PropertyFoundEventArgs args)
 		{
 			switch (args.Property){

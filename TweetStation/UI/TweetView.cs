@@ -203,8 +203,6 @@ namespace TweetStation
 
 		void Track (PointF pos)
 		{
-			var current = highlighted;
-			
 			foreach (var block in blocks){
 				if (!block.Bounds.Contains (pos))
 					continue;

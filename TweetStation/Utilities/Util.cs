@@ -25,6 +25,8 @@ using System.Threading;
 using MonoTouch.UIKit;
 using MonoTouch.Foundation;
 using MonoTouch.Dialog;
+using MonoTouch.CoreLocation;
+using System.Globalization;
 
 namespace TweetStation
 {
@@ -221,5 +223,50 @@ namespace TweetStation
 			sheet = new UIActionSheet (title);
 			return sheet;
 		}
+		
+		static CultureInfo americanCulture;
+		public static CultureInfo AmericanCulture {
+			get {
+				if (americanCulture == null)
+					americanCulture = new CultureInfo ("en-US");
+				return americanCulture;
+			}
+		}
+		#region Location
+		
+		internal class MyCLLocationManagerDelegate : CLLocationManagerDelegate {
+			Action<CLLocation> callback;
+			
+			public MyCLLocationManagerDelegate (Action<CLLocation> callback)
+			{
+				this.callback = callback;
+			}
+			
+			public override void UpdatedLocation (CLLocationManager manager, CLLocation newLocation, CLLocation oldLocation)
+			{
+				manager.StopUpdatingLocation ();
+				locationManager = null;
+				callback (newLocation);
+			}
+			
+			public override void Failed (CLLocationManager manager, NSError error)
+			{
+				callback (null);
+			}
+			
+		}
+
+		static CLLocationManager locationManager;
+		static public void RequestLocation (Action<CLLocation> callback)
+		{
+			locationManager = new CLLocationManager () {
+				DesiredAccuracy = CLLocation.AccuracyBest,
+				Delegate = new MyCLLocationManagerDelegate (callback),
+				DistanceFilter = 1000f
+			};
+			if (locationManager.LocationServicesEnabled)
+				locationManager.StartUpdatingLocation ();
+		}	
+		#endregion
 	}
 }

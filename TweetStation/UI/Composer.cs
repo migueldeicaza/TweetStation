@@ -97,7 +97,6 @@ namespace TweetStation
 		internal void OnShrinkTapped (object sender, EventArgs args)
 		{
 			var words = textView.Text.Split (new char [] { ' '}, StringSplitOptions.RemoveEmptyEntries);
-			bool hasUrls;
 			
 			foreach (var word in words)
 				if (word.StartsWith ("http://")){
@@ -126,12 +125,10 @@ namespace TweetStation
 		internal void InsertGeo (object sender, EventArgs args)
 		{
 			GpsButtonItem.Enabled = false;
-			composer.RequestLocation ();
-		}
-		
-		internal void GeoDone ()
-		{
-			GpsButtonItem.Enabled = true;
+			Util.RequestLocation (newLocation => {
+				composer.location = newLocation;
+				GpsButtonItem.Enabled = true;
+			});
 		}
 		
 		internal void Reset (string text)
@@ -214,8 +211,7 @@ namespace TweetStation
 		UIViewController previousController;
 		long InReplyTo;
 		string directRecipient;
-		CLLocationManager locationManager;
-		CLLocation location;
+		internal CLLocation location;
 		AudioPlay player;
 		
 		public static readonly Composer Main = new Composer ();
@@ -247,33 +243,6 @@ namespace TweetStation
 			View.AddSubview (navigationBar);
 		}
 
-		public class MyCLLocationManagerDelegate : CLLocationManagerDelegate {
-			Composer parent;
-			public MyCLLocationManagerDelegate (Composer parent)
-			{
-				this.parent = parent;
-			}
-			
-			public override void UpdatedLocation (CLLocationManager manager, CLLocation newLocation, CLLocation oldLocation)
-			{
-				parent.location = newLocation;
-				parent.composerView.GeoDone ();
-			}
-		}
-		
-		internal void RequestLocation ()
-		{
-			if (locationManager == null){
-				locationManager = new CLLocationManager () {
-					DesiredAccuracy = CLLocation.AccuracyBest,
-					Delegate = new MyCLLocationManagerDelegate (this),
-					DistanceFilter = 1000f
-				};
-			}
-			if (locationManager.LocationServicesEnabled)
-				locationManager.StartUpdatingLocation ();
-		}
-		
 		public override void ViewDidLoad ()
 		{
 			base.ViewDidLoad ();			
@@ -291,9 +260,6 @@ namespace TweetStation
 		
 		void CloseComposer (object sender, EventArgs a)
 		{
-			if (locationManager != null)
-				locationManager.StartUpdatingLocation ();
-			
 			previousController.DismissModalViewControllerAnimated (true);
 			player.Stop ();
 		}

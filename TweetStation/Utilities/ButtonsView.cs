@@ -30,7 +30,6 @@ namespace TweetStation
 {
 	
 	public class ButtonsView : UIView {
-		EventHandler [] actions;
 		UIButton [] buttons;
 		const int buttonHeight = 44;
 		

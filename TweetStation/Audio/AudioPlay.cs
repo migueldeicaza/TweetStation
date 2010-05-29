@@ -30,7 +30,6 @@ namespace TweetStation
 {
 	public class AudioPlay {
 		StreamingPlayback player;
-		Thread thread;
 		FileStream fs;
 		volatile bool stop;
 		
