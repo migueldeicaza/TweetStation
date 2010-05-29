@@ -23,7 +23,6 @@ namespace TweetStation
 	// highlighting of url-like things
 	//
 	public class TweetCell : UITableViewCell {
-		// Do these as static to reuse across all instances
 		const int userSize = 14;
 		const int textSize = 15;
 		const int timeSize = 12;
@@ -32,9 +31,10 @@ namespace TweetStation
 		const int PicXPad = 10;
 		const int PicYPad = 5;
 		
-		const int TextLeftStart = 2 * PicXPad + PicSize;
+		const int PicAreaWidth = 2 * PicXPad + PicSize;
 		
 		const int TextHeightPadding = 4;
+		const int TextWidthPadding = 4;
 		const int TextYOffset = userSize + 4;
 		const int MinHeight = PicSize + 2 * PicYPad;
 		const int TimeWidth = 46;
@@ -48,6 +48,7 @@ namespace TweetStation
 		TweetCellView tweetView;
 		
 		static CGGradient bottomGradient, topGradient;
+		public static int CellStyle;
 		
 		static TweetCell ()
 		{
@@ -137,9 +138,19 @@ namespace TweetStation
 					textColor = UIColor.Black;
 				}
 				
+				float xPic, xText;
+				
+				if (CellStyle == 0 && tweet.UserId == TwitterAccount.CurrentAccount.AccountId){
+					xText = TextWidthPadding;
+					xPic = bounds.Width-PicAreaWidth+PicXPad;
+				} else {
+					xText = PicAreaWidth;
+					xPic = PicXPad;
+				}
+				
 				textColor.SetColor ();
-				DrawString (userText, new RectangleF (TextLeftStart, TextHeightPadding, bounds.Width-TextLeftStart-TextHeightPadding-TimeWidth, userSize), userFont);
-				DrawString (tweet.Text, new RectangleF (TextLeftStart, bounds.Y + TextYOffset, bounds.Width-TextLeftStart-TextHeightPadding, bounds.Height-TextYOffset), textFont, UILineBreakMode.WordWrap);
+				DrawString (userText, new RectangleF (xText, TextHeightPadding, bounds.Width-PicAreaWidth-TextWidthPadding-TimeWidth, userSize), userFont);
+				DrawString (tweet.Text, new RectangleF (xText, bounds.Y + TextYOffset, bounds.Width-PicAreaWidth-TextWidthPadding, bounds.Height-TextYOffset), textFont, UILineBreakMode.WordWrap);
 				
 				timeColor.SetColor ();
 				string time = Util.FormatTime (new TimeSpan (DateTime.UtcNow.Ticks - tweet.CreatedAt));
@@ -147,16 +158,16 @@ namespace TweetStation
 					using (var nss = new NSString (time)){
 						var size = nss.StringSize (timeFont);
 						
-						star.Draw (new RectangleF (bounds.Width-6-size.Width-size.Height, TextHeightPadding, size.Height, size.Height));
+						star.Draw (new RectangleF (bounds.Width-16-size.Width-(xPic == 0 ? 0 : PicAreaWidth), TextHeightPadding, size.Height, size.Height));
 					}
 				}
-				DrawString (time, new RectangleF (TextLeftStart, TextHeightPadding, bounds.Width-TextLeftStart-TextHeightPadding, timeSize),
+				DrawString (time, new RectangleF (xText, TextHeightPadding, bounds.Width-PicAreaWidth-TextWidthPadding, timeSize),
 				            timeFont, UILineBreakMode.Clip, UITextAlignment.Right);
 
-				tweetImage.Draw (new RectangleF (PicXPad, PicYPad, PicSize, PicSize));
+				tweetImage.Draw (new RectangleF (xPic, PicYPad, PicSize, PicSize));
 				
 				if (retweetImage != null)
-					retweetImage.Draw (new RectangleF (PicXPad+30, PicYPad+30, 23, 23));
+					retweetImage.Draw (new RectangleF (xPic+30, PicYPad+30, 23, 23));
 			}
 
 			void IImageUpdated.UpdatedImage (long onId)
@@ -205,12 +216,12 @@ namespace TweetStation
 			bounds.Height = 999;
 			
 			// Keep the same as LayoutSubviews
-			bounds.X = TextLeftStart;
-			bounds.Width -= TextLeftStart+TextHeightPadding;
+			bounds.X = 0;
+			bounds.Width -= PicAreaWidth+TextWidthPadding;
 			
 			using (var nss = new NSString (tweet.Text)){
 				var dim = nss.StringSize (textFont, bounds.Size, UILineBreakMode.WordWrap);
-				return Math.Max (dim.Height + TextYOffset + 2*TextHeightPadding, MinHeight);
+				return Math.Max (dim.Height + TextYOffset + 2*TextWidthPadding, MinHeight);
 			}
 		}
 

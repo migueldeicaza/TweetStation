@@ -4,8 +4,6 @@
 
 * Usage Observations
 
-	Load More Tweets needs to use a spinner while it loads more data.
-
 	Need to support "Load more" for user timelines.
 
 	Swipe menu
@@ -19,8 +17,6 @@
 
 	Send needs to put some feedback about what is going on during the upload
 	of a picture
-
-	Sometimes when switch accounts the "Reloading" thing is still active
 
 	Sometimes the "reloading" becomes active on switching to
 	something, just dont remember what, need a test case.

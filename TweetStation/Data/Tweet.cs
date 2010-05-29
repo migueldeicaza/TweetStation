@@ -73,7 +73,9 @@ namespace TweetStation
 		
 		static string ParseText (JsonObject json)
 		{
-			return HttpUtility.UrlDecode (((string)json ["text"]) ?? "").Replace ("\n", " ").Replace ("\r", " ");
+			var text = (string)json ["text"] ?? "";
+			
+			return HttpUtility.HtmlDecode (text).Replace ("\n", " ").Replace ("\r", " ");
 		}
 		
 		bool TryPopulate (JsonObject json)
@@ -82,7 +84,7 @@ namespace TweetStation
 				Id = json ["id"];
 				CreatedAt = ParseCreation (json);
 				Text = ParseText (json);
-				Source = Util.StripHtml (HttpUtility.UrlDecode (json ["source"] ?? ""));
+				Source = Util.StripHtml (HttpUtility.HtmlDecode (json ["source"] ?? ""));
 				Favorited = json ["favorited"];
 				InReplyToStatus = GetLong (json, "in_reply_to_status_id");
 				InReplyToUser = GetLong (json, "in_reply_to_user_id");
@@ -349,7 +351,7 @@ namespace TweetStation
 						CreatedAt = ParseCreationSearch (result),
 						Id = (long) result ["id"],
 						Text = ParseText (result),
-						Source = Util.StripHtml (HttpUtility.UrlDecode (result ["source"]) ?? ""),
+						Source = Util.StripHtml (HttpUtility.HtmlDecode (result ["source"]) ?? ""),
 						UserId = serial++,
 						Screename = (string) result ["from_user"],
 						PicUrl = (string) result ["profile_image_url"]

@@ -97,6 +97,24 @@ namespace TweetStation
 		
 		BooleanElement playMusic;
 		BooleanElement chicken;
+		BooleanElement selfOnRight;
+		
+		public override void ViewWillDisappear (bool animated)
+		{
+			base.ViewWillDisappear (animated);
+			
+			Util.Defaults.SetInt (playMusic.Value ? 0 : 1, "disableMusic");
+			Util.Defaults.SetInt (chicken.Value ? 0 : 1, "disableChickens");
+			
+			int style = selfOnRight.Value ? 0 : 1;
+			
+			Util.Defaults.SetInt (style, "cellStyle");
+			TweetCell.CellStyle = style;
+			
+			Util.Defaults.Synchronize ();
+
+			parent.ReloadData ();
+		}
 		
 		public Settings (DialogViewController parent) : base (UITableViewStyle.Grouped, null)
 		{
@@ -107,6 +125,9 @@ namespace TweetStation
 				MakeAccounts (),
 				new Section (){
 					new RootElement (Locale.GetText ("Settings")){
+						new Section (Locale.GetText ("Style")){
+							(selfOnRight = new BooleanElement (Locale.GetText ("My tweets on right"), Util.Defaults.IntForKey ("cellStyle") == 0)),
+						},
 						new Section (Locale.GetText ("Inspiration"), 
 						             Locale.GetText ("Twitter is best used when you are inspired\n" +
 						                             "to write the best possible tweets.  I picked\n" +
@@ -127,21 +148,13 @@ namespace TweetStation
 						},
 						new Section (){
 							new RootElement ("@migueldeicaza", delegate { return new FullProfileView ("migueldeicaza"); }),
-							new RootElement ("@itweetstation", delegate { return new FullProfileView ("icluck"); }),
+							new RootElement ("@itweetstation", delegate { return new FullProfileView ("itweetstation"); }),
 							new RootElement ("@kmacleod", delegate { return new FullProfileView ("kmacleod"); })
 						},
 						new Section () {
 						}
 					}
 				}
-			};
-			playMusic.ValueChanged += delegate {
-				Util.Defaults.SetInt (playMusic.Value ? 0 : 1, "disableMusic");
-				Util.Defaults.Synchronize ();
-			};
-			chicken.ValueChanged += delegate {
-				Util.Defaults.SetInt (chicken.Value ? 0 : 1, "disableChickens");
-				Util.Defaults.Synchronize ();
 			};
 		}
 	}

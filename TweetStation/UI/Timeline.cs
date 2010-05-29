@@ -173,11 +173,12 @@ namespace TweetStation {
 					
 					continuous = false;
 					int nParsed = mainSection.Insert (insertPoint, UITableViewRowAnimation.None, FetchTweets (count, lastId, insertPoint));
-					NavigationController.TabBarItem.BadgeValue = (count > 1) ? (count-1).ToString () : null;
+					NavigationController.TabBarItem.BadgeValue = (nParsed > 1) ? nParsed.ToString () : null;
 
 					if (!continuous){
-						Element more = null;
-						more = new StringElement (Locale.GetText ("Load more tweets"), delegate {
+						LoadMoreElement more = null;
+						more = new LoadMoreElement (Locale.GetText ("Load more tweets"), Locale.GetText ("Loading"), delegate {
+							more.Animating = true;
 							DownloadTweets (insertPoint + nParsed, null, GetTableTweetId (insertPoint + count-1)-1, more);
 						});
 						try {
@@ -189,7 +190,7 @@ namespace TweetStation {
 					count = nParsed;
 				}
 				ReloadComplete ();
-				
+				                    
 				// Only scroll to last unread if this was not an intermediate "Load more tweets"
 				if (insertPoint == 0 && count > 0)
 					TableView.ScrollToRow (NSIndexPath.FromRowSection (count-1, 0), UITableViewScrollPosition.Middle, false);
@@ -199,7 +200,7 @@ namespace TweetStation {
 		protected override void ResetState ()
 		{
 			mainSection = new Section () {
-				FetchTweets (80, 0, 0)
+				FetchTweets (200, 0, 0)
 			};
 
 			Root = new RootElement (timelineTitle) {
