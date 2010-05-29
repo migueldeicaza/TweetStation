@@ -1,7 +1,12 @@
-TweetStation is licensed under the terms of the MIT X11 license,
-the text follows:
+TweetStation is licensed under the terms of the MIT X11 license, and
+the the audio is from Royalty Free music Kevin MacLeod from
+http://incompetech.com which is licensed under a Creative Commons
+Attribution 3.0 Unported license.
 
-Copyright (c) 2010 Miguel de Icaza 
+The SQlite-net binding was developed by Krueger Systems and is
+licensed also under the MIT X11 licese.
+
+The MIT X11 license follows:
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

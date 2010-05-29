@@ -12,7 +12,8 @@ TweetStation
 	than creating models and delegates left and right.
 
 	TweetStation is an open source, MIT X11 licensed twitter
-	client written for MonoTouch.
+	client written for MonoTouch.   See the file LICENSE for
+	details.
 
 Design Goals
 ============
