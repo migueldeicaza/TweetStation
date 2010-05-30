@@ -177,7 +177,7 @@ namespace TweetStation
 					using (var nss = new NSString (time)){
 						var size = nss.StringSize (timeFont);
 						
-						star.Draw (new RectangleF (bounds.Width-16-size.Width-(xPic == PicXPad ? PicXPad : PicAreaWidth), TextHeightPadding, size.Height, size.Height));
+						star.Draw (new RectangleF (bounds.Width-24-size.Width-(xPic == PicXPad ? 0 : PicAreaWidth), TextHeightPadding, size.Height, size.Height));
 					}
 				}
 				DrawString (time, new RectangleF (xText, TextHeightPadding, bounds.Width-PicAreaWidth-TextWidthPadding, timeSize),
