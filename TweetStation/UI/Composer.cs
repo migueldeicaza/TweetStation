@@ -111,7 +111,7 @@ namespace TweetStation
 		// Need HUD display here
 		void ShrinkUrls (string [] words)
 		{
-			var hud = new LoadingHUDView ("Compressing");
+			var hud = new LoadingHUDView (Locale.GetText ("Shrinking"));
 			this.AddSubview (hud);
 			hud.StartAnimating ();
 			
