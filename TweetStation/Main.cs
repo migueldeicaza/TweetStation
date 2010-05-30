@@ -36,11 +36,8 @@ namespace TweetStation
 		{
 			Util.ReportTime ("Entering Finished");
 			window.MakeKeyAndVisible ();
-			if (options != null){
-				var url = options.ObjectForKey (UIApplication.LaunchOptionsUrlKey) as NSUrl;
-				Console.WriteLine ("The url was: {0}", url.AbsoluteUrl);
-			}
 
+			// Required by some HTTP calls to Twitter
 			System.Net.ServicePointManager.Expect100Continue = false;
 
 			try {

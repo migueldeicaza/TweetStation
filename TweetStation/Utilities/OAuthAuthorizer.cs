@@ -313,7 +313,7 @@ namespace TweetStation
 			
 			bool LoadHook (UIWebView sender, NSUrlRequest request, UIWebViewNavigationType navType)
 			{
-				var requestString = request.Url.ToString ();
+				var requestString = request.Url.AbsoluteString;
 				if (requestString.StartsWith (container.config.Callback)){
 					var results = HttpUtility.ParseQueryString (requestString.Substring (container.config.Callback.Length+1));
 					

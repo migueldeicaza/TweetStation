@@ -260,6 +260,7 @@ namespace TweetStation
 		
 		void CloseComposer (object sender, EventArgs a)
 		{
+			sendItem.Enabled = true;
 			previousController.DismissModalViewControllerAnimated (true);
 			player.Stop ();
 		}
@@ -275,16 +276,36 @@ namespace TweetStation
 		
 		void PostCallback (object sender, EventArgs a)
 		{
+			sendItem.Enabled = false;
+			
 			var pictureDict = composerView.PictureDict;
 			if (pictureDict == null){
 				Post ();
 				return;
 			}
 			
+			int level = Util.Defaults.IntForKey ("sizeCompression");
+			
 			if ((pictureDict [UIImagePickerController.MediaType] as NSString) == "public.image"){
 				var img = pictureDict [UIImagePickerController.EditedImage] as UIImage;
 				if (img == null)
 					img = pictureDict [UIImagePickerController.OriginalImage] as UIImage;
+				
+				var size = img.Size;
+				float maxWidth;
+				switch (level){
+				case 0:
+					maxWidth = 640;
+					break;
+				case 1:
+					maxWidth = 1024;
+					break;
+				default:
+					maxWidth = size.Width;
+					break;
+				}
+				if (size.Width > maxWidth || size.Height > maxWidth)
+					img = img.Scale (new SizeF (maxWidth, maxWidth*size.Height/size.Width));
 				
 				var jpeg = img.AsJPEG ();
 				Stream stream;

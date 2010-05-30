@@ -119,6 +119,7 @@ namespace TweetStation
 		BooleanElement chicken;
 		BooleanElement selfOnRight;
 		BooleanElement shadows;
+		RootElement compress;
 		
 		public override void ViewWillDisappear (bool animated)
 		{
@@ -132,6 +133,7 @@ namespace TweetStation
 			Util.Defaults.SetInt (style, "cellStyle");
 			TweetCell.CellStyle = style;
 			
+			Util.Defaults.SetInt (compress.RadioSelected, "sizeCompression");
 			Util.Defaults.Synchronize ();
 
 			parent.ReloadData ();
@@ -150,6 +152,13 @@ namespace TweetStation
 						new Section (Locale.GetText ("Style")){
 							(selfOnRight = new BooleanElement (Locale.GetText ("My tweets on right"), (cellStyle & 1) == 0)),
 							(shadows = new BooleanElement (Locale.GetText ("Avatar shadows"), (cellStyle & 2) == 0)),
+							(compress = new RootElement ("Image Compression", new RadioGroup ("group", Util.Defaults.IntForKey ("sizeCompression"))) {
+								new Section () {
+									new RadioElement ("Maximum"),
+									new RadioElement ("Medium"),
+									new RadioElement ("None")
+								}
+							})
 						},
 						new Section (Locale.GetText ("Inspiration"), 
 						             Locale.GetText ("Twitter is best used when you are inspired\n" +
