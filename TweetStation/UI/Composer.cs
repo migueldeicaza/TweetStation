@@ -71,7 +71,7 @@ namespace TweetStation
 				new UIBarButtonItem (UIBarButtonSystemItem.FlexibleSpace, null),
 				ShrinkItem,
 				new UIBarButtonItem (UIBarButtonSystemItem.Search, delegate { if (LookupUserRequested != null) LookupUserRequested (); }) { Style = style },
-				new UIBarButtonItem (UIBarButtonSystemItem.Camera, delegate { TakePicture (); } ) { Style = style },
+				new UIBarButtonItem (UIBarButtonSystemItem.Camera, delegate { CameraButtonTouched (); } ) { Style = style },
 				GpsButtonItem }, false);	
 
 			AddSubview (toolbar);
@@ -166,6 +166,32 @@ namespace TweetStation
 			set {
 				textView.Text = value;
 			}
+		}
+		
+		void CameraButtonTouched ()
+		{
+			if (PictureDict == null){
+				TakePicture ();
+				return;
+			}
+			
+			var sheet = Util.GetSheet (Locale.GetText ("Tweet already contains a picture"));
+			sheet.AddButton (Locale.GetText ("Discard Picture"));
+			sheet.AddButton (Locale.GetText ("Pick New Picture"));
+			sheet.AddButton (Locale.GetText ("Cancel"));
+			
+			sheet.CancelButtonIndex = 2;
+			sheet.Clicked += delegate(object sender, UIButtonEventArgs e) {
+				if (e.ButtonIndex == 2)
+					return;
+				
+				if (e.ButtonIndex == 0)
+					PictureDict = null;
+				else
+					TakePicture ();
+			};
+			sheet.ShowInView (Util.MainAppDelegate.MainView);
+
 		}
 		
 		void TakePicture ()

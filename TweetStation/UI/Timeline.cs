@@ -105,6 +105,15 @@ namespace TweetStation {
 		{
 			ResetState ();
 		}	
+		
+		//
+		// This is necessary because the server-side tweet can 
+		// be instantiated in various ways
+		//
+		public virtual void FavoriteChanged (Tweet tweet)
+		{
+			// Should be abstract, but virtual until I fix all the derived classes
+		}
 	}
 	
 	public class TimelineViewController : BaseTimelineViewController {
@@ -264,6 +273,19 @@ namespace TweetStation {
 				base.Scrolled (scrollView);
 			}
 		}
+
+		public override void FavoriteChanged (Tweet tweet)
+		{
+			if (Root.Count > 0){
+				Section main = Root [0];
+
+				foreach (var element in main.Elements){
+					var te = element as TweetElement;
+					if (te != null && te.Tweet.Id == tweet.Id)
+						te.Tweet.Favorited = tweet.Favorited;
+				}
+			}
+		}
 	}
 	
 	//
@@ -279,7 +301,7 @@ namespace TweetStation {
 		protected string StreamedTitle;		
 		ShortProfileView shortProfileView;
 		protected string url;
-		bool loaded;
+		protected bool loaded;
 		
 		public StreamedViewController (string title, string url, User reference) : base (true)
 		{
@@ -335,6 +357,32 @@ namespace TweetStation {
 		}
 		
 		protected virtual void PopulateRootFrom (byte [] data) {}
+		
+		public override void FavoriteChanged (Tweet tweet)
+		{
+			 if (!loaded)
+				return;
+			
+			try {
+				Section main = Root [0];
+	
+				if (tweet.Favorited){
+					// Lame, inserted at top, but does it matter that much?
+					main.Insert (0, UITableViewRowAnimation.None, new TweetElement (tweet));
+				} else {
+					for (int i = 0; i < main.Count; i++){
+						var te = main [i] as TweetElement;
+						if (te == null)
+							continue;
+						if (te.Tweet == tweet){
+							main.Remove (i);
+							return;
+						}
+					}
+				} 
+			} catch {
+			}
+		}
 	}
 	
 	// 

@@ -189,7 +189,8 @@ namespace TweetStation
 
 				buttonView.TouchDown += delegate {
 					tweet.Favorited = !tweet.Favorited;
-					TwitterAccount.CurrentAccount.Post (String.Format ("http://api.twitter.com/1/1favorites/{0}/{1}.json", tweet.Favorited ? "create" : "destroy", tweet.Id),"");
+					Util.MainAppDelegate.FavoriteChanged (tweet);
+					TwitterAccount.CurrentAccount.Post (String.Format ("http://api.twitter.com/1/favorites/{0}/{1}.json", tweet.Favorited ? "create" : "destroy", tweet.Id),"");
 					UpdateButtonImage (tweet);
 					tweet.Replace (Database.Main);
 				};

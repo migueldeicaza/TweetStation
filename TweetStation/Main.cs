@@ -190,6 +190,14 @@ namespace TweetStation
 			sheet.ShowInView (Util.MainAppDelegate.MainView);
 		}
 		
+		// Broadcast the change, since tweets can be instantiated multiple times.
+		public void FavoriteChanged (Tweet tweet)
+		{
+			favorites.FavoriteChanged (tweet);
+			main.FavoriteChanged (tweet);
+			mentions.FavoriteChanged (tweet);
+		}
+		
 		UINavigationController loginRoot = null;
 		DialogViewController loginDialog = null;
 
