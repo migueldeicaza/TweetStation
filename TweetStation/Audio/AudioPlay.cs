@@ -43,13 +43,18 @@ namespace TweetStation
 		public AudioPlay (string file)
 		{
 			player = AVAudioPlayer.FromUrl (new NSUrl (file));
-			player.NumberOfLoops = -1;
+			if (player != null){
+				player.NumberOfLoops = -1;
 		
-			player.Play ();
+				player.Play ();
+			}
 		}
 
 		public void Play ()
 		{
+			if (player == null)
+				return;
+			
 			if (timer != null)
 				timer.Invalidate ();
 			player.Volume = 1;
@@ -61,6 +66,9 @@ namespace TweetStation
 		// Slowly turn off the audio
 		public void Stop ()
 		{
+			if (player == null)
+				return;
+			
 			float volume = player.Volume;
 			timer = NSTimer.CreateRepeatingScheduledTimer (TimeSpan.FromMilliseconds (100), delegate {
 				volume -= 0.05f;

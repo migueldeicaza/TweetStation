@@ -224,9 +224,9 @@ namespace TweetStation
 			context.SaveState ();
 			context.TranslateCTM (0, borderAt);
 			context.AddPath (borderPath);
-			UIColor.Gray.SetColor ();
+			UIColor.LightGray.SetColor ();
+
 			context.SetLineWidth (1);
-			
 			// Device and Sim interpret the Y for the shadow differently.
 			context.SetShadowWithColor (new SizeF (0, -1), 3, UIColor.DarkGray.CGColor);
 			context.StrokePath ();

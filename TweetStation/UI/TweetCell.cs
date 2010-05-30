@@ -107,8 +107,7 @@ namespace TweetStation
 			{
 				this.tweet = tweet;
 				userText = tweet.Retweeter == null ? tweet.Screename : tweet.Screename + "→" + tweet.Retweeter;
-
-				
+	
 				// 
 				// For fake UserIDs (returned by the search), we try looking up by screename now
 				//
@@ -193,7 +192,7 @@ namespace TweetStation
 					// On device, the shadow is painted in the opposite direction!
 					context.SetShadowWithColor (new SizeF (0, -1), 3, UIColor.DarkGray.CGColor);
 					context.AddPath (badgePath);
-					context.StrokePath ();
+					context.FillPath ();
 					
 					if (retweetImage != null){
 						context.TranslateCTM (30, 30);

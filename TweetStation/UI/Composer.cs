@@ -301,7 +301,8 @@ namespace TweetStation
 		{
 			sendItem.Enabled = true;
 			previousController.DismissModalViewControllerAnimated (true);
-			player.Stop ();
+			if (player != null)
+				player.Stop ();
 		}
 		
 		void AppendLocation (StringBuilder content)
