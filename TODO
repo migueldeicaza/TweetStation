@@ -11,24 +11,15 @@
 		Open (for links)
 		Quote
 
-	Send needs to put some feedback about what is going on during the upload
-	of a picture
-
 	Sometimes the "reloading" becomes active on switching to
 	something, just dont remember what, need a test case.
 
 *  Missing Stuff
 
-	HUD display:
-		Compress URL
-		Upload picture
-
-	Load 50 tweets, offer to load more DB storage
-	
 	Refresh user pictures when they change.  
 		Currently, once we download a pic, we never update it
 
-	Nearby tweets
+	Nearby tweets text is incorrectly centered.t
 	TweetCell - Main Display
 		geo info, and pic info?
 		Replace foo -> bar in retweet with a bottom "Retweeted by"

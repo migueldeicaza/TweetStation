@@ -44,6 +44,7 @@ namespace TweetStation
 		internal UIBarButtonItem GpsButtonItem, ShrinkItem;
 		public event NSAction LookupUserRequested;
 		public NSDictionary PictureDict;
+		public bool FromLibrary;
 		
 		public ComposerView (RectangleF bounds, Composer composer) : base (bounds)
 		{
@@ -110,6 +111,10 @@ namespace TweetStation
 		// Need HUD display here
 		void ShrinkUrls (string [] words)
 		{
+			var hud = new LoadingHUDView ("Compressing");
+			this.AddSubview (hud);
+			hud.StartAnimating ();
+			
 			var wc = new WebClient ();
 			for (int i = 0; i < words.Length; i++){
 				if (!words [i].StartsWith ("http://"))
@@ -120,6 +125,9 @@ namespace TweetStation
 				} catch {
 				}
 			}
+			hud.StopAnimating ();
+			hud.RemoveFromSuperview ();
+			hud = null;
 		}
 		
 		internal void InsertGeo (object sender, EventArgs args)
@@ -160,6 +168,7 @@ namespace TweetStation
 		
 		void TakePicture ()
 		{
+			FromLibrary = true;
 			if (!UIImagePickerController.IsSourceTypeAvailable (UIImagePickerControllerSourceType.Camera)){
 				Camera.SelectPicture (composer, PictureSelected);
 				return;
@@ -175,9 +184,10 @@ namespace TweetStation
 				if (e.ButtonIndex == 2)
 					return;
 				
-				if (e.ButtonIndex == 0)
+				if (e.ButtonIndex == 0){
+					FromLibrary = false;
 					Camera.TakePicture (composer, PictureSelected);
-				else
+				} else
 					Camera.SelectPicture (composer, PictureSelected);
 			};
 			sheet.ShowInView (Util.MainAppDelegate.MainView);
@@ -213,6 +223,7 @@ namespace TweetStation
 		string directRecipient;
 		internal CLLocation location;
 		AudioPlay player;
+		LoadingHUDView hud;
 		
 		public static readonly Composer Main = new Composer ();
 		
@@ -291,6 +302,13 @@ namespace TweetStation
 				if (img == null)
 					img = pictureDict [UIImagePickerController.OriginalImage] as UIImage;
 				
+				// Save a copy of the original picture
+				if (!composerView.FromLibrary){
+					img.SaveToPhotosAlbum (delegate {
+						// Ignore
+					});
+				}
+				
 				var size = img.Size;
 				float maxWidth;
 				switch (level){
@@ -304,12 +322,18 @@ namespace TweetStation
 					maxWidth = size.Width;
 					break;
 				}
+				
 				if (size.Width > maxWidth || size.Height > maxWidth)
 					img = img.Scale (new SizeF (maxWidth, maxWidth*size.Height/size.Width));
 				
 				var jpeg = img.AsJPEG ();
 				Stream stream;
 				unsafe { stream = new UnmanagedMemoryStream ((byte*) jpeg.Bytes, jpeg.Length); }
+				
+				hud = new LoadingHUDView (Locale.GetText ("Uploading\nImage"), "");
+				View.AddSubview (hud);
+				hud.StartAnimating ();
+				
 				TwitterAccount.CurrentAccount.UploadPicture (stream, PicUploadComplete);
 			} else {
 				//NSUrl movieUrl = pictureDict [UIImagePickerController.MediaURL] as NSUrl;
@@ -321,6 +345,10 @@ namespace TweetStation
 		UIAlertView alert;
 		void PicUploadComplete (string name)
 		{
+			hud.StopAnimating ();
+			hud.RemoveFromSuperview ();
+			hud = null;
+			
 			if (name == null){
 				alert = new UIAlertView (Locale.GetText ("Error"), 
 	                Locale.GetText ("There was an error uploading the media, do you want to post without it?"), null, 

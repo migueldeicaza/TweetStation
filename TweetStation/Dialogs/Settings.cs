@@ -161,10 +161,9 @@ namespace TweetStation
 							})
 						},
 						new Section (Locale.GetText ("Inspiration"), 
-						             Locale.GetText ("Twitter is best used when you are inspired\n" +
-						                             "to write the best possible tweets.  I picked\n" +
-						                             "music and audio that should inspire\n" +
-						                             "you to create clever tweets")){
+						             Locale.GetText ("Twitter is best used when you are inspired.\n" +
+						             				 "I picked music and audio that should\n" +
+						                             "inspire you to create clever tweets")){
 							(playMusic = new BooleanElement (Locale.GetText ("Music on Composer"), Util.Defaults.IntForKey ("disableMusic") == 0)),
 							(chicken = new BooleanElement (Locale.GetText ("Chicken noises"), Util.Defaults.IntForKey ("disableChickens") == 0)),
 						}
