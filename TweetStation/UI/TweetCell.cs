@@ -177,7 +177,7 @@ namespace TweetStation
 					using (var nss = new NSString (time)){
 						var size = nss.StringSize (timeFont);
 						
-						star.Draw (new RectangleF (bounds.Width-16-size.Width-(xPic == PicXPad ? 0 : PicAreaWidth), TextHeightPadding, size.Height, size.Height));
+						star.Draw (new RectangleF (bounds.Width-16-size.Width-(xPic == PicXPad ? PicXPad : PicAreaWidth), TextHeightPadding, size.Height, size.Height));
 					}
 				}
 				DrawString (time, new RectangleF (xText, TextHeightPadding, bounds.Width-PicAreaWidth-TextWidthPadding, timeSize),
@@ -189,7 +189,9 @@ namespace TweetStation
 					context.SaveState ();
 					context.TranslateCTM (xPic, PicYPad);
 					context.SetLineWidth (1);
-					context.SetShadowWithColor (new SizeF (0, 1), 3, UIColor.DarkGray.CGColor);
+					
+					// On device, the shadow is painted in the opposite direction!
+					context.SetShadowWithColor (new SizeF (0, -1), 3, UIColor.DarkGray.CGColor);
 					context.AddPath (badgePath);
 					context.FillPath ();
 					

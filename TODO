@@ -19,7 +19,6 @@
 	Refresh user pictures when they change.  
 		Currently, once we download a pic, we never update it
 
-	Nearby tweets text is incorrectly centered.t
 	TweetCell - Main Display
 		geo info, and pic info?
 		Replace foo -> bar in retweet with a bottom "Retweeted by"
