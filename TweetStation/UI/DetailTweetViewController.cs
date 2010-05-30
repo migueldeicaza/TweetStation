@@ -30,6 +30,7 @@ using MonoTouch.Dialog;
 using MonoTouch.Foundation;
 using MonoTouch.UIKit;
 using System.IO;
+using MonoTouch.CoreGraphics;
 
 namespace TweetStation
 {
@@ -54,7 +55,7 @@ namespace TweetStation
 			shortProfileView.UrlTapped += delegate { WebViewController.OpenUrl (this, User.FromId (tweet.UserId).Url); };
 			
 			var main = new Section (shortProfileView){
-				new UIViewElement (null, new DetailTweetView (detailRect, tweet, ContentHandler), false) { 
+				new UIViewElement (null, new DetailTweetView (detailRect, tweet, ContentHandler, this), false) { 
 					Flags = UIViewElement.CellFlags.DisableSelection 
 				}
 			};			
@@ -130,20 +131,25 @@ namespace TweetStation
 	}
 	
 	public class DetailTweetView : UIView, IImageUpdated {
+		static CGPath borderPath = Graphics.MakeRoundedPath (78);
 		static UIImage off = UIImage.FromFileUncached ("Images/star-off.png");
 		public static UIImage on = UIImage.FromFileUncached ("Images/star-on.png");
 		const int PadY = 4;
 		const int smallSize = 12;
+		
+		// If there is a picture, this contains the Y offset of the picture start
+		float borderAt;
 		TweetView tweetView;
 		UIButton buttonView;
-		UIImageView imageView;
+		UIImage image;
 		
-		public DetailTweetView (RectangleF rect, Tweet tweet, TweetView.TappedEvent handler) : base (rect)
+		public DetailTweetView (RectangleF rect, Tweet tweet, TweetView.TappedEvent handler, DialogViewController parent) : base (rect)
 		{
 			var tweetRect = rect;
 			if (tweet.Kind != TweetKind.Direct)
 				tweetRect.Width -= 30;
 			
+			BackgroundColor = UIColor.Clear;
 			tweetView = new TweetView (tweetRect, tweet.Text){
 				BackgroundColor = UIColor.Clear,
 			};
@@ -153,14 +159,12 @@ namespace TweetStation
 			AddSubview (tweetView);
 			float y = tweetView.Frame.Height + PadY;
 			
-			string thumbUrl;
-			var picUrl = PicDetect.FindPicUrl (tweet.Text, out thumbUrl);
+			string thumbUrl, previewUrl;
+			var picUrl = PicDetect.FindPicUrl (tweet.Text, out thumbUrl, out previewUrl);
 			if (picUrl != null){
-				imageView = new UIImageView (new RectangleF (0, y, 78, 78));
+				borderAt = y;
+				SetupImagePreview (parent, y, picUrl, thumbUrl, previewUrl);
 				y += 90;
-				//image.AddTarget (delegate { Util.MainAppDelegate.Open (}, UIControlEvent.TouchUpInside);
-				AddSubview (imageView);
-				ImageStore.QueueRequestForPicture (serial++, thumbUrl, this);
 			} 
 			
 			rect.Y = y;
@@ -194,6 +198,47 @@ namespace TweetStation
 			}
 		}
 		
+		void SetupImagePreview (DialogViewController parent, float y, string picUrl, string thumbUrl, string previewUrl)
+		{
+			var rect = new RectangleF (0, y, 78, 78);
+			
+			var imageButton = new UIButton (rect) {
+				BackgroundColor = UIColor.Clear
+			};
+			imageButton.TouchUpInside += delegate {
+				string html = "<html><body style='background-color:black'><div style='text-align:center; width: 320px; height: 480px;'><img src='{0}'/></div></body></html>";
+				WebViewController.OpenHtmlString (parent, String.Format (html, previewUrl), new NSUrl (picUrl).BaseUrl);
+			};
+			AddSubview (imageButton);
+			ImageStore.QueueRequestForPicture (serial++, thumbUrl, this);
+		}
+
+		public override void Draw (RectangleF rect)
+		{
+			Console.WriteLine (rect);
+			if (borderAt < 1)
+				return;
+				
+			var context = UIGraphics.GetCurrentContext ();
+			context.SaveState ();
+			context.TranslateCTM (0, borderAt);
+			context.AddPath (borderPath);
+			UIColor.Gray.SetColor ();
+			context.SetLineWidth (1);
+			
+			// Device and Sim interpret the Y for the shadow differently.
+			context.SetShadowWithColor (new SizeF (0, -1), 3, UIColor.DarkGray.CGColor);
+			context.StrokePath ();
+			
+			// Clip the image to the path and paint it
+			if (image != null){
+				context.AddPath (borderPath);
+				context.Clip ();
+				image.Draw (new RectangleF (0, 0, 78, 78));
+            }
+			context.RestoreState ();
+		}
+
 		void UpdateButtonImage (Tweet tweet)
 		{
 			var image = tweet.Favorited ? on : off;
@@ -207,7 +252,8 @@ namespace TweetStation
 		static long serial = ImageStore.TempStartId*2;
 		public void UpdatedImage (long id)
 		{
-			imageView.Image = ImageStore.GetLocalProfilePicture (id);
+			image = ImageStore.GetLocalProfilePicture (id);
+			SetNeedsDisplay ();
 		}
 		#endregion
 	}

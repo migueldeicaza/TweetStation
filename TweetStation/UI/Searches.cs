@@ -88,6 +88,7 @@ namespace TweetStation
 
 		public override void SearchButtonClicked (string text)
 		{
+			Save ();
 			ActivateController (new SearchViewController (text) { Account = TwitterAccount.CurrentAccount });
 		}
 		
@@ -99,6 +100,7 @@ namespace TweetStation
 		}
 
 		public abstract SearchMirrorElement MakeMirror ();
+		
 		public override void ViewWillAppear (bool animated)
 		{
 			base.ViewWillAppear (animated);
@@ -133,6 +135,8 @@ namespace TweetStation
 		}
 		
 		public abstract void PopulateSearch (Section entries);
+		
+		public virtual void Save () {}
 	}
 
 	public class SearchUser : SearchDialog {
@@ -214,13 +218,18 @@ namespace TweetStation
 			if (SearchMirror.Text != ""){
 				terms.Add (SearchMirror.Text);
 				
-				Util.Defaults.SetInt (terms.Count, "searches");
-				int i = 0;
-				foreach (string s in terms)
-					Util.Defaults.SetString (s, "u-" + i++);
+				Save ();
 			}
 
 			ActivateController (new SearchViewController (GetItemText (indexPath)) { Account = TwitterAccount.CurrentAccount });
+		}
+		
+		public override void Save ()
+		{
+			Util.Defaults.SetInt (terms.Count, "searches");
+			int i = 0;
+			foreach (string s in terms)
+				Util.Defaults.SetString (s, "u-" + i++);
 		}
 	}
 	

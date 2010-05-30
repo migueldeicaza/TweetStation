@@ -32,6 +32,7 @@ using MonoTouch.CoreLocation;
 using SQLite;
 using System.IO;
 using System.Net;
+using MonoTouch.AVFoundation;
 
 namespace TweetStation
 {
@@ -142,6 +143,7 @@ namespace TweetStation
 		internal void Reset (string text)
 		{
 			textView.Text = text;
+			PictureDict = null;
 			HandleTextViewChanged (null, null);
 		}
 		
@@ -425,7 +427,9 @@ namespace TweetStation
 				return;
 			
 			try {
-				player = new AudioPlay ("Audio/composeaudio.mp3");
+				if (player == null)
+					player = new AudioPlay ("Audio/composeaudio.mp3");
+				player.Play ();
 			} catch (Exception e){
 				Console.WriteLine (e);
 			}
@@ -463,6 +467,7 @@ namespace TweetStation
 		}
 	}
 	
+	// Does anyone really use drafts? 
 	public class Draft {
 		static bool inited;
 		

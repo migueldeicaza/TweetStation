@@ -22,16 +22,18 @@
 using System;
 using System.IO;
 using System.Threading;
-using StreamingAudio;
+using MonoTouch.AVFoundation;
 using MonoTouch.AudioToolbox;
 using MonoTouch.Foundation;
 
 namespace TweetStation
 {
+	//
+	// Wrapper class to play audio in a loop, with a soft ending
 	public class AudioPlay {
-		StreamingPlayback player;
-		FileStream fs;
-		volatile bool stop;
+		AVAudioPlayer player;
+		double lastTime;
+		NSTimer timer = null;
 		
 		static AudioPlay ()
 		{
@@ -40,58 +42,36 @@ namespace TweetStation
 		
 		public AudioPlay (string file)
 		{
-			stop = false;
-			fs = File.OpenRead (file);
-			player = new StreamingPlayback ();
-			ThreadPool.QueueUserWorkItem (Play);
+			player = AVAudioPlayer.FromUrl (new NSUrl (file));
+			player.NumberOfLoops = -1;
+		
+			player.Play ();
 		}
 
-		void Play (object state)
+		public void Play ()
 		{
-			AudioSession.Category = AudioSessionCategory.AmbientSound;
-			AudioSession.RoutingOverride = AudioSessionRoutingOverride.Speaker;
-			
-			var buffer = new byte [8192];
-			int n;
-			
-			while (!stop){
-				while ((n = fs.Read (buffer, 0, buffer.Length)) != 0){
-					player.ParseBytes (buffer, n, false);
-					if (stop)
-						break;
-				}
-				fs.Position = 0;
-			}
-			player.Dispose ();
+			if (timer != null)
+				timer.Invalidate ();
+			player.Volume = 1;
+			if (lastTime != 0)
+				player.CurrentTime = lastTime;
+			player.Play ();
 		}
 		
+		// Slowly turn off the audio
 		public void Stop ()
 		{
-			// If we have not yet decoded enough data to play, return
-			var oqueue = player.OutputQueue;
-			if (oqueue == null)
-				return;
-			
-			// Slowly turn off the audio
-			NSTimer timer = null;
-			float volume = player.OutputQueue.Volume;
+			float volume = player.Volume;
 			timer = NSTimer.CreateRepeatingScheduledTimer (TimeSpan.FromMilliseconds (100), delegate {
 				volume -= 0.05f;
-				player.OutputQueue.Volume = volume;
+				player.Volume = volume;
 				if (volume <= 0.1){
-					InternalStop ();
+					lastTime = player.CurrentTime;
+					player.Stop ();
 					timer.Invalidate ();
 				}
 			});
 		}
-		
-		void InternalStop ()
-		{
-			// Stop the output queue, then tell the loop to stop processing data
-			player.Pause ();
-			stop = true;
-		}
-		
 	}
 }
 

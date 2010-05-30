@@ -57,6 +57,7 @@ namespace TweetStation
 		{
 			WebView = new UIWebView (){
 				ScalesPageToFit = true,
+				MultipleTouchEnabled = true,
 				AutoresizingMask = UIViewAutoresizing.FlexibleHeight|UIViewAutoresizing.FlexibleWidth
 			};
 			WebView.LoadStarted += delegate { Util.PushNetworkActive (); };
@@ -98,6 +99,22 @@ namespace TweetStation
 			parent.ActivateController (Main);
 
 			UIView.CommitAnimations ();
+		}
+		
+		public static void OpenHtmlString (DialogViewController parent, string htmlString, NSUrl baseUrl)
+		{
+			UIView.BeginAnimations ("foo");
+			Main.HidesBottomBarWhenPushed = true;
+			Main.SetupWeb ();
+			
+			Main.WebView.LoadHtmlString (htmlString, baseUrl);
+			parent.ActivateController (Main);
+			UIView.CommitAnimations ();
+		}
+		
+		public static void OpenHtmlString (DialogViewController parent, string htmlString)
+		{
+			OpenHtmlString (parent, htmlString, new NSUrl (Util.BaseDir, true));
 		}
 	}
 }

@@ -126,12 +126,13 @@ namespace TweetStation
 			base.ViewWillDisappear (animated);
 			
 			Util.Defaults.SetInt (playMusic.Value ? 0 : 1, "disableMusic");
-			Util.Defaults.SetInt (chicken.Value ? 0 : 1, "disableChickens");
+			Util.Defaults.SetInt (chicken.Value ? 1 : 0, "enableChickens");
 			
 			int style = (selfOnRight.Value ? 0 : 1) | (shadows.Value ? 0 : 2);
 			
 			Util.Defaults.SetInt (style, "cellStyle");
 			TweetCell.CellStyle = style;
+			BaseTimelineViewController.ChickenNoisesEnabled = chicken.Value;
 			
 			Util.Defaults.SetInt (compress.RadioSelected, "sizeCompression");
 			Util.Defaults.Synchronize ();
@@ -165,7 +166,7 @@ namespace TweetStation
 						             				 "I picked music and audio that should\n" +
 						                             "inspire you to create clever tweets")){
 							(playMusic = new BooleanElement (Locale.GetText ("Music on Composer"), Util.Defaults.IntForKey ("disableMusic") == 0)),
-							(chicken = new BooleanElement (Locale.GetText ("Chicken noises"), Util.Defaults.IntForKey ("disableChickens") == 0)),
+							(chicken = new BooleanElement (Locale.GetText ("Chicken noises"), Util.Defaults.IntForKey ("enableChickens") != 0)),
 						}
 					},
 					//new RootElement (Locale.GetText ("Services"))
@@ -178,15 +179,33 @@ namespace TweetStation
 							new HtmlElement (Locale.GetText ("Web site"), "http://tirania.org/tweetstation")
 						},
 						new Section (){
-							new RootElement ("@migueldeicaza", delegate { return new FullProfileView ("migueldeicaza"); }),
-							new RootElement ("@itweetstation", delegate { return new FullProfileView ("itweetstation"); }),
-							new RootElement ("@kmacleod", delegate { return new FullProfileView ("kmacleod"); })
+							Twitterista ("migueldeicaza"),
+							Twitterista ("itweetstation"),
 						},
-						new Section () {
+						new Section ("Music"){
+							Twitterista ("kmacleod"),
+						},
+						new Section ("Conspirators") {
+							Twitterista ("JosephHill"),
+							Twitterista ("kangamono"),
+							Twitterista ("lauradeicaza"),
+							Twitterista ("mancha"),
+							Twitterista ("mjhutchinson"),
+						},
+						new Section ("Contributors"){
+							Twitterista ("martinbowling"),
+						},
+						new Section ("Includes X11 code from") {
+							Twitterista ("escoz"),
 						}
 					}
 				}
 			};
+		}
+	
+		public RootElement Twitterista (string name)
+		{
+			return new RootElement ("@" + name, delegate { return new FullProfileView (name); });
 		}
 	}
 

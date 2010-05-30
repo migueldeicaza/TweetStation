@@ -30,10 +30,11 @@ namespace TweetStation
 		// the thumbnail url.   For now, it detects one, but perhaps we should
 		// detect multiple?
 		//
-		public static string FindPicUrl (string text, out string thumbUrl)
+		public static string FindPicUrl (string text, out string thumbUrl, out string previewUrl)
 		{
 			int last = 0;
 			thumbUrl = null;
+			previewUrl = null;
 			Uri url = null;
 			
 			while (last < text.Length) {
@@ -55,6 +56,7 @@ namespace TweetStation
 				switch (url.Host.ToLower ()){
 				case "twitpic.com":
 					thumbUrl = "http://" + url.Host + "/show/thumb" + url.LocalPath;
+					previewUrl = "http://" + url.Host + "/show/large" + url.LocalPath;
 					break;
 					
 				case "yfrog.com":
@@ -68,19 +70,23 @@ namespace TweetStation
 				case "yfrog.pl":
 				case "yfrog.eu":
 					thumbUrl = url.ToString () + ".th.jpg";
+					previewUrl = url.ToString () + ":iphone";
 					break;
 					
+				case "pic.gd":
 				case "tweetphoto.com":
 					thumbUrl = "http://tweetphotoapi.com/api/TPAPI.svc/imagefromurl?size=thumbnail&url=" + url.ToString ();
+					previewUrl = "http://tweetphotoapi.com/api/TPAPI.svc/imagefromurl?size=medium&url=" + url.ToString ();
 					break;
 					
 				case "img.ly":
 					thumbUrl = "http://" + url.Host + "/show/thumb" + url.LocalPath;
+					previewUrl = "http://" + url.Host + "/show/large" + url.LocalPath;
 					break;
 					
 				case "moby.to":
 				case "twitgoo.com":
-					// requires another key
+					// life is too short to sign up for another key
 					break;
 					
 				default:

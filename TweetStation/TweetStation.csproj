@@ -123,11 +123,11 @@
     <Compile Include="Dialogs\Settings.cs" />
     <Compile Include="Utilities\OAuthAuthorizer.cs" />
     <Compile Include="UI\Camera.cs" />
-    <Compile Include="Audio\StreamingPlayback.cs" />
     <Compile Include="Audio\AudioPlay.cs" />
     <Compile Include="Utilities\PicDetect.cs" />
     <Compile Include="UI\SwipeSupport.cs" />
     <Compile Include="Utilities\LoadingHudView.cs" />
+    <Compile Include="UI\Chickens.cs" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="MainWindow.xib" />
@@ -168,6 +168,8 @@
     <Content Include="about.html" />
     <Content Include="Icon.png" />
     <Content Include="IconSpotlight.png" />
+    <Content Include="Audio\chicken1.caf" />
+    <Content Include="Audio\chicken2.caf" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\MonoTouch.Dialog\MonoTouch.Dialog\MonoTouch.Dialog.csproj">

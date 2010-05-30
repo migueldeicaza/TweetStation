@@ -193,12 +193,12 @@ namespace TweetStation
 					// On device, the shadow is painted in the opposite direction!
 					context.SetShadowWithColor (new SizeF (0, -1), 3, UIColor.DarkGray.CGColor);
 					context.AddPath (badgePath);
-					context.FillPath ();
+					context.StrokePath ();
 					
 					if (retweetImage != null){
 						context.TranslateCTM (30, 30);
 						context.AddPath (smallBadgePath);
-						context.FillPath ();
+						context.StrokePath ();
 					}
 					
 					context.RestoreState ();
