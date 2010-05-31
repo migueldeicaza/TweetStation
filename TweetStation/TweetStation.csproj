@@ -81,6 +81,16 @@
     <CodesignProvision>81CC6220-6404-46B6-BAC0-6F4C5E8C7C34</CodesignProvision>
     <CodesignKey>iPhone Distribution</CodesignKey>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'AppStore|iPhone' ">
+    <DebugType>none</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin</OutputPath>
+    <WarningLevel>4</WarningLevel>
+    <MtouchI18n />
+    <MtouchDebug>False</MtouchDebug>
+    <CodesignProvision>AACDC083-6F7D-4DCC-A50B-1E246C8E90E1</CodesignProvision>
+    <CodesignKey>iPhone Distribution</CodesignKey>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Xml" />

@@ -40,6 +40,7 @@ namespace TweetStation
 			// Required by some HTTP calls to Twitter
 			System.Net.ServicePointManager.Expect100Continue = false;
 
+#if true
 			try {
 				if (File.Exists ("/Users/miguel/xauth")){
 					using (var f = File.OpenText ("/Users/miguel/xauth")){
@@ -51,6 +52,13 @@ namespace TweetStation
 					}
 				} 
 			} catch {}				
+#else
+			var cfg = TwitterAccount.OAuthConfig;
+			
+			// Paste ~/xauth.cs here
+			
+			useXauth = true;
+#endif
 			
 			Util.ReportTime ("Before GetDefaultAccount");
 			var defaultAccount = TwitterAccount.GetDefaultAccount ();
