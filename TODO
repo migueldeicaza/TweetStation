@@ -14,6 +14,9 @@
 	Sometimes the "reloading" becomes active on switching to
 	something, just dont remember what, need a test case.
 
+	Shrink links should only be enabled if there is a URL in the
+	text or multiple spaces
+
 *  Missing Stuff
 
 	Refresh user pictures when they change.  

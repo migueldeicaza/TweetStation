@@ -33,6 +33,7 @@ using SQLite;
 using System.IO;
 using System.Net;
 using MonoTouch.AVFoundation;
+using System.Text.RegularExpressions;
 
 namespace TweetStation
 {
@@ -46,6 +47,7 @@ namespace TweetStation
 		public event NSAction LookupUserRequested;
 		public NSDictionary PictureDict;
 		public bool FromLibrary;
+		public bool justShrank;
 		
 		public ComposerView (RectangleF bounds, Composer composer) : base (bounds)
 		{
@@ -98,6 +100,23 @@ namespace TweetStation
 		
 		internal void OnShrinkTapped (object sender, EventArgs args)
 		{
+			// Double tapping on the shrink link removes bowels, idea from Nat.
+			// you -> u
+			// vowels removed
+			// and -> &
+			if (justShrank){
+				var copy = Regex.Replace (textView.Text, "\\band\\b", "&", RegexOptions.IgnoreCase);
+				copy = Regex.Replace (copy, "\\byou\\b", "\u6666", RegexOptions.IgnoreCase);
+				copy = Regex.Replace (copy, "\\B[aeiou]\\B", "");
+				copy = copy.Replace ("\u6666", " u ");
+				textView.Text = copy;
+				
+				// Hack because the text changed event is not raised
+				// synchronously, but after the UI pumps for events
+				justShrank = false;
+				return;
+			}
+			
 			var words = textView.Text.Split (new char [] { ' '}, StringSplitOptions.RemoveEmptyEntries);
 			
 			foreach (var word in words)
@@ -107,6 +126,7 @@ namespace TweetStation
 				}
 			
 			textView.Text = String.Join (" ", words);
+			justShrank = true;
 		}
 
 		// Need HUD display here
@@ -143,6 +163,7 @@ namespace TweetStation
 		internal void Reset (string text)
 		{
 			textView.Text = text;
+			justShrank = false;
 			PictureDict = null;
 			HandleTextViewChanged (null, null);
 		}
