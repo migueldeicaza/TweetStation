@@ -259,7 +259,6 @@ namespace TweetStation
 				} catch (Exception e) {
 					Console.WriteLine ("{0} Error fetching picture for {1}", e, id);
 				}
-				Console.WriteLine ("Done with {0}",id);
 				// Cluster all updates together
 				bool doInvoke = false;
 				
@@ -300,10 +299,8 @@ namespace TweetStation
 				foreach (var qid in queuedUpdates){
 					var list = pendingRequests [qid];
 					pendingRequests.Remove (qid);
-					foreach (var pr in list){
-							Console.WriteLine ("Notifying of picture {0}", qid);
+					foreach (var pr in list)
 						pr.UpdatedImage (qid);
-					}
 				}
 				queuedUpdates.Clear ();
 			}
