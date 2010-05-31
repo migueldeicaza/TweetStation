@@ -237,7 +237,6 @@ namespace TweetStation
 		static void StartPicDownload (long id, Uri url)
 		{
 			do {
-				Console.WriteLine ("Starting {0}", id);
 				var buffer = new byte [4*1024];
 				string picdir = id < TempStartId ? PicDir : TmpDir;
 				bool downloaded = false;
