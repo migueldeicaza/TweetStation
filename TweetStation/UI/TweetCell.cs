@@ -276,6 +276,7 @@ namespace TweetStation
 	public class TweetElement : Element, IElementSizing {
 		static NSString key = new NSString ("tweetelement");
 		public Tweet Tweet;
+		static ArrayList loading;
 		
 		public TweetElement (Tweet tweet) : base (null)
 		{
@@ -297,7 +298,13 @@ namespace TweetStation
 		public override void Selected (DialogViewController dvc, UITableView tableView, NSIndexPath path)
 		{
 			// For partial tweets we need to load the full tweet
-			if (Tweet.IsSearchResult)
+			if (Tweet.IsSearchResult){
+				if (loading == null)
+					loading = new ArrayList ();
+				if (loading.Contains (Tweet))
+					return;
+				loading.Add (Tweet);
+				
 				Tweet.LoadFullTweet (Tweet.Id, t => {
 					if (t == null)
 						return;
@@ -305,7 +312,7 @@ namespace TweetStation
 					Tweet = t;
 					Activate (dvc, t);
 				});
-			else 
+			} else 
 				Activate (dvc, Tweet);
 		}
 
