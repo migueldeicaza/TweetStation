@@ -17,13 +17,14 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-#if SWIPE_SUPPORT
+#if false|| SWIPE_SUPPORT
 
 using System;
 using MonoTouch.ObjCRuntime;
 using MonoTouch.Foundation;
 using MonoTouch.UIKit;
 using MonoTouch.Dialog;
+using System.Drawing;
 
 namespace TweetStation
 {
@@ -76,7 +77,9 @@ namespace TweetStation
 			
 			public override void TouchesEnded (NSSet touches, UIEvent evt)
 			{
+				Console.WriteLine ("Touch ended");
 				base.TouchesEnded (touches, evt);
+				touchStart = new PointF (-100, -100);
 			}
 		}
 	
@@ -88,7 +91,7 @@ namespace TweetStation
 		}
 		
 		UIView currentMenuView;
-		UITableViewCell currentCell;
+		UITableViewCell menuCell;
 	
 		void ShowMenu (UIView menuView, UITableViewCell cell)
 		{
@@ -96,7 +99,7 @@ namespace TweetStation
 			float offset = cell.ContentView.Frame.Width;
 
 			currentMenuView = menuView;
-			currentCell = cell;
+			menuCell = cell;
 			Move (menuView, -offset);
 			cell.ContentView.AddSubview (menuView);
 			
@@ -111,13 +114,14 @@ namespace TweetStation
 			}
 			menuView.Frame = cell.ContentView.Frame;
 			UIView.CommitAnimations ();
+			View.SetNeedsDisplay ();
 		}
 
 		void HideMenu ()
 		{
 			if (currentMenuView == null)
 				return;
-			float offset = currentCell.ContentView.Frame.Width;
+			float offset = menuCell.ContentView.Frame.Width;
 			UIView.BeginAnimations (null);
 			UIView.SetAnimationDuration (0.4);
 			UIView.SetAnimationDidStopSelector (new Selector ("hideFinished"));
@@ -125,12 +129,14 @@ namespace TweetStation
 			UIView.SetAnimationCurve (UIViewAnimationCurve.EaseInOut);			
 
 			Move (currentMenuView, -offset);
-			foreach (var view in currentCell.ContentView.Subviews){
+			foreach (var view in menuCell.ContentView.Subviews){
 				if (view == currentMenuView)
 					continue;
 				Move (view, -offset);
 			}
 			UIView.CommitAnimations ();
+			currentMenuView = null;
+			Console.WriteLine ("Reverted the previous changes");
 		}
 		
 		public virtual void OnSwipe (NSIndexPath path, UITableViewCell cell)
@@ -143,6 +149,7 @@ namespace TweetStation
 				var button = UIButton.FromType (UIButtonType.RoundedRect);
 				button.Frame = new RectangleF (0, 0, frame.Width, frame.Height);
 				
+				Console.WriteLine ("Swipe detected!");
 				ShowMenu (button, cell);
 			}
 		}
