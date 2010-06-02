@@ -17,7 +17,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-#if false|| SWIPE_SUPPORT
+#if true|| SWIPE_SUPPORT
 
 using System;
 using MonoTouch.ObjCRuntime;
@@ -30,7 +30,7 @@ namespace TweetStation
 {
 	public partial class BaseTimelineViewController
 	{
-			class SwipeDetectingTableView : UITableView {
+		class SwipeDetectingTableView : UITableView {
 			BaseTimelineViewController container;
 			NSIndexPath menuPath;
 			
@@ -40,17 +40,21 @@ namespace TweetStation
 				this.container = container;
 			}
 			
-			PointF touchStart;
+			PointF? touchStart;
 			public override void TouchesBegan (NSSet touches, UIEvent evt)
 			{
 				var touch = touches.AnyObject as UITouch;
 				touchStart = touch.LocationInView (this);
 				
 				if (menuPath != null){
-					var path = IndexPathForRowAtPoint (touchStart);
+					var path = IndexPathForRowAtPoint (touchStart.Value);
 					
+					// If tapping outside the cell, dismiss the menu, stop processing.
 					if (path.Row != menuPath.Row || path.Section != menuPath.Section){
 						container.CancelMenu ();
+						touchStart = null;
+						menuPath = null;
+						return;
 					}
 				}
 				
@@ -59,32 +63,42 @@ namespace TweetStation
 			
 			public override void TouchesMoved (NSSet touches, UIEvent evt)
 			{
-				var touch = touches.AnyObject as UITouch;
-				var currentPos = touch.LocationInView (this);
-				var deltaX = Math.Abs (touchStart.X - currentPos.X);
-				var deltaY = Math.Abs (touchStart.Y - currentPos.Y);
-				
-				if (deltaY < 5 && deltaX > 16){
-					menuPath = IndexPathForRowAtPoint (currentPos);
-					var cell = CellAt (menuPath);
+				if (touchStart != null){
+					var touch = touches.AnyObject as UITouch;
+					var currentPos = touch.LocationInView (this);
+					var deltaX = Math.Abs (touchStart.Value.X - currentPos.X);
+					var deltaY = Math.Abs (touchStart.Value.Y - currentPos.Y);
 					
-					container.OnSwipe (menuPath, cell);
-					touchStart = new PointF (-100, -100);
-					return;
+					if (deltaY < 5 && deltaX > 16){
+						menuPath = IndexPathForRowAtPoint (currentPos);
+						var cell = CellAt (menuPath);
+						
+						container.OnSwipe (menuPath, cell);
+						touchStart = null;
+						return;
+					}
 				}
 				base.TouchesMoved (touches, evt);
 			}
 			
 			public override void TouchesEnded (NSSet touches, UIEvent evt)
 			{
-				Console.WriteLine ("Touch ended");
 				base.TouchesEnded (touches, evt);
-				touchStart = new PointF (-100, -100);
+				touchStart = null;
+			}
+			
+			public override void SelectRow (NSIndexPath indexPath, bool animated, UITableViewScrollPosition scrollPosition)
+			{
+				if (container.currentMenuView != null)
+					return;
+				
+				base.SelectRow (indexPath, animated, scrollPosition);
 			}
 		}
 	
 		static void Move (UIView view, float xoffset)
 		{
+			Console.WriteLine ("    Moving {0} from {1} to {2}", view, view.Frame.X, view.Frame.X + xoffset);
 			var frame = view.Frame;
 			frame.Offset (xoffset, 0);
 			view.Frame = frame;
@@ -96,15 +110,17 @@ namespace TweetStation
 		void ShowMenu (UIView menuView, UITableViewCell cell)
 		{
 			HideMenu ();
+			var p = TableView.IndexPathForCell (cell);
 			float offset = cell.ContentView.Frame.Width;
+			Console.WriteLine ("Activating swipe at {0},{1} OFFSET={2}", p.Section, p.Row, offset);
 
 			currentMenuView = menuView;
 			menuCell = cell;
-			Move (menuView, -offset);
-			cell.ContentView.AddSubview (menuView);
+			//Move (menuView, -offset);
+			//cell.ContentView.AddSubview (menuView);
 			
 			UIView.BeginAnimations ("");
-			UIView.SetAnimationDuration (0.4);
+			UIView.SetAnimationDuration (0.2);
 			UIView.SetAnimationCurve (UIViewAnimationCurve.EaseInOut);
 
 			foreach (var view in cell.ContentView.Subviews){
@@ -112,31 +128,43 @@ namespace TweetStation
 					continue;
 				Move (view, offset);
 			}
-			menuView.Frame = cell.ContentView.Frame;
+			//menuView.Frame = cell.ContentView.Frame;
 			UIView.CommitAnimations ();
-			View.SetNeedsDisplay ();
 		}
 
 		void HideMenu ()
 		{
-			if (currentMenuView == null)
+			if (menuCell == null)
 				return;
+			
 			float offset = menuCell.ContentView.Frame.Width;
+			var p = TableView.IndexPathForCell (menuCell);
+			Console.WriteLine ("REMOVING swite at {0},{1} OFFSET={2}", p.Section, p.Row, offset);
+			
 			UIView.BeginAnimations (null);
-			UIView.SetAnimationDuration (0.4);
-			UIView.SetAnimationDidStopSelector (new Selector ("hideFinished"));
+			UIView.SetAnimationDuration (0.2);
+			UIView.SetAnimationDidStopSelector (new Selector ("animationDidStop:finished:context:"));
 			UIView.SetAnimationDelegate (this);
 			UIView.SetAnimationCurve (UIViewAnimationCurve.EaseInOut);			
 
-			Move (currentMenuView, -offset);
+			//Move (currentMenuView, -offset);
 			foreach (var view in menuCell.ContentView.Subviews){
 				if (view == currentMenuView)
 					continue;
 				Move (view, -offset);
 			}
 			UIView.CommitAnimations ();
-			currentMenuView = null;
-			Console.WriteLine ("Reverted the previous changes");
+			menuCell = null;
+		}
+		
+		[Export ("animationDidStop:finished:context:")]
+		[Preserve]
+		public void HideFinished (string name, NSNumber numFinished, IntPtr context)
+		{
+			if (currentMenuView != null){
+				currentMenuView.RemoveFromSuperview ();
+				currentMenuView = null;
+			}
 		}
 		
 		public virtual void OnSwipe (NSIndexPath path, UITableViewCell cell)
@@ -149,7 +177,7 @@ namespace TweetStation
 				var button = UIButton.FromType (UIButtonType.RoundedRect);
 				button.Frame = new RectangleF (0, 0, frame.Width, frame.Height);
 				
-				Console.WriteLine ("Swipe detected!");
+				//Console.WriteLine ("Swipe detected!");
 				ShowMenu (button, cell);
 			}
 		}
