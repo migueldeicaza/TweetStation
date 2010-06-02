@@ -15,8 +15,17 @@ TweetStation
 	client written for MonoTouch.   See the file LICENSE for
 	details.
 
+	I setup a web site at: http://tirania.org/tweetstation as
+	the oficial user-centric web site for TweetStation.
+
+	The official description for the app is on TweetStation.txt
+
 Design Goals
 ============
+
+   These design goals are just some basic principles, but like any
+   other project, they change depending on my mood each day or when
+   faced with harsh realities.
 
    The Murray Hill Style
 
