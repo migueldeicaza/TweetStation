@@ -26,6 +26,7 @@
 //
 using System;
 using System.Drawing;
+using System.Collections;
 using MonoTouch.UIKit;
 using MonoTouch.Foundation;
 using MonoTouch.CoreGraphics;

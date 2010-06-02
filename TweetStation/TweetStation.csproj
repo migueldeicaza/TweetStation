@@ -65,7 +65,7 @@
     <OutputPath>bin\iPhone\Release</OutputPath>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <CodesignKey>iPhone Developer: Miguel de Icaza (6YW2BSTNRQ)</CodesignKey>
+    <CodesignKey>iPhone Developer</CodesignKey>
     <MtouchDebug>False</MtouchDebug>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <MtouchI18n />
@@ -156,11 +156,9 @@
     <Folder Include="Utilities\" />
     <Folder Include="UI\" />
     <Folder Include="Images\" />
-    <Folder Include="x\" />
     <Folder Include="Audio\" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="home_timeline.json" />
     <Content Include="Images\friends.png" />
     <Content Include="Images\gps.png" />
     <Content Include="Images\shrink.png" />
