@@ -114,6 +114,45 @@ namespace TweetStation {
 		{
 			// Should be abstract, but virtual until I fix all the derived classes
 		}
+		
+		// 
+		// Override the default source so we can track when we reach the top
+		// and in that case, clear the badge value
+		//
+		public override Source CreateSizingSource (bool unevenRows)
+		{
+			// we are always uneven for TimelineViewControllers
+			return new ScrollTrackingSizingSource (this);
+		}
+		
+		bool DisableSelection;
+		
+		class ScrollTrackingSizingSource : DialogViewController.SizingSource {
+			BaseTimelineViewController parent;
+			
+			public ScrollTrackingSizingSource (DialogViewController dvc) : base (dvc)
+			{
+				parent = dvc as BaseTimelineViewController;
+			}
+			
+			public override void Scrolled (UIScrollView scrollView)
+			{
+				var point = Container.TableView.ContentOffset;
+				
+				if (point.Y <= 10)
+					parent.NavigationController.TabBarItem.BadgeValue = null;
+				
+				
+				base.Scrolled (scrollView);
+			}
+			
+			public override void RowSelected (UITableView tableView, NSIndexPath indexPath)
+			{
+				if (parent.DisableSelection)
+					return;
+				base.RowSelected (tableView, indexPath);
+			}
+		}
 	}
 	
 	public class TimelineViewController : BaseTimelineViewController {
@@ -247,33 +286,6 @@ namespace TweetStation {
 			Util.ReportTime ("After trigger");
 		}
 		
-		// 
-		// Override the default source so we can track when we reach the top
-		// and in that case, clear the badge value
-		//
-		public override Source CreateSizingSource (bool unevenRows)
-		{
-			// we are always uneven for TimelineViewControllers
-			return new ScrollTrackingSizingSource (this);
-		}
-		
-		class ScrollTrackingSizingSource : DialogViewController.SizingSource {
-			public ScrollTrackingSizingSource (DialogViewController dvc) : base (dvc)
-			{
-			}
-			
-			public override void Scrolled (UIScrollView scrollView)
-			{
-				var point = Container.TableView.ContentOffset;
-				
-				if (point.Y <= 10){
-					(Container as TimelineViewController).NavigationController.TabBarItem.BadgeValue = null;
-				}
-				
-				base.Scrolled (scrollView);
-			}
-		}
-
 		public override void FavoriteChanged (Tweet tweet)
 		{
 			if (Root.Count > 0){

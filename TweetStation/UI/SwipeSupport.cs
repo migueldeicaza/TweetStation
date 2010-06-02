@@ -86,14 +86,6 @@ namespace TweetStation
 				base.TouchesEnded (touches, evt);
 				touchStart = null;
 			}
-			
-			public override void SelectRow (NSIndexPath indexPath, bool animated, UITableViewScrollPosition scrollPosition)
-			{
-				if (container.currentMenuView != null)
-					return;
-				
-				base.SelectRow (indexPath, animated, scrollPosition);
-			}
 		}
 	
 		static void Move (UIView view, float xoffset)
@@ -110,6 +102,7 @@ namespace TweetStation
 		void ShowMenu (UIView menuView, UITableViewCell cell)
 		{
 			HideMenu ();
+			DisableSelection = true;
 			var p = TableView.IndexPathForCell (cell);
 			float offset = cell.ContentView.Frame.Width;
 			Console.WriteLine ("Activating swipe at {0},{1} OFFSET={2}", p.Section, p.Row, offset);
@@ -155,6 +148,7 @@ namespace TweetStation
 			}
 			UIView.CommitAnimations ();
 			menuCell = null;
+			DisableSelection = false;
 		}
 		
 		[Export ("animationDidStop:finished:context:")]
