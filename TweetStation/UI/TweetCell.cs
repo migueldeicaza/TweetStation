@@ -30,6 +30,7 @@ using MonoTouch.UIKit;
 using MonoTouch.Foundation;
 using MonoTouch.CoreGraphics;
 using MonoTouch.Dialog;
+using System.Collections;
 
 namespace TweetStation
 {
@@ -306,6 +307,7 @@ namespace TweetStation
 				loading.Add (Tweet);
 				
 				Tweet.LoadFullTweet (Tweet.Id, t => {
+					loading.Remove (Tweet);
 					if (t == null)
 						return;
 					
