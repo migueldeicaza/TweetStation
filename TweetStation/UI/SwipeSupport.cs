@@ -83,6 +83,9 @@ namespace TweetStation
 			
 			public override void TouchesEnded (NSSet touches, UIEvent evt)
 			{
+				if (container.DisableSelection)
+					return;
+				
 				base.TouchesEnded (touches, evt);
 				touchStart = null;
 			}
@@ -96,6 +99,7 @@ namespace TweetStation
 			view.Frame = frame;
 		}
 		
+		const double delay = 0.2;
 		UIView currentMenuView;
 		UITableViewCell menuCell;
 	
@@ -113,8 +117,8 @@ namespace TweetStation
 			//cell.ContentView.AddSubview (menuView);
 			
 			UIView.BeginAnimations ("");
-			UIView.SetAnimationDuration (0.2);
-			UIView.SetAnimationCurve (UIViewAnimationCurve.EaseInOut);
+			UIView.SetAnimationDuration (delay);
+			UIView.SetAnimationCurve (UIViewAnimationCurve.EaseIn);
 
 			foreach (var view in cell.ContentView.Subviews){
 				if (view == menuView)
@@ -135,7 +139,7 @@ namespace TweetStation
 			Console.WriteLine ("REMOVING swite at {0},{1} OFFSET={2}", p.Section, p.Row, offset);
 			
 			UIView.BeginAnimations (null);
-			UIView.SetAnimationDuration (0.2);
+			UIView.SetAnimationDuration (delay);
 			UIView.SetAnimationDidStopSelector (new Selector ("animationDidStop:finished:context:"));
 			UIView.SetAnimationDelegate (this);
 			UIView.SetAnimationCurve (UIViewAnimationCurve.EaseInOut);			
