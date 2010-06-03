@@ -31,7 +31,6 @@ using MonoTouch.UIKit;
 using MonoTouch.Foundation;
 using MonoTouch.CoreGraphics;
 using MonoTouch.Dialog;
-using System.Collections;
 
 namespace TweetStation
 {
@@ -118,7 +117,7 @@ namespace TweetStation
 					img = ImageStore.GetLocalProfilePicture (tweet.Screename);
 				if (img == null)
 					ImageStore.QueueRequestForPicture (tweet.UserId, tweet.PicUrl, this);
-				else
+				else 
 					tweet.PicUrl = null;
 				tweetImage = img == null ? ImageStore.DefaultImage : img;
 				
@@ -278,8 +277,7 @@ namespace TweetStation
 	public class TweetElement : Element, IElementSizing {
 		static NSString key = new NSString ("tweetelement");
 		public Tweet Tweet;
-		static ArrayList loading;
-		
+
 		public TweetElement (Tweet tweet) : base (null)
 		{
 			Tweet = tweet;	
@@ -299,29 +297,7 @@ namespace TweetStation
 		
 		public override void Selected (DialogViewController dvc, UITableView tableView, NSIndexPath path)
 		{
-			// For partial tweets we need to load the full tweet
-			if (Tweet.IsSearchResult){
-				if (loading == null)
-					loading = new ArrayList ();
-				if (loading.Contains (Tweet))
-					return;
-				loading.Add (Tweet);
-				
-				Tweet.LoadFullTweet (Tweet.Id, t => {
-					loading.Remove (Tweet);
-					if (t == null)
-						return;
-					
-					Tweet = t;
-					Activate (dvc, t);
-				});
-			} else 
-				Activate (dvc, Tweet);
-		}
-
-		void Activate (DialogViewController dvc, Tweet source)
-		{
-			var profile = new DetailTweetViewController (source);
+			var profile = new DetailTweetViewController (Tweet);
 			dvc.ActivateController (profile);
 		}
 

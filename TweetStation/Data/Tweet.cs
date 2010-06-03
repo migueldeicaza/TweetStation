@@ -461,6 +461,7 @@ namespace TweetStation
 					callback (null);
 				
 				var tweet = Tweet.ParseTweet (new MemoryStream (result));
+				
 				if (tweet == null)
 					callback (null);
 

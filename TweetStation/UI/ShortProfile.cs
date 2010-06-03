@@ -44,21 +44,25 @@ namespace TweetStation
 		UIButton url;
 		User user;
 		
-		public ShortProfileView (RectangleF rect, long userId, bool discloseButton) : base (rect)
+		public ShortProfileView (RectangleF rect, long userId, bool discloseButton) : this (rect, discloseButton)
+		{
+			UpdateFromUserId (userId);
+		}
+		
+		public ShortProfileView (RectangleF rect, Tweet partialTweet, bool discloseButton) : this (rect, discloseButton)
+		{
+			// Load the picture we have for the user.
+			if (partialTweet.IsSearchResult)
+				profilePic.Image = ImageStore.RequestProfilePicture (partialTweet.UserId, null, this);
+		}
+		
+		public ShortProfileView (RectangleF rect, bool discloseButton) : base (rect)
 		{
 			BackgroundColor = UIColor.Clear;
-			
-			user = User.FromId (userId);
-			if (user == null){
-				Console.WriteLine ("userid={0}", userId);
-				return;
-			}
-			
+
 			// Pics are 73x73, but we will add a border.
 			profilePic = new UIImageView (new RectangleF (10, 10, 73, 73));
 			profilePic.BackgroundColor = UIColor.Clear;
-			
-			profilePic.Image = ImageStore.RequestProfilePicture (-userId, user.PicUrl, this);
 			AddSubview (profilePic);
 			
 			url = UIButton.FromType (UIButtonType.Custom);
@@ -67,9 +71,6 @@ namespace TweetStation
 			url.LineBreakMode = UILineBreakMode.TailTruncation;
 			url.HorizontalAlignment = UIControlContentHorizontalAlignment.Left;
 			url.TitleShadowOffset = new SizeF (0, 1);
-
-			url.SetTitle (user.Url, UIControlState.Normal);
-			url.SetTitle (user.Url, UIControlState.Highlighted);
 			url.SetTitleColor (UIColor.FromRGB (0x32, 0x4f, 0x85), UIControlState.Normal);
 			url.SetTitleColor (UIColor.Red, UIControlState.Highlighted);
 			url.SetTitleShadowColor (UIColor.White, UIControlState.Normal);
@@ -78,13 +79,31 @@ namespace TweetStation
 			url.AddTarget (delegate { if (UrlTapped != null) UrlTapped (); }, UIControlEvent.TouchUpInside);
 
 			AddSubview (url);
-			
+
 			if (discloseButton){
 				var button = UIButton.FromType (UIButtonType.DetailDisclosure);
 				button.Frame = new RectangleF (290, 36, 20, 20);
 				AddSubview (button);
 				button.TouchDown += delegate { Tapped (); };
 			}
+		}
+
+		// Used to update asynchronously our display when we get enough information about the tweet detail
+		public void UpdateFromUserId (long userId)
+		{
+			user = User.FromId (userId);
+			if (user == null){
+				Console.WriteLine ("Could nto find user ID={0}", userId);
+				return;
+			}
+			
+			var pic = ImageStore.RequestProfilePicture (-userId, user.PicUrl, this);
+			if (pic != ImageStore.DefaultImage)
+				profilePic.Image = pic;
+			
+			url.SetTitle (user.Url, UIControlState.Normal);
+			url.SetTitle (user.Url, UIControlState.Highlighted);
+			SetNeedsDisplay ();
 		}
 		
 		public event NSAction PictureTapped;
@@ -109,7 +128,7 @@ namespace TweetStation
 		
 		public override void Draw (RectangleF rect)
 		{
-			// Perhaps we should never instantiate this view if the user is null.
+			// If we have a partialTweet, we do not have this information yet.
 			if (user == null)
 				return;
 			
