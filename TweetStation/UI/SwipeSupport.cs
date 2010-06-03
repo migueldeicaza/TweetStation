@@ -32,7 +32,6 @@ namespace TweetStation
 	{
 		class SwipeDetectingTableView : UITableView {
 			BaseTimelineViewController container;
-			NSIndexPath menuPath;
 			
 			public SwipeDetectingTableView (RectangleF bounds, UITableViewStyle style, BaseTimelineViewController container)
 				: base (bounds, style)
@@ -46,18 +45,7 @@ namespace TweetStation
 				var touch = touches.AnyObject as UITouch;
 				touchStart = touch.LocationInView (this);
 				
-				if (menuPath != null){
-					var path = IndexPathForRowAtPoint (touchStart.Value);
-					
-					// If tapping outside the cell, dismiss the menu, stop processing.
-					if (path.Row != menuPath.Row || path.Section != menuPath.Section){
-						container.CancelMenu ();
-						touchStart = null;
-						menuPath = null;
-						return;
-					}
-				}
-				
+				container.CancelMenu ();
 				base.TouchesBegan (touches, evt);
 			}
 			
@@ -70,7 +58,7 @@ namespace TweetStation
 					var deltaY = Math.Abs (touchStart.Value.Y - currentPos.Y);
 					
 					if (deltaY < 5 && deltaX > 16){
-						menuPath = IndexPathForRowAtPoint (currentPos);
+						var menuPath = IndexPathForRowAtPoint (currentPos);
 						var cell = CellAt (menuPath);
 						
 						container.OnSwipe (menuPath, cell);
