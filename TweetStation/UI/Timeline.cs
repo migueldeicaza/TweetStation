@@ -163,7 +163,7 @@ namespace TweetStation {
 		long? GetTableTweetId (int pos)
 		{
 			var mainSection = Root [0];
-			if (mainSection.Elements.Count > pos){
+			if (mainSection.Elements.Count > pos && pos >= 0){
 				return (mainSection.Elements [pos] as TweetElement).Tweet.Id;
 			} else
 				return null;
