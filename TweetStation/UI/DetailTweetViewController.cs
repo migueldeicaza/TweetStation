@@ -35,6 +35,8 @@ using MonoTouch.CoreGraphics;
 namespace TweetStation
 {
 	public class DetailTweetViewController : DialogViewController {
+		Section main;
+		ShortProfileView shortProfileView;
 		const int PadX = 4;
 		Tweet tweet;
 		static string [] buttons = new string [] { 
@@ -42,46 +44,60 @@ namespace TweetStation
 			Locale.GetText ("Retweet"),
 			Locale.GetText ("Direct") };
 		
-		public DetailTweetViewController (Tweet tweet) : base (UITableViewStyle.Grouped, null, true)
+		public DetailTweetViewController (Tweet partialTweet) : base (UITableViewStyle.Grouped, null, true)
 		{
-			this.tweet = tweet;
+			if (partialTweet.IsSearchResult)
+				Tweet.LoadFullTweet (partialTweet.Id, fullTweet => SetTweet (fullTweet));
+			
 			var handlers = new EventHandler [] { Reply, Retweet, Direct };
 			var profileRect = new RectangleF (PadX, 0, View.Bounds.Width-30-PadX*2, 100);
 			var detailRect = new RectangleF (PadX, 0, View.Bounds.Width-30-PadX*2, 0);
 			 
-			var shortProfileView = new ShortProfileView (profileRect, tweet.UserId, true);
-			shortProfileView.PictureTapped += delegate { PictureViewer.Load (this, tweet.UserId); };
-			shortProfileView.Tapped += LoadFullProfile;
-			shortProfileView.UrlTapped += delegate { WebViewController.OpenUrl (this, User.FromId (tweet.UserId).Url); };
+			shortProfileView = new ShortProfileView (profileRect, partialTweet, true);
 			
-			var main = new Section (shortProfileView){
-				new UIViewElement (null, new DetailTweetView (detailRect, tweet, ContentHandler, this), false) { 
+			main = new Section (shortProfileView){
+				new UIViewElement (null, new DetailTweetView (detailRect, partialTweet, ContentHandler, this), false) { 
 					Flags = UIViewElement.CellFlags.DisableSelection 
 				}
 			};			
-			if (tweet.InReplyToStatus != 0){
-				var in_reply = new ConversationRootElement (Locale.Format ("In reply to: {0}", tweet.InReplyToUserName), tweet);
-			                        
-				main.Add (in_reply);
-			}
 			
 			Section replySection = new Section ();
-			if (tweet.Kind == TweetKind.Direct)
+			if (partialTweet.Kind == TweetKind.Direct)
 				replySection.Add (new StringElement (Locale.GetText ("Direct Reply"), delegate { Direct (this, EventArgs.Empty); }));
 			else 
 				replySection.Add (new UIViewElement (null, new ButtonsView (buttons, handlers), true) {
 					Flags = UIViewElement.CellFlags.DisableSelection | UIViewElement.CellFlags.Transparent
 				});
 			
-			Root = new RootElement (tweet.Screename){
+			Root = new RootElement (partialTweet.Screename){
 				main,
 				replySection,
 				new Section () {
-					TimelineRootElement.MakeTimeline (tweet.Screename, Locale.GetText ("User's timeline"), "http://api.twitter.com/1/statuses/user_timeline.json?skip_user=true&id=" + tweet.UserId, User.FromId (tweet.UserId))
+					TimelineRootElement.MakeTimeline (partialTweet.Screename, Locale.GetText ("User's timeline"), "http://api.twitter.com/1/statuses/user_timeline.json?skip_user=true&screen_name=" + partialTweet.Screename, User.FromId (partialTweet.UserId))
 				}
 			};
+			if (partialTweet.IsSearchResult)
+				return;
+			SetTweet (partialTweet);
 		}
 
+		// Once we have a full tweet, setup the rest of the view.
+		void SetTweet (Tweet fullTweet)
+		{
+			this.tweet = fullTweet;
+			
+			shortProfileView.UpdateFromUserId (tweet.UserId);
+			shortProfileView.PictureTapped += delegate { PictureViewer.Load (this, tweet.UserId); };
+			shortProfileView.Tapped += LoadFullProfile;
+			shortProfileView.UrlTapped += delegate { WebViewController.OpenUrl (this, User.FromId (tweet.UserId).Url); };
+			
+			if (tweet.InReplyToStatus != 0){
+				var in_reply = new ConversationRootElement (Locale.Format ("In reply to: {0}", tweet.InReplyToUserName), tweet);
+			                        
+				main.Add (in_reply);
+			}
+		}
+	
 		//
 		// Invoked by the TweetView when the content is tapped
 		//
@@ -93,11 +109,6 @@ namespace TweetStation
 		void LoadFullProfile ()
 		{
 			ActivateController (new FullProfileView (tweet.UserId));
-		}
-		
-		void DisplayUserTimeline ()
-		{
-			
 		}
 		
 		void Reply (object sender, EventArgs args)

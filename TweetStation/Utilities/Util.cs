@@ -110,7 +110,7 @@ namespace TweetStation
 			
 			if (ts.Ticks < TicksMinute){
 				v = ts.Seconds;
-				if (v == 1)
+				if (v <= 1)
 					return s1;
 				else
 					return v + sn;

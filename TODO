@@ -1,7 +1,3 @@
-* Re-QA when we have more data:
-
-	Make sure that clicking on a search result shows some activity indicator
-
 * Usage Observations
 
 	Swipe menu
@@ -70,6 +66,9 @@
 
 	If the picture has been posted, do not bother trying to post it again
 
+	The search API now has a feature that allows the result to show whether
+	it is a popular tweet;   Include this feature ("100+ recent tweets");
+
 	Remember where the song is after compose, or restart every time?
 
 	Add editing capability to searches to trim down the search list
@@ -101,6 +100,10 @@
 
 	Showing User Pictures
 		Needs a custom image loader for user profiles and urls that we detect as pictures
+
+	Add support to remove a saved search.
+
+	Add support to add a search to the saved searches.
 
 * Wanted
 
