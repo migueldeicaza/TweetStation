@@ -524,7 +524,8 @@ namespace TweetStation
 			if (inited)
 				return;
 			inited = true;
-			Database.Main.CreateTable<Draft> ();
+			lock (Database.Main)
+				Database.Main.CreateTable<Draft> ();
 		}
 		
 		[PrimaryKey]

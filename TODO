@@ -7,8 +7,11 @@
 		Open (for links)
 		Quote
 
-	Shrink links should only be enabled if there is a URL in the
-	text or multiple spaces
+	New detailed tweet view, animates insertion of "Reply-To".
+
+	Rotated web view ends up without the bottom bar
+
+	Probably should not rotate to upside down mode
 
 *  Missing Stuff
 

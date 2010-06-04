@@ -68,17 +68,19 @@ namespace TweetStation
 		{
 			var section = new Section (Locale.GetText ("Accounts"));
 			
-			foreach (var account in Database.Main.Query<TwitterAccount> ("SELECT * from TwitterAccount")){
-				var copy = account;
-				var element = new AccountElement (account);
-				element.Tapped += delegate {
-					DismissModalViewControllerAnimated (true);
-					
-					TwitterAccount.SetDefault (copy);
-					Util.MainAppDelegate.Account = copy;
+			lock (Database.Main){
+				foreach (var account in Database.Main.Query<TwitterAccount> ("SELECT * from TwitterAccount")){
+					var copy = account;
+					var element = new AccountElement (account);
+					element.Tapped += delegate {
+						DismissModalViewControllerAnimated (true);
+						
+						TwitterAccount.SetDefault (copy);
+						Util.MainAppDelegate.Account = copy;
+					};
+					section.Add (element);
 				};
-				section.Add (element);
-			};
+			}
 			var addAccount = new StringElement (Locale.GetText ("Add account"));
 			addAccount.Tapped += delegate {
 				Util.MainAppDelegate.AddAccount (this, delegate {

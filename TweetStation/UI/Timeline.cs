@@ -145,7 +145,7 @@ namespace TweetStation {
 		// that the timeline is continuous
 		//
 		bool continuous;
-		IEnumerable<Element> FetchTweets (int limit, long lastId, int skip)
+		IEnumerable<Element> UnlockedFetchTweets (int limit, long lastId, int skip)
 		{
 			continuous = false;
 			foreach (var tweet in Database.Main.Query<Tweet> (
@@ -172,7 +172,11 @@ namespace TweetStation {
 		public override void ReloadTimeline ()
 		{
 			long? since = null; 
-			var res = Database.Main.Query<Tweet> ("SELECT Id FROM Tweet WHERE LocalAccountId = ? AND Kind = ? ORDER BY Id DESC LIMIT 1", Account.LocalAccountId, kind).FirstOrDefault ();
+			Tweet res;
+			
+			lock (Database.Main)
+				res = Database.Main.Query<Tweet> ("SELECT Id FROM Tweet WHERE LocalAccountId = ? AND Kind = ? ORDER BY Id DESC LIMIT 1", Account.LocalAccountId, kind).FirstOrDefault ();
+			
 			if (res != null){
 				// This should return one overlapping value.
 				since = res.Id - 1;
@@ -183,9 +187,6 @@ namespace TweetStation {
 		
 		void DownloadTweets (int insertPoint, long? since, long? max_id, Element removeOnInsert)
 		{
-			//if (kind != TweetKind.Home)
-			//	return;
-			
 			Account.ReloadTimeline (kind, since, max_id, count => {
 				mainSection.Remove (removeOnInsert);
 				if (count == -1){
@@ -201,7 +202,13 @@ namespace TweetStation {
 					long lastId = GetTableTweetId (insertPoint == 0 ? 0 : insertPoint-1) ?? 0;					
 					
 					continuous = false;
-					int nParsed = mainSection.Insert (insertPoint, UITableViewRowAnimation.None, FetchTweets (count, lastId, insertPoint));
+					int nParsed;
+					
+					Util.ReportTime ("Before Loading tweet from DB");
+					lock (Database.Main)
+						nParsed = mainSection.Insert (insertPoint, UITableViewRowAnimation.None, UnlockedFetchTweets (count, lastId, insertPoint));
+					Util.ReportTime ("Time spent loading tweets");
+					
 					NavigationController.TabBarItem.BadgeValue = (nParsed > 1) ? nParsed.ToString () : null;
 
 					if (!continuous){
@@ -228,9 +235,10 @@ namespace TweetStation {
 		
 		protected override void ResetState ()
 		{
-			mainSection = new Section () {
-				FetchTweets (200, 0, 0)
-			};
+			lock (Database.Main)
+				mainSection = new Section () {
+					UnlockedFetchTweets (200, 0, 0)
+				};
 
 			Root = new RootElement (timelineTitle) {
 				UnevenRows = true

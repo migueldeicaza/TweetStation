@@ -66,7 +66,8 @@ namespace TweetStation
 				Root = Util.MakeError (diagMsg);
 				return;
 			}
-			user = User.LoadUsers (new MemoryStream (res)).FirstOrDefault ();
+			lock (Database.Main)
+				user = User.UnlockedLoadUsers (new MemoryStream (res)).FirstOrDefault ();
 			if (user == null)
 				Root = Util.MakeError (diagMsg);
 			else

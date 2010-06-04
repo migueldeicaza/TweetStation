@@ -203,7 +203,9 @@ namespace TweetStation
 					Util.MainAppDelegate.FavoriteChanged (tweet);
 					TwitterAccount.CurrentAccount.Post (String.Format ("http://api.twitter.com/1/favorites/{0}/{1}.json", tweet.Favorited ? "create" : "destroy", tweet.Id),"");
 					UpdateButtonImage (tweet);
-					tweet.Replace (Database.Main);
+					
+					lock (Database.Main)
+						tweet.Replace (Database.Main);
 				};
 			
 				AddSubview (buttonView);

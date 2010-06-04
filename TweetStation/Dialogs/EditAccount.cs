@@ -92,10 +92,12 @@ namespace TweetStation
 						account.Username = info.Login;
 						//account.Password = info.Password;
 						
-						if (newAccount)
-							Database.Main.Insert (account);
-						else
-							Database.Main.Update (account);
+						lock (Database.Main){
+							if (newAccount)
+								Database.Main.Insert (account);
+							else
+								Database.Main.Update (account);
+						}
 						
 						account.SetDefaultAccount ();
 						DismissModalViewControllerAnimated (true);
