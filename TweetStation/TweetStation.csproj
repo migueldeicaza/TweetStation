@@ -179,6 +179,8 @@
     <Content Include="IconSpotlight.png" />
     <Content Include="Audio\chicken1.caf" />
     <Content Include="Audio\chicken2.caf" />
+    <Content Include="Images\back.png" />
+    <Content Include="Images\forward.png" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\MonoTouch.Dialog\MonoTouch.Dialog\MonoTouch.Dialog.csproj">

@@ -76,8 +76,6 @@ namespace TweetStation
 			url.SetTitleShadowColor (UIColor.White, UIControlState.Normal);
 			url.Frame = new RectangleF (TextX, 70, rect.Width-TextX, urlSize);
 			
-			url.AddTarget (delegate { if (UrlTapped != null) UrlTapped (); }, UIControlEvent.TouchUpInside);
-
 			AddSubview (url);
 
 			if (discloseButton){
@@ -101,6 +99,7 @@ namespace TweetStation
 			if (pic != ImageStore.DefaultImage)
 				profilePic.Image = pic;
 			
+			url.AddTarget (delegate { if (UrlTapped != null) UrlTapped (); }, UIControlEvent.TouchUpInside);
 			url.SetTitle (user.Url, UIControlState.Normal);
 			url.SetTitle (user.Url, UIControlState.Highlighted);
 			SetNeedsDisplay ();
