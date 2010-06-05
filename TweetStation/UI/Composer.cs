@@ -500,11 +500,16 @@ namespace TweetStation
 		
 		public void NewTweet (UIViewController parent)
 		{
-			ResetComposer (Locale.GetText ("New Tweet"), "");
+			NewTweet (parent, "");
+		}
+		
+		public void NewTweet (UIViewController parent, string initialText)
+		{
+			ResetComposer (Locale.GetText ("New Tweet"), initialText);
 			
 			Activate (parent);
 		}
-		
+
 		public void ReplyTo (UIViewController parent, Tweet source, bool replyAll)
 		{
 			ResetComposer (Locale.GetText ("Reply Tweet"), replyAll ? source.GetRecipients () : '@' + source.Screename + ' ');
@@ -514,6 +519,15 @@ namespace TweetStation
 			Activate (parent);
 		}
 		
+		public void ReplyTo (UIViewController parent, Tweet source, string recipient)
+		{
+			ResetComposer (Locale.GetText ("Reply Tweet"), recipient	);
+			InReplyTo = source.Id;
+			directRecipient = null;
+			
+			Activate (parent);
+		}
+
 		public void Quote (UIViewController parent, Tweet source)
 		{
 			ResetComposer (Locale.GetText ("Quote"), "RT @" + source.Screename + " " + source.Text);
