@@ -34,6 +34,7 @@ using System.IO;
 using System.Net;
 using MonoTouch.AVFoundation;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace TweetStation
 {
@@ -335,6 +336,15 @@ namespace TweetStation
 			content.AppendFormat ("&lat={0}&long={1}", location.Coordinate.Latitude, location.Coordinate.Longitude);
 		}
 		
+		UIImage Scale (UIImage image, SizeF size)
+		{
+			UIGraphics.BeginImageContext (size);
+			image.Draw (new RectangleF (new PointF (0, 0), size));
+			var ret = UIGraphics.GetImageFromCurrentImageContext ();
+			UIGraphics.EndImageContext ();
+			return ret;
+		}
+		
 		void PostCallback (object sender, EventArgs a)
 		{
 			sendItem.Enabled = false;
@@ -355,7 +365,7 @@ namespace TweetStation
 				// Save a copy of the original picture
 				if (!composerView.FromLibrary){
 					img.SaveToPhotosAlbum (delegate {
-						// Ignore
+						// ignore errors
 					});
 				}
 				
@@ -372,19 +382,25 @@ namespace TweetStation
 					maxWidth = size.Width;
 					break;
 				}
+
 				
-				if (size.Width > maxWidth || size.Height > maxWidth)
-					img = img.Scale (new SizeF (maxWidth, maxWidth*size.Height/size.Width));
-				
-				var jpeg = img.AsJPEG ();
-				Stream stream;
-				unsafe { stream = new UnmanagedMemoryStream ((byte*) jpeg.Bytes, jpeg.Length); }
-				
-				hud = new LoadingHUDView (Locale.GetText ("Uploading\nImage"), "");
+				hud = new LoadingHUDView (Locale.GetText ("Image"), "Compressing");
 				View.AddSubview (hud);
 				hud.StartAnimating ();
 				
-				TwitterAccount.CurrentAccount.UploadPicture (stream, PicUploadComplete);
+				ThreadPool.QueueUserWorkItem (delegate {
+					if (size.Width > maxWidth || size.Height > maxWidth)
+						img = Scale (img, new SizeF (maxWidth, maxWidth*size.Height/size.Width));
+					var jpeg = img.AsJPEG ();
+				
+					Stream stream;
+					unsafe { stream = new UnmanagedMemoryStream ((byte*) jpeg.Bytes, jpeg.Length); }
+					
+					BeginInvokeOnMainThread (delegate {
+						hud.Message = "Uploading";
+						TwitterAccount.CurrentAccount.UploadPicture (stream, PicUploadComplete);
+					});
+				});
 			} else {
 				//NSUrl movieUrl = pictureDict [UIImagePickerController.MediaURL] as NSUrl;
 				
