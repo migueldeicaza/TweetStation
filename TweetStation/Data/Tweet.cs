@@ -495,6 +495,7 @@ namespace TweetStation
 				}
 				recipients.Add (res.ToString ());
 			}
+			recipients.Remove (TwitterAccount.CurrentAccount.Username);
 			return "@" + String.Join (" @", recipients.ToArray ()) + " ";
 		}
 		
