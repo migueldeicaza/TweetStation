@@ -69,6 +69,9 @@ namespace TweetStation
 					Flags = UIViewElement.CellFlags.DisableSelection | UIViewElement.CellFlags.Transparent
 				});
 			
+			if (!partialTweet.IsSearchResult)
+				SetTweet (partialTweet);
+			
 			Root = new RootElement (partialTweet.Screename){
 				main,
 				replySection,
@@ -76,9 +79,6 @@ namespace TweetStation
 					TimelineRootElement.MakeTimeline (partialTweet.Screename, Locale.GetText ("User's timeline"), "http://api.twitter.com/1/statuses/user_timeline.json?skip_user=true&screen_name=" + partialTweet.Screename, User.FromId (partialTweet.UserId))
 				}
 			};
-			if (partialTweet.IsSearchResult)
-				return;
-			SetTweet (partialTweet);
 		}
 
 		// Once we have a full tweet, setup the rest of the view.
