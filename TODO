@@ -14,6 +14,10 @@
 
 	Fix the HUD display rendering
 
+	Always load the cached searches, and update the contents
+	from the server results instead of the timeout+update that
+	I have now
+
 *  Missing Stuff
 
 	Refresh user pictures when they change.  
@@ -23,7 +27,6 @@
 		geo info, and pic info?
 		Replace foo -> bar in retweet with a bottom "Retweeted by"
 
-	Chicken noises for reload
 	Turning a search into a saved search
 	Lists:
 		Instead of managing lists, be able to "add user to list" in the UI in the profile view.
@@ -73,8 +76,6 @@
 	The search API now has a feature that allows the result to show whether
 	it is a popular tweet;   Include this feature ("100+ recent tweets");
 
-	Remember where the song is after compose, or restart every time?
-
 	Add editing capability to searches to trim down the search list
 
 	Nearby tweets on a map
@@ -86,13 +87,13 @@
 	Themed cell renderers
 
 	Retweet rendering style
+		Support Foo -> Bar at top (now)
+		Support [Retweeted by Foo] at bottom
 
 	Direct messages style (grouped by recipient, by time)
 
 	Direct Messages special view
 		Grouped per user, blend conversation together
-
-	Pagination support for StreamedUserViewController and StreamedTimelineViewController
 
 	Cell "themes"
 
@@ -111,6 +112,9 @@
 
 	Show attachments, this way we can calculate the actual number
 	of characters left before we post
+
+	Add "Attachment" rendering to support showing various bits of information
+	pictures, forsquare, amazon links, 
 
 * Wanted
 
