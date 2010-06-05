@@ -9,6 +9,11 @@
 
 	Probably should not rotate to upside down mode
 
+	Perhaps compress when picture is taken?
+		Show "Progress" at that point
+
+	Fix the HUD display rendering
+
 *  Missing Stuff
 
 	Refresh user pictures when they change.  
@@ -103,6 +108,9 @@
 	Add support to remove a saved search.
 
 	Add support to add a search to the saved searches.
+
+	Show attachments, this way we can calculate the actual number
+	of characters left before we post
 
 * Wanted
 

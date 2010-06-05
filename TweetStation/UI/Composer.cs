@@ -383,7 +383,6 @@ namespace TweetStation
 					break;
 				}
 
-				
 				hud = new LoadingHUDView (Locale.GetText ("Image"), "Compressing");
 				View.AddSubview (hud);
 				hud.StartAnimating ();
