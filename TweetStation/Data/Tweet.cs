@@ -490,7 +490,7 @@ namespace TweetStation
 					continue;
 				
 				var res = new StringBuilder ();
-				for (i++; i < text.Length && Char.IsLetterOrDigit (text [i]); i++){
+				for (i++; i < text.Length && Char.IsLetterOrDigit (text [i]) || text [i] == '_'; i++){
 					res.Append (text [i]);
 				}
 				recipients.Add (res.ToString ());

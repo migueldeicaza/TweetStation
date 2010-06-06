@@ -45,7 +45,7 @@ namespace TweetStation
 			toolbar = new UIToolbar ();
 			topBar = new UIToolbar ();
 			
-			title = new UILabel (new RectangleF (0, 0, 80, 30)){
+			title = new UILabel (new RectangleF (10, 0, 80, 30)){
 				BackgroundColor = UIColor.Clear,
 				AdjustsFontSizeToFitWidth = true,
 				Font = UIFont.BoldSystemFontOfSize (22),
@@ -72,29 +72,36 @@ namespace TweetStation
 			View.AddSubview (toolbar);
 		}
 
-		public void SetupWeb ()
+		void UpdateNavButtons ()
+		{
+			backButton.Enabled = WebView.CanGoBack;
+			forwardButton.Enabled = WebView.CanGoForward;
+		}
+		
+		public void SetupWeb (string initialTitle)
 		{
 			WebView = new UIWebView (){
 				ScalesPageToFit = true,
 				MultipleTouchEnabled = true,
-				AutoresizingMask = UIViewAutoresizing.FlexibleHeight|UIViewAutoresizing.FlexibleWidth
+				AutoresizingMask = UIViewAutoresizing.FlexibleHeight|UIViewAutoresizing.FlexibleWidth,
 			};
 			WebView.LoadStarted += delegate { 
 				stopButton.Enabled = true;
 				refreshButton.Enabled = false;
-				backButton.Enabled = true;
+				UpdateNavButtons ();
+				
 				Util.PushNetworkActive (); 
 			};
 			WebView.LoadFinished += delegate {
 				stopButton.Enabled = false;
 				refreshButton.Enabled = true;
 				Util.PopNetworkActive (); 
-				backButton.Enabled = WebView.CanGoBack;
-				forwardButton.Enabled = WebView.CanGoForward;
+				UpdateNavButtons ();
 				
 				title.Text = WebView.EvaluateJavascript ("document.title");
 			};
 			
+			title.Text = initialTitle;
 			View.AddSubview (WebView);
 			backButton.Enabled = false;
 			forwardButton.Enabled = false;
@@ -102,7 +109,7 @@ namespace TweetStation
 		
 		public override bool ShouldAutorotateToInterfaceOrientation (UIInterfaceOrientation toInterfaceOrientation)
 		{
-			return true;
+			return toInterfaceOrientation != UIInterfaceOrientation.PortraitUpsideDown;
 		}
 		
 		public override void ViewDidDisappear (bool animated)
@@ -117,29 +124,33 @@ namespace TweetStation
 
 		void LayoutViews ()
 		{
+			var sbounds = View.Bounds;
+			int top = (InterfaceOrientation == UIInterfaceOrientation.Portrait) ? -44 : 0;
+			
+			topBar.Frame = new RectangleF (0, top, sbounds.Width, 44);
+			toolbar.Frame =  new RectangleF (0, sbounds.Height-44, sbounds.Width, 44);
+			WebView.Frame = new RectangleF (0, top+44, sbounds.Width, sbounds.Height-88);
+			
+			title.Frame = new RectangleF (0, 0, sbounds.Width-80, 38);
 		}
 		
 		public override void ViewWillAppear (bool animated)
 		{
 			base.ViewWillAppear (animated);
+			LayoutViews ();
 		}
 
 		public override void DidRotate (UIInterfaceOrientation fromInterfaceOrientation)
 		{
 			base.DidRotate (fromInterfaceOrientation);
-			var sbounds = View.Bounds;
-
-			toolbar.Frame =  new RectangleF (0, sbounds.Height-44, sbounds.Width, 44);
-			WebView.Frame = new RectangleF (0, 44, sbounds.Width, sbounds.Height-88);
-			topBar.Frame = new RectangleF (0, 0, sbounds.Width, 44);
-			title.Frame = new RectangleF (0, 0, sbounds.Width-80, 38);
+			LayoutViews ();
 		}
 		
 		public static void OpenUrl (DialogViewController parent, string url)
 		{
 			UIView.BeginAnimations ("foo");
 			Main.HidesBottomBarWhenPushed = true;
-			Main.SetupWeb ();
+			Main.SetupWeb (url);
 			Main.WebView.LoadRequest (new NSUrlRequest (new NSUrl (url)));
 			
 			parent.PresentModalViewController (Main, true);
@@ -151,7 +162,7 @@ namespace TweetStation
 		{
 			UIView.BeginAnimations ("foo");
 			Main.HidesBottomBarWhenPushed = true;
-			Main.SetupWeb ();
+			Main.SetupWeb ("");
 			
 			Main.WebView.LoadHtmlString (htmlString, baseUrl);
 			parent.ActivateController (Main);

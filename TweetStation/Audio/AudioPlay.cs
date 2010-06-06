@@ -38,6 +38,7 @@ namespace TweetStation
 		static AudioPlay ()
 		{
 			AudioSession.Initialize ();
+			AudioSession.Category = AudioSessionCategory.AmbientSound;
 		}
 		
 		public AudioPlay (string file)
