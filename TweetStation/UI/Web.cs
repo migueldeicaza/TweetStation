@@ -125,7 +125,7 @@ namespace TweetStation
 		void LayoutViews ()
 		{
 			var sbounds = View.Bounds;
-			int top = (InterfaceOrientation == UIInterfaceOrientation.Portrait) ? -44 : 0;
+			int top = (InterfaceOrientation == UIInterfaceOrientation.Portrait) ? 0 : -44;
 			
 			topBar.Frame = new RectangleF (0, top, sbounds.Width, 44);
 			toolbar.Frame =  new RectangleF (0, sbounds.Height-44, sbounds.Width, 44);
