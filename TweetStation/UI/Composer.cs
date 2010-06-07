@@ -387,9 +387,9 @@ namespace TweetStation
 				View.AddSubview (hud);
 				hud.StartAnimating ();
 				
+				if (size.Width > maxWidth || size.Height > maxWidth)
+					img = Scale (img, new SizeF (maxWidth, maxWidth*size.Height/size.Width));
 				ThreadPool.QueueUserWorkItem (delegate {
-					if (size.Width > maxWidth || size.Height > maxWidth)
-						img = Scale (img, new SizeF (maxWidth, maxWidth*size.Height/size.Width));
 					var jpeg = img.AsJPEG ();
 				
 					Stream stream;

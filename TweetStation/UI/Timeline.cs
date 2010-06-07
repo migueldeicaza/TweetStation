@@ -164,9 +164,14 @@ namespace TweetStation {
 		{
 			var mainSection = Root [0];
 			if (mainSection.Elements.Count > pos && pos >= 0){
-				return (mainSection.Elements [pos] as TweetElement).Tweet.Id;
-			} else
-				return null;
+				foreach (var element in mainSection.Elements){
+					var te = element as TweetElement;
+					if (te == null)
+						continue;
+					return te.Tweet.Id;
+				}
+			} 
+			return null;
 		}
 		
 		public override void ReloadTimeline ()

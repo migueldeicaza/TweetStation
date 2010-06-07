@@ -1,5 +1,13 @@
 * Usage Observations
 
+	Incorrect rendering of the Image Compress dialog
+	neds to save draft
+	needs to remembr last position (after phone call, everything is cancelled)
+
+	(http://foo) is not highlighted
+
+	multiline segments might not carry the proper data (large urls) on tap
+
 	Swipe menu
 		Retweet
 		Reply

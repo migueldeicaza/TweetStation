@@ -34,11 +34,21 @@ namespace TweetStation
 		AVAudioPlayer player;
 		double lastTime;
 		NSTimer timer = null;
+		static bool inited;
+		
+		public static void InitAudio ()
+		{
+			if (inited)
+				return;
+			inited = true;
+			AudioSession.Initialize ();
+			AudioSession.Category = AudioSessionCategory.AmbientSound;
+			AudioSession.OverrideCategoryMixWithOthers = true;
+		}
 		
 		static AudioPlay ()
 		{
-			AudioSession.Initialize ();
-			AudioSession.Category = AudioSessionCategory.AmbientSound;
+			InitAudio ();
 		}
 		
 		public AudioPlay (string file)
