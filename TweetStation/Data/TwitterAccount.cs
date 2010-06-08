@@ -343,21 +343,19 @@ namespace TweetStation
 			using (var rs = req.GetRequestStream ())
 				Copy (upload, rs);
 
-			ThreadPool.QueueUserWorkItem (delegate {
-				string urlToPic = null;
-				try {
-					var response = (HttpWebResponse) req.GetResponse  ();
-					var stream = response.GetResponseStream ();
-					var doc = XDocument.Load (stream);
-					if (doc.Element ("rsp").Attribute ("stat").Value == "ok"){
-						urlToPic = doc.Element ("rsp").Element ("mediaurl").Value;
-					}
-					stream.Close ();
-				} catch (Exception e){
-					Console.WriteLine (e);
+			string urlToPic = null;
+			try {
+				var response = (HttpWebResponse) req.GetResponse  ();
+				var stream = response.GetResponseStream ();
+				var doc = XDocument.Load (stream);
+				if (doc.Element ("rsp").Attribute ("stat").Value == "ok"){
+					urlToPic = doc.Element ("rsp").Element ("mediaurl").Value;
 				}
-				invoker.BeginInvokeOnMainThread (delegate { completed (urlToPic); });
-			});
+				stream.Close ();
+			} catch (Exception e){
+				Console.WriteLine (e);
+			}
+			invoker.BeginInvokeOnMainThread (delegate { completed (urlToPic); });
 		}
 		
 		// 
