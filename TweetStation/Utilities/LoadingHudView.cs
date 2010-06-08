@@ -160,7 +160,7 @@ namespace TweetStation {
 			float midx = rrect.Left + (rrect.Width)/2;
 			float maxx = rrect.Right;
 			float miny = rrect.Top;
-			float midy = (rrect.Y+rrect.Size.Width)/2;
+			float midy = rrect.Y+rrect.Size.Width/2;
 			float maxy = rrect.Bottom;
 	
 			context.MoveTo(minx, midy);
