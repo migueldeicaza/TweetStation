@@ -19,6 +19,7 @@
 // THE SOFTWARE.
 
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -209,12 +210,19 @@ namespace TweetStation
 		}
 		
 		static long lastTime;
+		[Conditional ("TRACE")]
 		public static void ReportTime (string s)
 		{
 			long now = DateTime.UtcNow.Ticks;
 			
 			Console.WriteLine ("[{0}] ticks since last invoke: {1}", s, now-lastTime);
 			lastTime = now;
+		}
+		
+		[Conditional ("TRACE")]
+		public static void Log (string format, params object [] args)
+		{
+			Console.WriteLine (String.Format (format, args));
 		}
 		
 		static UIActionSheet sheet;

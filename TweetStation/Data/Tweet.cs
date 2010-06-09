@@ -230,7 +230,7 @@ namespace TweetStation
 				db.Execute ("COMMIT");
 			}
 			var end = DateTime.UtcNow;
-			Console.WriteLine ("With transactions: Spent {0} ticks in inserting {1} elements", (end-start).Ticks, count);
+			Util.Log ("With transactions: Spent {0} ticks in inserting {1} elements", (end-start).Ticks, count);
 			return count;
 		}
 
@@ -301,7 +301,7 @@ namespace TweetStation
 				}
 			}
 			var end = DateTime.UtcNow;		
-			Console.WriteLine ("Parsing time for tweet stream: {0} for {1} tweets", end-start, tweets.Count);
+			Util.Log ("Parsing time for tweet stream: {0} for {1} tweets", end-start, tweets.Count);
 		}
 
 		/// <summary>
@@ -439,8 +439,6 @@ namespace TweetStation
 				tweet.RetweeterId = user.Id;
 				tweet.Retweeter = user.Screenname;
 				tweet.RetweeterPicUrl = user.PicUrl;
-				if (tweet.RetweeterPicUrl == null)
-					Console.WriteLine ("TWEFF");
 			} else {
 				tweet.UserId = user.Id;
 				tweet.Screename = user.Screenname;

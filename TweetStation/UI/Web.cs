@@ -45,7 +45,7 @@ namespace TweetStation
 			toolbar = new UIToolbar ();
 			topBar = new UIToolbar ();
 			
-			title = new UILabel (new RectangleF (10, 0, 80, 30)){
+			title = new UILabel (new RectangleF (0, 0, 80, 30)){
 				BackgroundColor = UIColor.Clear,
 				AdjustsFontSizeToFitWidth = true,
 				Font = UIFont.BoldSystemFontOfSize (22),
@@ -56,6 +56,7 @@ namespace TweetStation
 			};
 			
 			topBar.Items = new UIBarButtonItem []  {
+				fixedSpace,
 				new UIBarButtonItem (title),
 				flexibleSpace,
 				new UIBarButtonItem (Locale.GetText ("Close"), UIBarButtonItemStyle.Bordered, (o, e) => { DismissModalViewControllerAnimated (true);} )

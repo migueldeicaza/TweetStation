@@ -293,7 +293,6 @@ namespace TweetStation
 
 		public override void Draw (RectangleF rect)
 		{
-			Console.WriteLine (rect);
 			if (borderAt < 1)
 				return;
 				

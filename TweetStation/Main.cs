@@ -216,8 +216,13 @@ namespace TweetStation
 			if (parent == null){
 				loginRoot = new UINavigationController (loginDialog);
 				window.AddSubview (loginRoot.View);
-			} else
+			} else {
+				loginDialog.NavigationItem.RightBarButtonItem = 
+					new UIBarButtonItem (Locale.GetText ("Close"),
+                                         UIBarButtonItemStyle.Plain, 
+					                     delegate { loginDialog.DismissModalViewControllerAnimated (true); });
 				parent.ActivateController (loginDialog);
+			}
 		}
 		
 		void StartupAfterAuthorization (OAuthAuthorizer oauth)
