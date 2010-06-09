@@ -152,7 +152,8 @@ namespace TweetStation
 		
 		public override void PopulateSearch (Section entries)
 		{
-			entries.Add (from x in Database.Main.Query<User> ("SELECT * from User ORDER BY Screenname")
+			lock (Database.Main)
+				entries.Add (from x in Database.Main.Query<User> ("SELECT * from User ORDER BY Screenname")
 				             select (Element) new UserElement (x));
 		}
 		

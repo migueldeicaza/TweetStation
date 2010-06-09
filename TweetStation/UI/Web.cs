@@ -31,45 +31,85 @@ namespace TweetStation
 	public class WebViewController : UIViewController {
 		static WebViewController Main = new WebViewController ();
 		
+		UIToolbar topBar;
 		UIToolbar toolbar;
-		UIBarButtonItem [] items;
+		UIBarButtonItem backButton, forwardButton, stopButton, refreshButton;
+		UILabel title;
 		protected UIWebView WebView;
 
 		protected WebViewController ()
 		{
-			toolbar = new UIToolbar () {
-				AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleBottomMargin
+			var fixedSpace = new UIBarButtonItem (UIBarButtonSystemItem.FixedSpace, null);
+			var flexibleSpace = new UIBarButtonItem (UIBarButtonSystemItem.FlexibleSpace, null);
+
+			toolbar = new UIToolbar ();
+			topBar = new UIToolbar ();
+			
+			title = new UILabel (new RectangleF (10, 0, 80, 30)){
+				BackgroundColor = UIColor.Clear,
+				AdjustsFontSizeToFitWidth = true,
+				Font = UIFont.BoldSystemFontOfSize (22),
+				MinimumFontSize = 14,
+				TextColor = UIColor.White,
+				ShadowColor = UIColor.FromRGB (64, 74, 87),
+				ShadowOffset = new SizeF (0, -1)
 			};
 			
-			items = new UIBarButtonItem [] {
-				new UIBarButtonItem (Locale.GetText ("Back"), UIBarButtonItemStyle.Bordered, (o, e) => { WebView.GoBack (); }),
-				new UIBarButtonItem (Locale.GetText ("Forward"), UIBarButtonItemStyle.Bordered, (o, e) => { WebView.GoForward (); }),
-				new UIBarButtonItem (UIBarButtonSystemItem.FlexibleSpace, null),
-				new UIBarButtonItem (UIBarButtonSystemItem.Refresh, (o, e) => { WebView.Reload (); }),
-				new UIBarButtonItem (UIBarButtonSystemItem.Stop, (o, e) => { WebView.StopLoading (); })
+			topBar.Items = new UIBarButtonItem []  {
+				new UIBarButtonItem (title),
+				flexibleSpace,
+				new UIBarButtonItem (Locale.GetText ("Close"), UIBarButtonItemStyle.Bordered, (o, e) => { DismissModalViewControllerAnimated (true);} )
 			};
-			toolbar.Items = items;
 			
+			backButton = new UIBarButtonItem (UIImage.FromFile ("Images/back.png"), UIBarButtonItemStyle.Plain, (o, e) => { WebView.GoBack (); });
+			forwardButton = new UIBarButtonItem (UIImage.FromFile ("Images/forward.png"), UIBarButtonItemStyle.Plain, (o, e) => { WebView.GoForward (); });
+			refreshButton = new UIBarButtonItem (UIBarButtonSystemItem.Refresh, (o, e) => { WebView.Reload (); });
+			stopButton = new UIBarButtonItem (UIBarButtonSystemItem.Stop, (o, e) => { WebView.StopLoading (); });
+
+			toolbar.Items = new UIBarButtonItem [] { backButton,	fixedSpace, forwardButton, flexibleSpace, stopButton, refreshButton };
+
+			View.AddSubview (topBar);
 			View.AddSubview (toolbar);
 		}
 
-		public void SetupWeb ()
+		void UpdateNavButtons ()
+		{
+			backButton.Enabled = WebView.CanGoBack;
+			forwardButton.Enabled = WebView.CanGoForward;
+		}
+		
+		public void SetupWeb (string initialTitle)
 		{
 			WebView = new UIWebView (){
 				ScalesPageToFit = true,
 				MultipleTouchEnabled = true,
-				AutoresizingMask = UIViewAutoresizing.FlexibleHeight|UIViewAutoresizing.FlexibleWidth
+				AutoresizingMask = UIViewAutoresizing.FlexibleHeight|UIViewAutoresizing.FlexibleWidth,
 			};
-			WebView.LoadStarted += delegate { Util.PushNetworkActive (); };
-			WebView.LoadFinished += delegate { Util.PopNetworkActive (); };
+			WebView.LoadStarted += delegate { 
+				stopButton.Enabled = true;
+				refreshButton.Enabled = false;
+				UpdateNavButtons ();
+				
+				Util.PushNetworkActive (); 
+			};
+			WebView.LoadFinished += delegate {
+				stopButton.Enabled = false;
+				refreshButton.Enabled = true;
+				Util.PopNetworkActive (); 
+				UpdateNavButtons ();
+				
+				title.Text = WebView.EvaluateJavascript ("document.title");
+			};
 			
-			//webView.SizeToFit ();
+			title.Text = initialTitle;
 			View.AddSubview (WebView);
+			backButton.Enabled = false;
+			forwardButton.Enabled = false;
 		}
 		
 		public override bool ShouldAutorotateToInterfaceOrientation (UIInterfaceOrientation toInterfaceOrientation)
 		{
-			return true;
+			return toInterfaceOrientation != UIInterfaceOrientation.PortraitUpsideDown;
 		}
 		
 		public override void ViewDidDisappear (bool animated)
@@ -81,22 +121,39 @@ namespace TweetStation
 				WebView = null;
 			}
 		}
+
+		void LayoutViews ()
+		{
+			var sbounds = View.Bounds;
+			int top = (InterfaceOrientation == UIInterfaceOrientation.Portrait) ? 0 : -44;
+			
+			topBar.Frame = new RectangleF (0, top, sbounds.Width, 44);
+			toolbar.Frame =  new RectangleF (0, sbounds.Height-44, sbounds.Width, 44);
+			WebView.Frame = new RectangleF (0, top+44, sbounds.Width, sbounds.Height-88);
+			
+			title.Frame = new RectangleF (0, 0, sbounds.Width-80, 38);
+		}
 		
 		public override void ViewWillAppear (bool animated)
 		{
 			base.ViewWillAppear (animated);
-			toolbar.Frame =  new RectangleF (0, View.Frame.Height-44, View.Frame.Width, 44);
-			WebView.Frame = new RectangleF (0, 0, View.Frame.Width, View.Frame.Height-44);
+			LayoutViews ();
+		}
+
+		public override void DidRotate (UIInterfaceOrientation fromInterfaceOrientation)
+		{
+			base.DidRotate (fromInterfaceOrientation);
+			LayoutViews ();
 		}
 		
 		public static void OpenUrl (DialogViewController parent, string url)
 		{
 			UIView.BeginAnimations ("foo");
 			Main.HidesBottomBarWhenPushed = true;
-			Main.SetupWeb ();
+			Main.SetupWeb (url);
 			Main.WebView.LoadRequest (new NSUrlRequest (new NSUrl (url)));
 			
-			parent.ActivateController (Main);
+			parent.PresentModalViewController (Main, true);
 
 			UIView.CommitAnimations ();
 		}
@@ -105,7 +162,7 @@ namespace TweetStation
 		{
 			UIView.BeginAnimations ("foo");
 			Main.HidesBottomBarWhenPushed = true;
-			Main.SetupWeb ();
+			Main.SetupWeb ("");
 			
 			Main.WebView.LoadHtmlString (htmlString, baseUrl);
 			parent.ActivateController (Main);

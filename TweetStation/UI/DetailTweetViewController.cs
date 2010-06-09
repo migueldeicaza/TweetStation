@@ -56,7 +56,7 @@ namespace TweetStation
 			shortProfileView = new ShortProfileView (profileRect, partialTweet, true);
 			
 			main = new Section (shortProfileView){
-				new UIViewElement (null, new DetailTweetView (detailRect, partialTweet, ContentHandler, this), false) { 
+				new UIViewElement (null, new DetailTweetView (detailRect, partialTweet, TapHandler, TapAndHoldHandler, this), false) { 
 					Flags = UIViewElement.CellFlags.DisableSelection 
 				}
 			};			
@@ -69,6 +69,9 @@ namespace TweetStation
 					Flags = UIViewElement.CellFlags.DisableSelection | UIViewElement.CellFlags.Transparent
 				});
 			
+			if (!partialTweet.IsSearchResult)
+				SetTweet (partialTweet);
+			
 			Root = new RootElement (partialTweet.Screename){
 				main,
 				replySection,
@@ -76,9 +79,6 @@ namespace TweetStation
 					TimelineRootElement.MakeTimeline (partialTweet.Screename, Locale.GetText ("User's timeline"), "http://api.twitter.com/1/statuses/user_timeline.json?skip_user=true&screen_name=" + partialTweet.Screename, User.FromId (partialTweet.UserId))
 				}
 			};
-			if (partialTweet.IsSearchResult)
-				return;
-			SetTweet (partialTweet);
 		}
 
 		// Once we have a full tweet, setup the rest of the view.
@@ -101,9 +101,75 @@ namespace TweetStation
 		//
 		// Invoked by the TweetView when the content is tapped
 		//
-		void ContentHandler (string data)
+		void TapHandler (string data)
 		{
 			Util.MainAppDelegate.Open (this, data);
+		}
+		
+		void TapAndHoldHandler (string data)
+		{
+			UIActionSheet sheet;
+			
+			if (data.StartsWith ("http://")){
+				sheet = Util.GetSheet (data);
+
+				sheet.AddButton (Locale.GetText ("Open"));
+				sheet.AddButton (Locale.GetText ("Open in Safari"));
+				sheet.AddButton (Locale.GetText ("Copy"));
+				sheet.AddButton (Locale.GetText ("Cancel"));
+				sheet.CancelButtonIndex = 3;
+				
+				sheet.Clicked += delegate(object sender, UIButtonEventArgs e) {
+					if (e.ButtonIndex == 0)
+						Util.MainAppDelegate.Open (this, data);
+					else if (e.ButtonIndex == 1)
+						UIApplication.SharedApplication.OpenUrl (new NSUrl (data));
+					else if (e.ButtonIndex == 2)
+						UIPasteboard.General.SetValue (new NSString (data), "public.utf8-plain-text");
+				};
+			} else if (data [0] == '@'){
+				sheet = Util.GetSheet (data);
+				sheet.AddButton (Locale.GetText ("Reply"));
+				sheet.AddButton (Locale.GetText ("Private Reply"));
+				sheet.AddButton (Locale.GetText ("Open profile"));
+				sheet.AddButton (Locale.GetText ("Search mentions"));
+				sheet.AddButton (Locale.GetText ("Cancel"));
+				sheet.CancelButtonIndex = 4;
+				
+				sheet.Clicked += delegate(object sender, UIButtonEventArgs e) {
+					switch (e.ButtonIndex){
+					case 0:
+						Composer.Main.ReplyTo (this, tweet, data);
+						break;
+					case 1:
+						Composer.Main.Direct (this, data.Substring (1));
+						break;
+					case 2:
+						Util.MainAppDelegate.Open (this, data);
+						break;
+					case 3:
+						ActivateController (new SearchViewController (data) { Account = TwitterAccount.CurrentAccount });
+						break;
+					}
+				};
+			} else if (data [0] == '#'){
+				sheet = Util.GetSheet (data);
+				sheet.AddButton (Locale.GetText ("Search mentions"));
+				sheet.AddButton (Locale.GetText ("Post with topic"));
+				sheet.AddButton (Locale.GetText ("Cancel"));
+				sheet.CancelButtonIndex = 2;
+				
+				sheet.Clicked += delegate(object sender, UIButtonEventArgs e) {
+					if (e.ButtonIndex == 0)
+						ActivateController (new SearchViewController (data) { Account = TwitterAccount.CurrentAccount });
+					else if (e.ButtonIndex == 1){
+						Composer.Main.NewTweet (this, data + " ");
+					}
+				};
+			} else 
+				return;
+			
+			sheet.ShowInView (Util.MainAppDelegate.MainView);
 		}
 		
 		void LoadFullProfile ()
@@ -154,19 +220,17 @@ namespace TweetStation
 		UIButton buttonView;
 		UIImage image;
 		
-		public DetailTweetView (RectangleF rect, Tweet tweet, TweetView.TappedEvent handler, DialogViewController parent) : base (rect)
+		public DetailTweetView (RectangleF rect, Tweet tweet, TweetView.TappedEvent tapped, TweetView.TappedEvent tapAndHold, DialogViewController parent) : base (rect)
 		{
 			var tweetRect = rect;
 			if (tweet.Kind != TweetKind.Direct)
 				tweetRect.Width -= 30;
 			
 			BackgroundColor = UIColor.Clear;
-			tweetView = new TweetView (tweetRect, tweet.Text){
+			tweetView = new TweetView (tweetRect, tweet.Text, tapped, tapAndHold){
 				BackgroundColor = UIColor.Clear,
 			};
-			if (handler != null)
-				tweetView.Tapped += handler;
-			
+
 			AddSubview (tweetView);
 			float y = tweetView.Frame.Height + PadY;
 			
@@ -203,7 +267,9 @@ namespace TweetStation
 					Util.MainAppDelegate.FavoriteChanged (tweet);
 					TwitterAccount.CurrentAccount.Post (String.Format ("http://api.twitter.com/1/favorites/{0}/{1}.json", tweet.Favorited ? "create" : "destroy", tweet.Id),"");
 					UpdateButtonImage (tweet);
-					tweet.Replace (Database.Main);
+					
+					lock (Database.Main)
+						tweet.Replace (Database.Main);
 				};
 			
 				AddSubview (buttonView);

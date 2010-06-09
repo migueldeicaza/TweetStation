@@ -63,7 +63,8 @@ namespace TweetStation {
 			}
 		}
 	
-		public LoadingHUDView(string title, string message) {
+		public LoadingHUDView(string title, string message) 
+		{
 			Title = title;
 			Message = message;
 			_activity = new UIActivityIndicatorView(UIActivityIndicatorViewStyle.White);
@@ -146,8 +147,6 @@ namespace TweetStation {
 		protected SizeF calculateHeightOfTextForWidth(string text, UIFont font, float width, UILineBreakMode lineBreakMode){
 			return text==null? new SizeF(0, 0) : this.StringSize(text, font, new SizeF(width, 300), lineBreakMode);
 		}
-	
-		
 	}
 	
 	public static class UIViewExtensions {
@@ -161,7 +160,7 @@ namespace TweetStation {
 			float midx = rrect.Left + (rrect.Width)/2;
 			float maxx = rrect.Right;
 			float miny = rrect.Top;
-			float midy = (rrect.Y+rrect.Size.Width)/2;
+			float midy = rrect.Y+rrect.Size.Width/2;
 			float maxy = rrect.Bottom;
 	
 			context.MoveTo(minx, midy);

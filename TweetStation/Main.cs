@@ -365,7 +365,7 @@ namespace TweetStation
 			
 			public override bool ShouldAutorotateToInterfaceOrientation (UIInterfaceOrientation toInterfaceOrientation)
 			{
-				return true;
+				return (toInterfaceOrientation != UIInterfaceOrientation.PortraitUpsideDown);
 			}
 		}
 		

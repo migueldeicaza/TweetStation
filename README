@@ -90,6 +90,16 @@ Design Goals
 	the settings to take place right away, even if there is no
 	network connectivity
 
+Implementation Notes
+====================
+
+	In the original TweetStation, I ended up doing a of database
+	operations on the main thread, as opposed to doing it on a
+	background thread.
+
+	I am moving towards locking the Database.Main to allow the
+	parsing of initial tweets to take place in the background
+
 OAuth and xAuth
 ===============
 

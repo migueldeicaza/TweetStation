@@ -202,30 +202,33 @@ namespace TweetStation
 			var start = DateTime.UtcNow;
 			
 			var usersSeen = new HashSet<long> ();
-			Database.Main.Execute ("BEGIN");
-			foreach (JsonObject jentry in root){
-				var juser = jentry [userKey];
-				bool result;
-				
-				if (!ParseUser ((JsonObject) juser, user, usersSeen))
-					continue;
-				
-				if (kind == TweetKind.Direct)
-					result = tweet.TryPopulateDirect (jentry);
-				else
-					result = tweet.TryPopulate (jentry);
-				
-				if (result){
-					PopulateUser (tweet, user);
-					tweet.Insert (db);
-					count++;
-				}	
-				
-				// Repeat user loading for the retweet info
-				if (tweet.Retweeter != null)
-					ParseUser ((JsonObject)(jentry ["retweeted_status"]["user"]), user, usersSeen);
+			
+			lock (db){
+				db.Execute ("BEGIN");
+				foreach (JsonObject jentry in root){
+					var juser = jentry [userKey];
+					bool result;
+					
+					if (!ParseUser ((JsonObject) juser, user, usersSeen))
+						continue;
+					
+					if (kind == TweetKind.Direct)
+						result = tweet.TryPopulateDirect (jentry);
+					else
+						result = tweet.TryPopulate (jentry);
+					
+					if (result){
+						PopulateUser (tweet, user);
+						tweet.Insert (db);
+						count++;
+					}	
+					
+					// Repeat user loading for the retweet info
+					if (tweet.Retweeter != null)
+						ParseUser ((JsonObject)(jentry ["retweeted_status"]["user"]), user, usersSeen);
+				}
+				db.Execute ("COMMIT");
 			}
-			Database.Main.Execute ("COMMIT");
 			var end = DateTime.UtcNow;
 			Console.WriteLine ("With transactions: Spent {0} ticks in inserting {1} elements", (end-start).Ticks, count);
 			return count;
@@ -385,7 +388,7 @@ namespace TweetStation
 			}
 		}
 		
-		public static Tweet ParseTweet (Stream stream)
+		static Tweet ParseTweet (Stream stream)
 		{
 			JsonObject jentry;
 			
@@ -398,7 +401,8 @@ namespace TweetStation
 			try {
 				var user = new User ();
 				user.UpdateFromJson ((JsonObject) jentry ["user"]);
-				Database.Main.Insert (user, "OR REPLACE");
+				lock (Database.Main)
+					Database.Main.Insert (user, "OR REPLACE");
 				
 				return FromJsonEntry (jentry, user);
 			} catch (Exception e){
@@ -418,7 +422,8 @@ namespace TweetStation
 			if (tweet.Retweeter != null){
 				user = new User ();
 				user.UpdateFromJson ((JsonObject)(jentry ["retweeted_status"]["user"]));
-				Database.Main.Insert (user, "OR REPLACE");
+				lock (Database.Main)
+					Database.Main.Insert (user, "OR REPLACE");
 			}
 			return tweet;
 		}
@@ -449,7 +454,8 @@ namespace TweetStation
 		//
 		public static Tweet FromId (long id)
 		{
-			return Database.Main.Query<Tweet> ("SELECT * FROM Tweet WHERE Id = ?", id).FirstOrDefault ();
+			lock (Database.Main)
+				return Database.Main.Query<Tweet> ("SELECT * FROM Tweet WHERE Id = ?", id).FirstOrDefault ();
 		}
 		
 		public delegate void LoadCallback (Tweet tweet);
@@ -484,11 +490,12 @@ namespace TweetStation
 					continue;
 				
 				var res = new StringBuilder ();
-				for (i++; i < text.Length && Char.IsLetterOrDigit (text [i]); i++){
+				for (i++; i < text.Length && Char.IsLetterOrDigit (text [i]) || text [i] == '_'; i++){
 					res.Append (text [i]);
 				}
 				recipients.Add (res.ToString ());
 			}
+			recipients.Remove (TwitterAccount.CurrentAccount.Username);
 			return "@" + String.Join (" @", recipients.ToArray ()) + " ";
 		}
 		
@@ -589,7 +596,8 @@ namespace TweetStation
 		// Loads the users from the stream, as a convenience, 
 		// returns the last user loaded (which during lookups is a single one)
 		//
-		static public IEnumerable<User> LoadUsers (Stream source)
+		// Requires datbase lock to be taken.
+		static public IEnumerable<User> UnlockedLoadUsers (Stream source)
 		{
 			JsonValue root;
 			
@@ -623,7 +631,8 @@ namespace TweetStation
 			}
 			User user = new User ();
 			user.UpdateFromJson ((JsonObject) root);
-			Database.Main.Insert (user, "OR REPLACE");
+			lock (Database.Main)
+				Database.Main.Insert (user, "OR REPLACE");
 			return user;
 		}
 		
@@ -632,12 +641,14 @@ namespace TweetStation
 		//
 		public static User FromId (long id)
 		{
-			return Database.Main.Query<User> ("SELECT * FROM User WHERE Id = ?", id).FirstOrDefault ();
+			lock (Database.Main)
+				return Database.Main.Query<User> ("SELECT * FROM User WHERE Id = ?", id).FirstOrDefault ();
 		}
 		
 		public static User FromName (string screenname)
 		{
-			return Database.Main.Query<User> ("SELECT * From User WHERE Screenname = ?", screenname).FirstOrDefault ();
+			lock (Database.Main)
+				return Database.Main.Query<User> ("SELECT * From User WHERE Screenname = ?", screenname).FirstOrDefault ();
 		}
 	}
 }

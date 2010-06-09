@@ -33,6 +33,11 @@ namespace TweetStation
 	public class TweetView : UIView {
 		public float Height { get; private set; }
 
+		// Tapped events
+		public delegate void TappedEvent (string value);
+		public TappedEvent Tapped;
+		public TappedEvent TapAndHold;
+
 		UIFont regular = UIFont.SystemFontOfSize (fontHeight);
 		UIFont bold = UIFont.BoldSystemFontOfSize (fontHeight);
 		
@@ -43,13 +48,15 @@ namespace TweetStation
 
 		const int fontHeight = 17;
 		
-		public TweetView (RectangleF frame, string text) : base (frame)
+		public TweetView (RectangleF frame, string text, TappedEvent tapped, TappedEvent tapAndHold) : base (frame)
 		{
 			blocks = new List<Block> ();
 			lastRect = RectangleF.Empty;
 
 			this.text = text;
 			Height = Layout ();
+			Tapped = tapped;
+			TapAndHold = tapAndHold;
 			
 			// Update our Frame size
 			var f = Frame;
@@ -196,11 +203,48 @@ namespace TweetStation
 			}
 		}
 		
+		// 
+		// Cleans the tapped result for a few common punctuations
+		//
+		static string PrepareTappedText (string source)
+		{
+			if (source.StartsWith ("http://"))
+				return source.Trim ();
+			if (source [0] == '@'){
+				source = source.Trim ();
+				if (source.EndsWith (":") || source.EndsWith ("."))
+					return source.Substring (0, source.Length-1);
+			}
+			return source;
+		}
+		
+		bool blockingTouchEvents;
+		NSTimer holdTimer;
+		
 		public override void TouchesBegan (NSSet touches, UIEvent evt)
 		{
+			blockingTouchEvents = false;
 			Track ((touches.AnyObject as UITouch).LocationInView (this));
+			
+			// Start tracking tap and hold
+			if (highlighted != null && highlighted.Font == bold){
+				holdTimer = NSTimer.CreateScheduledTimer (TimeSpan.FromSeconds (1), delegate {
+					blockingTouchEvents = true;
+					
+					if (TapAndHold != null)
+						TapAndHold (PrepareTappedText (highlighted.Value));
+				});
+			}
 		}
 
+		void CancelHoldTimer ()
+		{
+			if (holdTimer == null)
+				return;
+			holdTimer.Invalidate ();
+			holdTimer = null;
+		}
+		
 		void Track (PointF pos)
 		{
 			foreach (var block in blocks){
@@ -212,15 +256,14 @@ namespace TweetStation
 			}
 		}
 		
-		public delegate void TappedEvent (string value);
-		
-		public event TappedEvent Tapped;
-		
 		public override void TouchesEnded (NSSet touches, UIEvent evt)
 		{
+			CancelHoldTimer ();
+			if (blockingTouchEvents)
+				return;
 			if (highlighted != null && highlighted.Font == bold){
 				if (Tapped != null)
-					Tapped (highlighted.Value);
+					Tapped (PrepareTappedText (highlighted.Value));
 			}
 			
 			highlighted = null;
@@ -229,12 +272,14 @@ namespace TweetStation
 		
 		public override void TouchesCancelled (NSSet touches, UIEvent evt)
 		{
+			CancelHoldTimer ();
 			highlighted = null;
 			SetNeedsDisplay ();
 		}
 
 		public override void TouchesMoved (NSSet touches, UIEvent evt)
 		{
+			CancelHoldTimer ();
 			Track ((touches.AnyObject as UITouch).LocationInView (this));
 		}
 	}

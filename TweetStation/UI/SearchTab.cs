@@ -102,7 +102,7 @@ namespace TweetStation
 		bool SearchResultsAreRecent {
 			get {
 				long lastTime;
-				return Int64.TryParse (Util.Defaults.StringForKey ("searchLoadedTime"), out lastTime) && (DateTime.UtcNow.Ticks - lastTime) < TimeSpan.FromHours (24).Ticks;
+				return Int64.TryParse (Util.Defaults.StringForKey ("searchLoadedTime" + TwitterAccount.CurrentAccount.AccountId), out lastTime) && (DateTime.UtcNow.Ticks - lastTime) < TimeSpan.FromHours (24).Ticks;
 			}
 		}
 		
@@ -113,53 +113,72 @@ namespace TweetStation
 			if (savedSearches != null)
 				return;
 			
+			LoadSearches ();
 			FetchLists ();
-			
-			if (SearchResultsAreRecent){
-				InsertCachedSearchResults ();
-				FetchTrends ();
-			} else {
-				account.Download ("http://api.twitter.com/1/saved_searches.json", result => {
-					if (result != null)
-						LoadSearches (result);
-				});
-			}
-		}
-		
-		void LoadSearches (byte [] result)
-		{
-			try {
-				var json = JsonValue.Load (new MemoryStream (result));
-	
-				for (int i = 0; i < json.Count; i++)
-					Util.Defaults.SetString (json [i]["query"], "s-" + i);
-				
-				Util.Defaults.SetString (DateTime.UtcNow.Ticks.ToString (), "searchLoadedTime");
-				InsertCachedSearchResults ();
-			} catch (Exception e){
-				Console.WriteLine (e);
-			}
 			FetchTrends ();
 		}
 		
-		void InsertCachedSearchResults ()
+		void LoadSearchResults (byte [] result)
 		{
-			savedSearches = new Section ("Saved searches"){
-				GetCachedResults ()
-			};
-			Root.Add (savedSearches);
+			try {
+				var json = JsonValue.Load (new MemoryStream (result));
+				int i;
+				
+				var key = "x-" + TwitterAccount.CurrentAccount.AccountId;
+				for (i = 0; i < json.Count; i++)
+					Util.Defaults.SetString (json [i]["query"], key + i);
+				for (; i < 10; i++)
+					Util.Defaults.SetString ("", key + i);
+				
+				Util.Defaults.SetString (DateTime.UtcNow.Ticks.ToString (), "searchLoadedTime" + TwitterAccount.CurrentAccount.AccountId);
+			} catch (Exception e){
+				Console.WriteLine (e);
+			}
 		}
 		
-		IEnumerable<Element> GetCachedResults ()
+		// Load the cached searches, and then updates the contents if required
+		void LoadSearches ()
 		{
-			for (int i = 0; i < 10; i++){
-				var value = Util.Defaults.StringForKey ("s-" + i);
-				if (value == null)
-					yield break;
-				yield return new SearchElement (value, value);
-			}
-		}		
+			var cachedSearches = GetCachedResults ();
+			savedSearches = new Section ("Saved searches");
+			PopulateSearchFromArray (cachedSearches);
+			Root.Add (savedSearches);
+			if (SearchResultsAreRecent)
+				return;
+			
+			account.Download ("http://api.twitter.com/1/saved_searches.json", result => {
+				if (result == null)
+					return;
+				LoadSearchResults (result);
+				var freshResults = GetCachedResults ();
+				if (freshResults.Length != cachedSearches.Length)
+					PopulateSearchFromArray (freshResults);
+				
+				for (int i = 0; i < cachedSearches.Length; i++){
+					if (freshResults [i] != cachedSearches [i]){
+						PopulateSearchFromArray (freshResults);
+						return;
+					}
+				}
+			});
+		}
+
+		void PopulateSearchFromArray (string [] results)
+		{
+			savedSearches.Clear ();
+			savedSearches.Insert (0, UITableViewRowAnimation.None, from x in results select (Element) new SearchElement (x, x));
+		}
 		
+		string [] GetCachedResults ()
+		{
+			var key = "x-" + TwitterAccount.CurrentAccount.AccountId;
+			return (from x in Enumerable.Range (0, 10)
+				let k = Util.Defaults.StringForKey (key + x)
+				where k != null && k != ""
+				orderby k
+				select k).ToArray ();
+		}		
+
 		// 
 		// Queues a request to fetch the trends, and adds a new section to the root
 		//

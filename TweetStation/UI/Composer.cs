@@ -34,6 +34,7 @@ using System.IO;
 using System.Net;
 using MonoTouch.AVFoundation;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace TweetStation
 {
@@ -45,11 +46,9 @@ namespace TweetStation
 		UILabel charsLeft;
 		internal UIBarButtonItem GpsButtonItem, ShrinkItem;
 		public event NSAction LookupUserRequested;
-		public NSDictionary PictureDict;
-		public bool FromLibrary;
 		public bool justShrank;
 		
-		public ComposerView (RectangleF bounds, Composer composer) : base (bounds)
+		public ComposerView (RectangleF bounds, Composer composer, EventHandler cameraTapped) : base (bounds)
 		{
 			this.composer = composer;
 			textView = new UITextView (RectangleF.Empty) {
@@ -73,7 +72,7 @@ namespace TweetStation
 				new UIBarButtonItem (UIBarButtonSystemItem.FlexibleSpace, null),
 				ShrinkItem,
 				new UIBarButtonItem (UIBarButtonSystemItem.Search, delegate { if (LookupUserRequested != null) LookupUserRequested (); }) { Style = style },
-				new UIBarButtonItem (UIBarButtonSystemItem.Camera, delegate { CameraButtonTouched (); } ) { Style = style },
+				new UIBarButtonItem (UIBarButtonSystemItem.Camera, cameraTapped) { Style = style },
 				GpsButtonItem }, false);	
 
 			AddSubview (toolbar);
@@ -164,7 +163,6 @@ namespace TweetStation
 		{
 			textView.Text = text;
 			justShrank = false;
-			PictureDict = null;
 			HandleTextViewChanged (null, null);
 		}
 		
@@ -188,72 +186,6 @@ namespace TweetStation
 				textView.Text = value;
 			}
 		}
-		
-		void CameraButtonTouched ()
-		{
-			if (PictureDict == null){
-				TakePicture ();
-				return;
-			}
-			
-			var sheet = Util.GetSheet (Locale.GetText ("Tweet already contains a picture"));
-			sheet.AddButton (Locale.GetText ("Discard Picture"));
-			sheet.AddButton (Locale.GetText ("Pick New Picture"));
-			sheet.AddButton (Locale.GetText ("Cancel"));
-			
-			sheet.CancelButtonIndex = 2;
-			sheet.Clicked += delegate(object sender, UIButtonEventArgs e) {
-				if (e.ButtonIndex == 2)
-					return;
-				
-				if (e.ButtonIndex == 0)
-					PictureDict = null;
-				else
-					TakePicture ();
-			};
-			sheet.ShowInView (Util.MainAppDelegate.MainView);
-
-		}
-		
-		void TakePicture ()
-		{
-			FromLibrary = true;
-			if (!UIImagePickerController.IsSourceTypeAvailable (UIImagePickerControllerSourceType.Camera)){
-				Camera.SelectPicture (composer, PictureSelected);
-				return;
-			}
-			
-			var sheet = Util.GetSheet ("");
-			sheet.AddButton (Locale.GetText ("Take a photo or video"));
-			sheet.AddButton (Locale.GetText ("From Album"));
-			sheet.AddButton (Locale.GetText ("Cancel"));
-			
-			sheet.CancelButtonIndex = 2;
-			sheet.Clicked += delegate(object sender, UIButtonEventArgs e) {
-				if (e.ButtonIndex == 2)
-					return;
-				
-				if (e.ButtonIndex == 0){
-					FromLibrary = false;
-					Camera.TakePicture (composer, PictureSelected);
-				} else
-					Camera.SelectPicture (composer, PictureSelected);
-			};
-			sheet.ShowInView (Util.MainAppDelegate.MainView);
-		}
-		
-		void PictureSelected (NSDictionary dict)
-		{
-			PictureDict = dict;
-		}
-		
-		public void ReleaseResources ()
-		{
-			if (PictureDict == null)
-				return;
-			PictureDict.Dispose ();
-			PictureDict = null;
-		}
 	}
 	
 	/// <summary>
@@ -273,6 +205,8 @@ namespace TweetStation
 		internal CLLocation location;
 		AudioPlay player;
 		LoadingHUDView hud;
+		bool FromLibrary;
+		UIImage Picture;
 		
 		public static readonly Composer Main = new Composer ();
 		
@@ -289,7 +223,7 @@ namespace TweetStation
 			navigationBar.PushNavigationItem (navItem, false);
 			
 			// Composer
-			composerView = new ComposerView (ComputeComposerSize (RectangleF.Empty), this);
+			composerView = new ComposerView (ComputeComposerSize (RectangleF.Empty), this, CameraTapped);
 			composerView.LookupUserRequested += delegate {
 				PresentModalViewController (new UserSelector (userName => {
 					composerView.Text += ("@" + userName + " ");
@@ -303,6 +237,122 @@ namespace TweetStation
 			View.AddSubview (navigationBar);
 		}
 
+		void CameraTapped (object sender, EventArgs args)
+		{
+			if (Picture == null){
+				TakePicture ();
+				return;
+			}
+			
+			var sheet = Util.GetSheet (Locale.GetText ("Tweet already contains a picture"));
+			sheet.AddButton (Locale.GetText ("Discard Picture"));
+			sheet.AddButton (Locale.GetText ("Pick New Picture"));
+			sheet.AddButton (Locale.GetText ("Cancel"));
+			
+			sheet.CancelButtonIndex = 2;
+			sheet.Clicked += delegate(object ss, UIButtonEventArgs e) {
+				if (e.ButtonIndex == 2)
+					return;
+				
+				if (e.ButtonIndex == 0)
+					Picture = null;
+				else
+					TakePicture ();
+			};
+			sheet.ShowInView (Util.MainAppDelegate.MainView);
+
+		}
+		
+		void TakePicture ()
+		{
+			FromLibrary = true;
+			if (!UIImagePickerController.IsSourceTypeAvailable (UIImagePickerControllerSourceType.Camera)){
+				Camera.SelectPicture (this, PictureSelected);
+				return;
+			}
+			
+			var sheet = Util.GetSheet ("");
+			sheet.AddButton (Locale.GetText ("Take a photo or video"));
+			sheet.AddButton (Locale.GetText ("From Album"));
+			sheet.AddButton (Locale.GetText ("Cancel"));
+			
+			sheet.CancelButtonIndex = 2;
+			sheet.Clicked += delegate(object sender, UIButtonEventArgs e) {
+				if (e.ButtonIndex == 2)
+					return;
+				
+				if (e.ButtonIndex == 0){
+					FromLibrary = false;
+					Camera.TakePicture (this, PictureSelected);
+				} else
+					Camera.SelectPicture (this, PictureSelected);
+			};
+			sheet.ShowInView (Util.MainAppDelegate.MainView);
+		}
+
+		UIImage Scale (UIImage image, SizeF size)
+		{
+			UIGraphics.BeginImageContext (size);
+			image.Draw (new RectangleF (new PointF (0, 0), size));
+			var ret = UIGraphics.GetImageFromCurrentImageContext ();
+			UIGraphics.EndImageContext ();
+			return ret;
+		}
+		
+		void PictureSelected (NSDictionary pictureDict)
+		{
+			int level = Util.Defaults.IntForKey ("sizeCompression");
+			
+			if ((pictureDict [UIImagePickerController.MediaType] as NSString) == "public.image"){
+				Picture = pictureDict [UIImagePickerController.EditedImage] as UIImage;
+				if (Picture == null)
+					Picture = pictureDict [UIImagePickerController.OriginalImage] as UIImage;
+				
+				// Save a copy of the original picture
+				if (!FromLibrary){
+					Picture.SaveToPhotosAlbum (delegate {
+						// ignore errors
+					});
+				}
+				
+				var size = Picture.Size;
+				float maxWidth;
+				switch (level){
+				case 0:
+					maxWidth = 640;
+					break;
+				case 1:
+					maxWidth = 1024;
+					break;
+				default:
+					maxWidth = size.Width;
+					break;
+				}
+
+				var hud = new LoadingHUDView (Locale.GetText ("Image"), "Compressing");
+				View.AddSubview (hud);
+				hud.StartAnimating ();
+				
+				// Show the UI, and on a callback, do the scaling, so the user gets an animation
+				NSTimer.CreateScheduledTimer (TimeSpan.FromSeconds (0), delegate {
+					if (size.Width > maxWidth || size.Height > maxWidth)
+						Picture = Scale (Picture, new SizeF (maxWidth, maxWidth*size.Height/size.Width));
+					hud.StopAnimating ();
+					hud.RemoveFromSuperview ();
+				});
+			} else {
+				//NSUrl movieUrl = pictureDict [UIImagePickerController.MediaURL] as NSUrl;
+				
+				// Future use, when we find a video host that does not require your Twitter login/password
+			}
+			
+			pictureDict.Dispose ();
+		}
+		
+		public void ReleaseResources ()
+		{
+		}
+		
 		public override void ViewDidLoad ()
 		{
 			base.ViewDidLoad ();			
@@ -320,6 +370,11 @@ namespace TweetStation
 		
 		void CloseComposer (object sender, EventArgs a)
 		{
+			if (Picture != null){
+				Picture.Dispose ();
+				Picture = null;
+			}
+			
 			sendItem.Enabled = true;
 			previousController.DismissModalViewControllerAnimated (true);
 			if (player != null)
@@ -339,57 +394,22 @@ namespace TweetStation
 		{
 			sendItem.Enabled = false;
 			
-			var pictureDict = composerView.PictureDict;
-			if (pictureDict == null){
+			if (Picture == null){
 				Post ();
 				return;
 			}
+
+			hud = new LoadingHUDView (Locale.GetText ("Image"), "Uploading");
+			View.AddSubview (hud);
+			hud.StartAnimating ();
 			
-			int level = Util.Defaults.IntForKey ("sizeCompression");
+			var jpeg = Picture.AsJPEG ();
+			Stream stream;
+			unsafe { stream = new UnmanagedMemoryStream ((byte*) jpeg.Bytes, jpeg.Length); }
 			
-			if ((pictureDict [UIImagePickerController.MediaType] as NSString) == "public.image"){
-				var img = pictureDict [UIImagePickerController.EditedImage] as UIImage;
-				if (img == null)
-					img = pictureDict [UIImagePickerController.OriginalImage] as UIImage;
-				
-				// Save a copy of the original picture
-				if (!composerView.FromLibrary){
-					img.SaveToPhotosAlbum (delegate {
-						// Ignore
-					});
-				}
-				
-				var size = img.Size;
-				float maxWidth;
-				switch (level){
-				case 0:
-					maxWidth = 640;
-					break;
-				case 1:
-					maxWidth = 1024;
-					break;
-				default:
-					maxWidth = size.Width;
-					break;
-				}
-				
-				if (size.Width > maxWidth || size.Height > maxWidth)
-					img = img.Scale (new SizeF (maxWidth, maxWidth*size.Height/size.Width));
-				
-				var jpeg = img.AsJPEG ();
-				Stream stream;
-				unsafe { stream = new UnmanagedMemoryStream ((byte*) jpeg.Bytes, jpeg.Length); }
-				
-				hud = new LoadingHUDView (Locale.GetText ("Uploading\nImage"), "");
-				View.AddSubview (hud);
-				hud.StartAnimating ();
-				
+			ThreadPool.QueueUserWorkItem (delegate {
 				TwitterAccount.CurrentAccount.UploadPicture (stream, PicUploadComplete);
-			} else {
-				//NSUrl movieUrl = pictureDict [UIImagePickerController.MediaURL] as NSUrl;
-				
-				// Future use, when we find a video host that does not require your Twitter login/password
-			}
+			});
 		}
 		
 		UIAlertView alert;
@@ -485,11 +505,16 @@ namespace TweetStation
 		
 		public void NewTweet (UIViewController parent)
 		{
-			ResetComposer (Locale.GetText ("New Tweet"), "");
+			NewTweet (parent, "");
+		}
+		
+		public void NewTweet (UIViewController parent, string initialText)
+		{
+			ResetComposer (Locale.GetText ("New Tweet"), initialText);
 			
 			Activate (parent);
 		}
-		
+
 		public void ReplyTo (UIViewController parent, Tweet source, bool replyAll)
 		{
 			ResetComposer (Locale.GetText ("Reply Tweet"), replyAll ? source.GetRecipients () : '@' + source.Screename + ' ');
@@ -499,6 +524,15 @@ namespace TweetStation
 			Activate (parent);
 		}
 		
+		public void ReplyTo (UIViewController parent, Tweet source, string recipient)
+		{
+			ResetComposer (Locale.GetText ("Reply Tweet"), recipient	);
+			InReplyTo = source.Id;
+			directRecipient = null;
+			
+			Activate (parent);
+		}
+
 		public void Quote (UIViewController parent, Tweet source)
 		{
 			ResetComposer (Locale.GetText ("Quote"), "RT @" + source.Screename + " " + source.Text);
@@ -524,7 +558,8 @@ namespace TweetStation
 			if (inited)
 				return;
 			inited = true;
-			Database.Main.CreateTable<Draft> ();
+			lock (Database.Main)
+				Database.Main.CreateTable<Draft> ();
 		}
 		
 		[PrimaryKey]

@@ -80,11 +80,13 @@ namespace TweetStation
 				return accounts [id];
 			}
 			
-			var account = Database.Main.Query<TwitterAccount> ("select * from TwitterAccount where LocalAccountId = ?", id).FirstOrDefault ();
-			if (account != null)
-				accounts [account.LocalAccountId] = account;
-			
-			return account;
+			lock (Database.Main){
+				var account = Database.Main.Query<TwitterAccount> ("select * from TwitterAccount where LocalAccountId = ?", id).FirstOrDefault ();
+				if (account != null)
+					accounts [account.LocalAccountId] = account;
+				
+				return account;
+			}
 		}
 		
 		public static TwitterAccount Create (OAuthAuthorizer oauth)
@@ -95,7 +97,8 @@ namespace TweetStation
 				OAuthToken = oauth.AccessToken,
 				OAuthTokenSecret = oauth.AccessTokenSecret
 			};
-			Database.Main.Insert (account);
+			lock (Database.Main)
+				Database.Main.Insert (account);
 			accounts [account.LocalAccountId] = account;
 			
 			return account;
@@ -109,13 +112,15 @@ namespace TweetStation
 			if (accounts.ContainsKey (id))
 				accounts.Remove (id);
 			
-			Database.Main.Execute ("DELETE FROM Tweet where LocalAccountId = ?", account.LocalAccountId);
-			Database.Main.Delete<TwitterAccount> (account);
+			lock (Database.Main){
+				Database.Main.Execute ("DELETE FROM Tweet where LocalAccountId = ?", account.LocalAccountId);
+				Database.Main.Delete<TwitterAccount> (account);
 			
-			if (pickNewDefault){
-				var newDefault = Database.Main.Query<TwitterAccount> ("SELECT LocalAccountId FROM TwitterAccount WHERE OAuthToken != \"\"").FirstOrDefault ();
-				if (newDefault != null)
-					Util.Defaults.SetInt (newDefault.LocalAccountId, DEFAULT_ACCOUNT);
+				if (pickNewDefault){
+					var newDefault = Database.Main.Query<TwitterAccount> ("SELECT LocalAccountId FROM TwitterAccount WHERE OAuthToken != \"\"").FirstOrDefault ();
+					if (newDefault != null)
+						Util.Defaults.SetInt (newDefault.LocalAccountId, DEFAULT_ACCOUNT);
+				}
 			}
 		}
 		
@@ -153,19 +158,18 @@ namespace TweetStation
 				(since.HasValue ? "&since_id=" + since.Value : "") +
 				(max_id.HasValue ? "&max_id=" + max_id.Value : "");
 				
-			Download (req, true, result => {
-				if (result == null){
-					
-					done (-1);
-				} else {
-					int count = -1;
+			Download (req, false, result => {
+				int count = -1;
+				
+				if (result != null){
 					try {
 						count = Tweet.LoadJson (new MemoryStream (result), LocalAccountId, kind);
 					} catch (Exception e) { 
 						Console.WriteLine (e);
 					}
-					done (count);
 				}
+
+				invoker.BeginInvokeOnMainThread (delegate { done (count); });
 			});
 		}
 		
@@ -339,21 +343,19 @@ namespace TweetStation
 			using (var rs = req.GetRequestStream ())
 				Copy (upload, rs);
 
-			ThreadPool.QueueUserWorkItem (delegate {
-				string urlToPic = null;
-				try {
-					var response = (HttpWebResponse) req.GetResponse  ();
-					var stream = response.GetResponseStream ();
-					var doc = XDocument.Load (stream);
-					if (doc.Element ("rsp").Attribute ("stat").Value == "ok"){
-						urlToPic = doc.Element ("rsp").Element ("mediaurl").Value;
-					}
-					stream.Close ();
-				} catch (Exception e){
-					Console.WriteLine (e);
+			string urlToPic = null;
+			try {
+				var response = (HttpWebResponse) req.GetResponse  ();
+				var stream = response.GetResponseStream ();
+				var doc = XDocument.Load (stream);
+				if (doc.Element ("rsp").Attribute ("stat").Value == "ok"){
+					urlToPic = doc.Element ("rsp").Element ("mediaurl").Value;
 				}
-				invoker.BeginInvokeOnMainThread (delegate { completed (urlToPic); });
-			});
+				stream.Close ();
+			} catch (Exception e){
+				Console.WriteLine (e);
+			}
+			invoker.BeginInvokeOnMainThread (delegate { completed (urlToPic); });
 		}
 		
 		// 
@@ -368,15 +370,18 @@ namespace TweetStation
 				Url = url, 
 				PostData = content,
 			};
-			Database.Main.Insert (qtask);
+			lock (Database.Main)
+				Database.Main.Insert (qtask);
 			
 			FlushTasks ();
 		}
 		
 		void FlushTasks ()
 		{
-			var tasks = Database.Main.Query<QueuedTask> ("SELECT * FROM QueuedTask where AccountId = ? ORDER BY TaskId DESC", LocalAccountId).ToArray ();	
-			ThreadPool.QueueUserWorkItem (delegate { PostTask (tasks); });
+			lock (Database.Main){
+				var tasks = Database.Main.Query<QueuedTask> ("SELECT * FROM QueuedTask where AccountId = ? ORDER BY TaskId DESC", LocalAccountId).ToArray ();
+				ThreadPool.QueueUserWorkItem (delegate { PostTask (tasks); });
+			}
 		}
 		
 		// 
@@ -402,13 +407,8 @@ namespace TweetStation
 						// Can happen if we had already favorited this status
 					}
 					
-					invoker.BeginInvokeOnMainThread (delegate {
-						try {
-							Database.Main.Execute ("DELETE FROM QueuedTask WHERE TaskId = ?", task.TaskId);
-						} catch (Exception e){
-							Console.WriteLine (e);
-						}
-					});	
+					lock (Database.Main)
+						Database.Main.Execute ("DELETE FROM QueuedTask WHERE TaskId = ?", task.TaskId);
 				}
 			} catch (Exception e) {
 				Console.WriteLine (e);

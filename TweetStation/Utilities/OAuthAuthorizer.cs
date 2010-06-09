@@ -305,7 +305,7 @@ namespace TweetStation
 				  
 			public override void ViewWillAppear (bool animated)
 			{
-				SetupWeb ();
+				SetupWeb ("Authorize");
 				WebView.ShouldStartLoad = LoadHook;
 				WebView.LoadRequest (new NSUrlRequest (new NSUrl (url)));
 				base.ViewWillAppear (animated);
