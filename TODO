@@ -1,12 +1,9 @@
 * Usage Observations
 
-	Incorrect rendering of the Image Compress dialog
 	neds to save draft
 	needs to remembr last position (after phone call, everything is cancelled)
 
 	(http://foo) is not highlighted
-
-	multiline segments might not carry the proper data (large urls) on tap
 
 	Swipe menu
 		Retweet
@@ -14,17 +11,6 @@
 		Star
 		Open (for links)
 		Quote
-
-	Probably should not rotate to upside down mode
-
-	Perhaps compress when picture is taken?
-		Show "Progress" at that point
-
-	Fix the HUD display rendering
-
-	Always load the cached searches, and update the contents
-	from the server results instead of the timeout+update that
-	I have now
 
 *  Missing Stuff
 
