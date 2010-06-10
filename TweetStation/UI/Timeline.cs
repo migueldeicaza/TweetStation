@@ -214,7 +214,10 @@ namespace TweetStation {
 						nParsed = mainSection.Insert (insertPoint, UITableViewRowAnimation.None, UnlockedFetchTweets (count, lastId, insertPoint));
 					Util.ReportTime ("Time spent loading tweets");
 					
-					NavigationController.TabBarItem.BadgeValue = (nParsed > 1) ? nParsed.ToString () : null;
+					Console.WriteLine (nParsed);
+					NSTimer.CreateScheduledTimer (TimeSpan.FromSeconds (0.3), delegate {
+						NavigationController.TabBarItem.BadgeValue = (nParsed > 0) ? nParsed.ToString () : null;
+					});
 
 					if (!continuous){
 						LoadMoreElement more = null;

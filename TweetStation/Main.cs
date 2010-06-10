@@ -53,11 +53,6 @@ namespace TweetStation
 				} 
 			} catch {}				
 #else
-			var cfg = TwitterAccount.OAuthConfig;
-			
-			// Paste ~/xauth.cs here
-			
-			useXauth = true;
 #endif
 			
 			Util.ReportTime ("Before GetDefaultAccount");
@@ -106,7 +101,7 @@ namespace TweetStation
 					TabBarItem = new UITabBarItem ("Favorites", UIImage.FromFileUncached ("Images/fav.png"), 3)
 				},
 				new UINavigationController (searches) {
-					TabBarItem = new UITabBarItem ("Search", UIImage.FromFileUncached ("Images/lupa.png"), 3)
+					TabBarItem = new UITabBarItem ("Search", UIImage.FromFileUncached ("Images/lupa.png"), 4)
 				}
 			};
 	
@@ -363,16 +358,76 @@ namespace TweetStation
 			Account = newAccount;
 		}
 		
+		public class PositionView : UIView {
+			public PositionView () 
+			{
+				Opaque = false;
+			}
+			
+			public override void Draw (RectangleF rect)
+			{
+				var context = UIGraphics.GetCurrentContext ();
+				
+				context.SetRGBFillColor (0.26f, 0.26f, 0.26f, 1);
+				context.MoveTo (0, 6);
+				context.AddLineToPoint (5, 0);
+				context.AddLineToPoint (10, 6);
+				context.ClosePath ();
+				context.FillPath ();
+				
+				context.SetRGBStrokeColor (0, 0, 0, 1);
+				context.MoveTo (0, 5);
+				context.AddLineToPoint (5, 0);
+				context.AddLineToPoint (10, 5);
+				context.StrokePath ();
+			}
+		}
+	
 		public class RotatingTabBar : UITabBarController {
+			UIView indicator;
+			
 			public RotatingTabBar () : base ()
 			{
+				indicator = new PositionView ();
+				//indicator = UIButton.FromType (UIButtonType.DetailDisclosure);
+				View.AddSubview (indicator);
+				ViewControllerSelected += OnSelected;
 			}
 			
 			public override bool ShouldAutorotateToInterfaceOrientation (UIInterfaceOrientation toInterfaceOrientation)
 			{
 				return (toInterfaceOrientation != UIInterfaceOrientation.PortraitUpsideDown);
 			}
+
+			void UpdatePosition (int pos)
+			{
+				var w = View.Bounds.Width/5;
+				var x = w * pos;
+				
+				UIView.BeginAnimations (null);
+				UIView.SetAnimationCurve (UIViewAnimationCurve.EaseInOut);
+				indicator.Frame = new RectangleF (x+((w-10)/2), View.Bounds.Height-TabBar.Bounds.Height-4, 10, 6);
+				UIView.CommitAnimations ();
+			}
+			
+			public override void ViewWillAppear (bool animated)
+			{
+				base.ViewWillAppear (animated);
+				
+				UpdatePosition (0);
+			}
+			
+			public void OnSelected (object sender, UITabBarSelectionEventArgs a)
+			{
+				var vc = ViewControllers;
+				
+				for (int i = 0; i < vc.Length; i++){
+					if (vc [i] == a.ViewController){
+						UpdatePosition (i);
+						return;
+					}
+				}
+			}
 		}
-		
 	}
 }
