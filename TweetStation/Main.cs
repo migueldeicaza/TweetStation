@@ -40,7 +40,7 @@ namespace TweetStation
 			// Required by some HTTP calls to Twitter
 			System.Net.ServicePointManager.Expect100Continue = false;
 
-#if true
+#if false
 			try {
 				if (File.Exists ("/Users/miguel/xauth")){
 					using (var f = File.OpenText ("/Users/miguel/xauth")){
@@ -388,10 +388,6 @@ namespace TweetStation
 			
 			public RotatingTabBar () : base ()
 			{
-				indicator = new PositionView ();
-				//indicator = UIButton.FromType (UIButtonType.DetailDisclosure);
-				View.AddSubview (indicator);
-				ViewControllerSelected += OnSelected;
 			}
 			
 			public override bool ShouldAutorotateToInterfaceOrientation (UIInterfaceOrientation toInterfaceOrientation)
@@ -413,8 +409,13 @@ namespace TweetStation
 			public override void ViewWillAppear (bool animated)
 			{
 				base.ViewWillAppear (animated);
-				
-				UpdatePosition (0);
+			
+				if (indicator == null){
+					indicator = new PositionView ();
+					View.AddSubview (indicator);
+					ViewControllerSelected += OnSelected;
+					UpdatePosition (0);
+				}
 			}
 			
 			public void OnSelected (object sender, UITabBarSelectionEventArgs a)

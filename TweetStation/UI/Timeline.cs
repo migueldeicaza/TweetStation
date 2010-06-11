@@ -195,9 +195,14 @@ namespace TweetStation {
 			Account.ReloadTimeline (kind, since, max_id, count => {
 				mainSection.Remove (removeOnInsert);
 				if (count == -1){
-					mainSection.Insert (insertPoint, new StyledStringElement (Locale.Format ("Net failure on {0}", DateTime.Now)){
-						Font = UIFont.SystemFontOfSize (14)
-					});
+					var insertElement = mainSection [insertPoint] as StyledStringElement;
+					var msg = Locale.Format ("Net failure on {0}", DateTime.Now);
+					if (insertElement == null)
+						mainSection.Insert (insertPoint, new StyledStringElement (msg){
+							Font = UIFont.SystemFontOfSize (14)
+						});
+					else
+						insertElement.Caption = msg;
 					count = 1;
 				} else {
 					// If we find an overlapping value, the timeline is continous, otherwise, we offer to load more
