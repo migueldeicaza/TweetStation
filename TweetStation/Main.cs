@@ -16,7 +16,11 @@ namespace TweetStation
 	{
 		static void Main (string[] args)
 		{
-			UIApplication.Main (args);
+			try {
+				UIApplication.Main (args);
+			} catch (Exception e){
+				Console.WriteLine ("Toplevel exception: {0}", e);
+			}
 		}
 	}
 
@@ -161,12 +165,14 @@ namespace TweetStation
 		// Replies to a tweet
 		public void Reply (UIViewController controller, Tweet tweet)
 		{
+			if (tweet == null)
+				throw new ArgumentNullException ("tweet");
+			
 			int p = tweet.Text.IndexOf ('@');
 			if (p == -1){
 				Composer.Main.ReplyTo (controller, tweet, false);
 				return;
 			}
-			
 			// If we have a '@' make sure it is not just @user
 			// but someone else is included
 			if (tweet.Text.Substring (p+1).StartsWith (TwitterAccount.CurrentAccount.Username)){
@@ -176,13 +182,11 @@ namespace TweetStation
 					return;
 				}
 			}
-			
 			var sheet = Util.GetSheet ("");
 			sheet.AddButton (Locale.GetText ("Reply"));
 			sheet.AddButton (Locale.GetText ("Reply All"));
 			sheet.AddButton (Locale.GetText ("Cancel"));
 			sheet.CancelButtonIndex = 2;
-			
 			sheet.Clicked += delegate(object s, UIButtonEventArgs e) {
 				if (e.ButtonIndex == 0)
 					Composer.Main.ReplyTo (controller, tweet, false);

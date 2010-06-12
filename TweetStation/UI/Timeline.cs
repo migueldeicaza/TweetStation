@@ -195,14 +195,15 @@ namespace TweetStation {
 			Account.ReloadTimeline (kind, since, max_id, count => {
 				mainSection.Remove (removeOnInsert);
 				if (count == -1){
-					var insertElement = mainSection [insertPoint] as StyledStringElement;
 					var msg = Locale.Format ("Net failure on {0}", DateTime.Now);
-					if (insertElement == null)
+					Element insertElement;
+					
+					if (mainSection.Count > 0 && (insertElement = mainSection [insertPoint] as StyledStringElement) != null)
+						insertElement.Caption = msg;
+					else
 						mainSection.Insert (insertPoint, new StyledStringElement (msg){
 							Font = UIFont.SystemFontOfSize (14)
 						});
-					else
-						insertElement.Caption = msg;
 					count = 1;
 				} else {
 					// If we find an overlapping value, the timeline is continous, otherwise, we offer to load more
@@ -219,7 +220,6 @@ namespace TweetStation {
 						nParsed = mainSection.Insert (insertPoint, UITableViewRowAnimation.None, UnlockedFetchTweets (count, lastId, insertPoint));
 					Util.ReportTime ("Time spent loading tweets");
 					
-					Console.WriteLine (nParsed);
 					NSTimer.CreateScheduledTimer (TimeSpan.FromSeconds (0.3), delegate {
 						NavigationController.TabBarItem.BadgeValue = (nParsed > 0) ? nParsed.ToString () : null;
 					});

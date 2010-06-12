@@ -45,7 +45,7 @@ namespace TweetStation
 			toolbar = new UIToolbar ();
 			topBar = new UIToolbar ();
 			
-			title = new UILabel (new RectangleF (0, 0, 80, 30)){
+			title = new UILabel (new RectangleF (10, 0, 80, 30)){
 				BackgroundColor = UIColor.Clear,
 				AdjustsFontSizeToFitWidth = true,
 				Font = UIFont.BoldSystemFontOfSize (22),
@@ -56,7 +56,6 @@ namespace TweetStation
 			};
 			
 			topBar.Items = new UIBarButtonItem []  {
-				fixedSpace,
 				new UIBarButtonItem (title),
 				flexibleSpace,
 				new UIBarButtonItem (Locale.GetText ("Close"), UIBarButtonItemStyle.Bordered, (o, e) => { DismissModalViewControllerAnimated (true);} )
@@ -75,8 +74,16 @@ namespace TweetStation
 
 		void UpdateNavButtons ()
 		{
+			if (WebView == null)
+				return;
+			
 			backButton.Enabled = WebView.CanGoBack;
 			forwardButton.Enabled = WebView.CanGoForward;
+		}
+		
+		protected virtual string UpdateTitle ()
+		{
+			return WebView.EvaluateJavascript ("document.title");			
 		}
 		
 		public void SetupWeb (string initialTitle)
@@ -99,7 +106,7 @@ namespace TweetStation
 				Util.PopNetworkActive (); 
 				UpdateNavButtons ();
 				
-				title.Text = WebView.EvaluateJavascript ("document.title");
+				title.Text = UpdateTitle ();
 			};
 			
 			title.Text = initialTitle;
@@ -132,7 +139,7 @@ namespace TweetStation
 			toolbar.Frame =  new RectangleF (0, sbounds.Height-44, sbounds.Width, 44);
 			WebView.Frame = new RectangleF (0, top+44, sbounds.Width, sbounds.Height-88);
 			
-			title.Frame = new RectangleF (0, 0, sbounds.Width-80, 38);
+			title.Frame = new RectangleF (10, 0, sbounds.Width-80, 38);
 		}
 		
 		public override void ViewWillAppear (bool animated)

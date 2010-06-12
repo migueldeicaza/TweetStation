@@ -69,6 +69,7 @@ namespace TweetStation
 					Flags = UIViewElement.CellFlags.DisableSelection | UIViewElement.CellFlags.Transparent
 				});
 			
+			tweet = partialTweet;
 			if (!partialTweet.IsSearchResult)
 				SetTweet (partialTweet);
 			
