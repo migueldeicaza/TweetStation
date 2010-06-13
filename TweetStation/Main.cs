@@ -381,15 +381,20 @@ namespace TweetStation
 				return (toInterfaceOrientation != UIInterfaceOrientation.PortraitUpsideDown);
 			}
 
-			void UpdatePosition (int pos)
+			void UpdatePosition (int pos, bool animate)
 			{
 				var w = View.Bounds.Width/5;
 				var x = w * pos;
 				
-				UIView.BeginAnimations (null);
-				UIView.SetAnimationCurve (UIViewAnimationCurve.EaseInOut);
+				if (animate){
+					UIView.BeginAnimations (null);
+					UIView.SetAnimationCurve (UIViewAnimationCurve.EaseInOut);
+				}
+				
 				indicator.Frame = new RectangleF (x+((w-10)/2), View.Bounds.Height-TabBar.Bounds.Height-4, 10, 6);
-				UIView.CommitAnimations ();
+				
+				if (animate)
+					UIView.CommitAnimations ();
 			}
 			
 			public override void ViewWillAppear (bool animated)
@@ -400,7 +405,7 @@ namespace TweetStation
 					indicator = new TriangleView (UIColor.FromRGB (0.26f, 0.26f, 0.26f), UIColor.Black);
 					View.AddSubview (indicator);
 					ViewControllerSelected += OnSelected;
-					UpdatePosition (0);
+					UpdatePosition (0, false);
 				}
 			}
 			
@@ -410,7 +415,7 @@ namespace TweetStation
 				
 				for (int i = 0; i < vc.Length; i++){
 					if (vc [i] == a.ViewController){
-						UpdatePosition (i);
+						UpdatePosition (i, true);
 						return;
 					}
 				}
