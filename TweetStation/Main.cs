@@ -145,6 +145,13 @@ namespace TweetStation
 			}
 		}
 		
+		public override void WillEnterForeground (UIApplication application)
+		{
+			main.ReloadTimeline ();
+			mentions.ReloadTimeline ();
+			messages.ReloadTimeline ();
+		}
+		
 		//
 		// Dispatcher that can open various assorted link-like text entries
 		//
@@ -362,31 +369,6 @@ namespace TweetStation
 			Account = newAccount;
 		}
 		
-		public class PositionView : UIView {
-			public PositionView () 
-			{
-				Opaque = false;
-			}
-			
-			public override void Draw (RectangleF rect)
-			{
-				var context = UIGraphics.GetCurrentContext ();
-				
-				context.SetRGBFillColor (0.26f, 0.26f, 0.26f, 1);
-				context.MoveTo (0, 6);
-				context.AddLineToPoint (5, 0);
-				context.AddLineToPoint (10, 6);
-				context.ClosePath ();
-				context.FillPath ();
-				
-				context.SetRGBStrokeColor (0, 0, 0, 1);
-				context.MoveTo (0, 5);
-				context.AddLineToPoint (5, 0);
-				context.AddLineToPoint (10, 5);
-				context.StrokePath ();
-			}
-		}
-	
 		public class RotatingTabBar : UITabBarController {
 			UIView indicator;
 			
@@ -415,7 +397,7 @@ namespace TweetStation
 				base.ViewWillAppear (animated);
 			
 				if (indicator == null){
-					indicator = new PositionView ();
+					indicator = new TriangleView (UIColor.FromRGB (0.26f, 0.26f, 0.26f), UIColor.Black);
 					View.AddSubview (indicator);
 					ViewControllerSelected += OnSelected;
 					UpdatePosition (0);

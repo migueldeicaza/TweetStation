@@ -52,10 +52,19 @@ namespace TweetStation
 			var handlers = new EventHandler [] { Reply, Retweet, Direct };
 			var profileRect = new RectangleF (PadX, 0, View.Bounds.Width-30-PadX*2, 100);
 			var detailRect = new RectangleF (PadX, 0, View.Bounds.Width-30-PadX*2, 0);
-			 
-			shortProfileView = new ShortProfileView (profileRect, partialTweet, true);
 			
-			main = new Section (shortProfileView){
+			shortProfileView = new ShortProfileView (profileRect, partialTweet, true);
+			profileRect.Height += 8;
+			
+			var triangle = new TriangleView (UIColor.White, UIColor.FromRGB (171, 171, 171)) {
+				Frame = new RectangleF (43, shortProfileView.Bounds.Height+1, 16, 8)
+			};
+			
+			var containerView = new UIView (profileRect);
+			containerView.Add (shortProfileView);
+			containerView.Add (triangle);
+			
+			main = new Section (containerView){
 				new UIViewElement (null, new DetailTweetView (detailRect, partialTweet, TapHandler, TapAndHoldHandler, this), false) { 
 					Flags = UIViewElement.CellFlags.DisableSelection 
 				}
