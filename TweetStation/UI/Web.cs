@@ -137,7 +137,7 @@ namespace TweetStation
 			
 			topBar.Frame = new RectangleF (0, top, sbounds.Width, 44);
 			toolbar.Frame =  new RectangleF (0, sbounds.Height-44, sbounds.Width, 44);
-			WebView.Frame = new RectangleF (0, top+44, sbounds.Width, sbounds.Height-88);
+			WebView.Frame = new RectangleF (0, top+44, sbounds.Width, sbounds.Height-88-top);
 			
 			title.Frame = new RectangleF (10, 0, sbounds.Width-80, 38);
 		}

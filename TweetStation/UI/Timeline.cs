@@ -224,7 +224,7 @@ namespace TweetStation {
 						NavigationController.TabBarItem.BadgeValue = (nParsed > 0) ? nParsed.ToString () : null;
 					});
 
-					if (!continuous){
+					if (!continuous && nParsed > 0){
 						LoadMoreElement more = null;
 						more = new LoadMoreElement (Locale.GetText ("Load more tweets"), Locale.GetText ("Loading"), delegate {
 							more.Animating = true;
