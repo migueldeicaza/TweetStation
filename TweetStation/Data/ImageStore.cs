@@ -100,9 +100,11 @@ namespace TweetStation
 				if (ret != null)
 					return ret;
 			}
-			
-			if (pendingRequests.ContainsKey (id))
-				return null;
+
+			lock (requestQueue){
+				if (pendingRequests.ContainsKey (id))
+					return null;
+			}
 
 			string picfile;
 			if (id >= TempStartId){
@@ -201,24 +203,26 @@ namespace TweetStation
 			if (url == null)
 				return;
 
-			if (pendingRequests.ContainsKey (id)){
-				pendingRequests [id].Add (notify);
-				return;
-			}
-			var slot = new List<IImageUpdated> (4);
-			slot.Add (notify);
-			pendingRequests [id] = slot;
-			if (pendingRequests.Count >= MaxRequests){
-				lock (requestQueue)
+			lock (requestQueue){
+				if (pendingRequests.ContainsKey (id)){
+					pendingRequests [id].Add (notify);
+					return;
+				}
+				var slot = new List<IImageUpdated> (4);
+				slot.Add (notify);
+				pendingRequests [id] = slot;
+				
+				if (pendingRequests.Count >= MaxRequests){
 					requestQueue.Enqueue (id);
-			} else {
-				ThreadPool.QueueUserWorkItem (delegate { 
-					try {
-						StartPicDownload (id, url); 
-					} catch (Exception e){
-						Console.WriteLine (e);
-					}
-				});
+				} else {
+					ThreadPool.QueueUserWorkItem (delegate { 
+							try {
+								StartPicDownload (id, url); 
+							} catch (Exception e){
+								Console.WriteLine (e);
+							}
+						});
+				}
 			}
 		}
 
@@ -293,20 +297,20 @@ namespace TweetStation
 		// Runs on the main thread
 		static void NotifyImageListeners ()
 		{
-			try {
 			lock (queuedUpdates){
 				foreach (var qid in queuedUpdates){
 					var list = pendingRequests [qid];
 					pendingRequests.Remove (qid);
-					foreach (var pr in list)
-						pr.UpdatedImage (qid);
+					foreach (var pr in list){
+						try {
+							pr.UpdatedImage (qid);
+						} catch (Exception e){
+							Console.WriteLine (e);
+						}
+					}
 				}
 				queuedUpdates.Clear ();
 			}
-			} catch (Exception e){
-				Console.WriteLine (e);
-			}
-			         
 		}
 		
 		static UIImage RoundedPic (string picfile, long id)
