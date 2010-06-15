@@ -14,7 +14,7 @@
     <AssemblyName>TweetStation</AssemblyName>
     <MtouchMinimumOS>3.0</MtouchMinimumOS>
     <BundleIdentifier>org.tirania.tweetstation</BundleIdentifier>
-    <BundleVersion>1.1</BundleVersion>
+    <BundleVersion>1.2</BundleVersion>
     <BundleDisplayName>TweetStation</BundleDisplayName>
     <BundleIcon>Icon.png</BundleIcon>
     <BundleIconSpotlight>IconSpotlight.png</BundleIconSpotlight>
