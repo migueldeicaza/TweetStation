@@ -213,6 +213,7 @@ namespace TweetStation
 				pendingRequests [id] = slot;
 				
 				if (pendingRequests.Count >= MaxRequests){
+					Console.WriteLine ("Queuing Image request because {0} >= {1}", pendingRequests.Count, MaxRequests);
 					requestQueue.Enqueue (id);
 				} else {
 					ThreadPool.QueueUserWorkItem (delegate { 
@@ -265,7 +266,7 @@ namespace TweetStation
 				// Cluster all updates together
 				bool doInvoke = false;
 				
-				lock (queuedUpdates){
+				lock (requestQueue){
 					if (downloaded){
 						queuedUpdates.Add (id);
 					
@@ -273,9 +274,7 @@ namespace TweetStation
 						if (queuedUpdates.Count == 1)
 							doInvoke = true;
 					}
-				}
-				
-				lock (requestQueue){
+
 					idToUrl.Remove (id);
 
 					// Try to get more jobs.
@@ -283,6 +282,7 @@ namespace TweetStation
 						id = requestQueue.Dequeue ();
 						url = GetPicUrlFromId (id, null);
 						if (url == null){
+							Console.WriteLine ("Dropping request {0} because url is null", id);
 							pendingRequests.Remove (id);
 							id = -1;
 						}
@@ -297,7 +297,7 @@ namespace TweetStation
 		// Runs on the main thread
 		static void NotifyImageListeners ()
 		{
-			lock (queuedUpdates){
+			lock (requestQueue){
 				foreach (var qid in queuedUpdates){
 					var list = pendingRequests [qid];
 					pendingRequests.Remove (qid);
