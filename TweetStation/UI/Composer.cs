@@ -409,6 +409,10 @@ namespace TweetStation
 			
 			ThreadPool.QueueUserWorkItem (delegate {
 				TwitterAccount.CurrentAccount.UploadPicture (stream, PicUploadComplete);
+				
+				// This captures the variable and handle of jpeg, and then we clear it
+				// to release it
+				jpeg = null;
 			});
 		}
 		

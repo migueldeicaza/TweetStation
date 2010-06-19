@@ -295,8 +295,9 @@ namespace TweetStation
 			int n = 0;
 
 			source.Position = 0;
-			while ((n = source.Read (buffer, 0, buffer.Length)) != 0)
+			while ((n = source.Read (buffer, 0, buffer.Length)) != 0){
 				dest.Write (buffer, 0, n);
+			}
 		}
 
 		static void AddPart (Stream target, string boundary, bool newline, string header, string value)
@@ -340,9 +341,10 @@ namespace TweetStation
 
 			Stream upload = GenerateYFrogFrom (boundary, source, Username);
 			req.ContentLength = upload.Length;
-			using (var rs = req.GetRequestStream ())
+			using (var rs = req.GetRequestStream ()){
 				Copy (upload, rs);
-
+				rs.Close ();
+			}
 			string urlToPic = null;
 			try {
 				var response = (HttpWebResponse) req.GetResponse  ();
