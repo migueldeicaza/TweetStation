@@ -200,6 +200,7 @@ namespace TweetStation
 						},
 						new Section ("Includes X11 code from") {
 							Twitterista ("escoz"),
+							Twitterista ("praeclarum"),
 						}
 					}
 				}
