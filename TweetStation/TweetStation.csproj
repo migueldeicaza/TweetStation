@@ -147,6 +147,8 @@
     <Compile Include="UI\SwipeSupport.cs" />
     <Compile Include="Utilities\LoadingHudView.cs" />
     <Compile Include="UI\Chickens.cs" />
+    <Compile Include="Data\TwitterAccountDatabase.cs" />
+    <Compile Include="Data\TweetDatabase.cs" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="MainWindow.xib" />
