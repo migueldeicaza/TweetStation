@@ -118,8 +118,9 @@ namespace TweetStation
 					Retweeter = subuser ["screen_name"];
 					RetweeterPicUrl = subuser ["profile_image_url"];
 					RetweeterId = subuser ["id"];
-					if (Text.StartsWith ("RT "))
-						Text = Text.Substring (3);
+					var subText = sub ["text"];
+					if (subText != null)
+						Text = subText;
 				} else {
 					RetweeterPicUrl = null;
 					Retweeter = null;
