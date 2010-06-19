@@ -272,7 +272,7 @@ namespace TweetStation
 				Delegate = new MyCLLocationManagerDelegate (callback),
 				DistanceFilter = 1000f
 			};
-			if (locationManager.LocationServicesEnabled)
+			if (CLLocationManager.LocationServicesEnabled)
 				locationManager.StartUpdatingLocation ();
 		}	
 		#endregion

@@ -373,6 +373,7 @@ namespace TweetStation
 		
 		public class RotatingTabBar : UITabBarController {
 			UIView indicator;
+			int selected;
 			
 			public RotatingTabBar () : base ()
 			{
@@ -383,10 +384,10 @@ namespace TweetStation
 				return (toInterfaceOrientation != UIInterfaceOrientation.PortraitUpsideDown);
 			}
 
-			void UpdatePosition (int pos, bool animate)
+			void UpdatePosition (bool animate)
 			{
 				var w = View.Bounds.Width/5;
-				var x = w * pos;
+				var x = w * selected;
 				
 				if (animate){
 					UIView.BeginAnimations (null);
@@ -399,6 +400,13 @@ namespace TweetStation
 					UIView.CommitAnimations ();
 			}
 			
+			public override void DidRotate (UIInterfaceOrientation fromInterfaceOrientation)
+			{
+				base.DidRotate (fromInterfaceOrientation);
+				
+				UpdatePosition (false);
+			}
+			
 			public override void ViewWillAppear (bool animated)
 			{
 				base.ViewWillAppear (animated);
@@ -407,7 +415,7 @@ namespace TweetStation
 					indicator = new TriangleView (UIColor.FromRGB (0.26f, 0.26f, 0.26f), UIColor.Black);
 					View.AddSubview (indicator);
 					ViewControllerSelected += OnSelected;
-					UpdatePosition (0, false);
+					UpdatePosition (false);
 				}
 			}
 			
@@ -417,7 +425,8 @@ namespace TweetStation
 				
 				for (int i = 0; i < vc.Length; i++){
 					if (vc [i] == a.ViewController){
-						UpdatePosition (i, true);
+						selected = i;
+						UpdatePosition (true);
 						return;
 					}
 				}
