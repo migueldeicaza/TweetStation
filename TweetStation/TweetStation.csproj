@@ -74,7 +74,7 @@
     <MtouchI18n />
     <MtouchSdkVersion>4.0</MtouchSdkVersion>
     <DefineConstants>TRACE</DefineConstants>
-    <CodesignProvision>20AAB69C-80C0-4785-B694-8A4A2DBC489C</CodesignProvision>
+    <CodesignProvision>CD7CE718-F7A1-4858-A956-9B9A161C239C</CodesignProvision>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'AdHoc|iPhone' ">
     <DebugType>none</DebugType>

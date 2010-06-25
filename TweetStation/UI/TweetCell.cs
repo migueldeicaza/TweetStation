@@ -301,18 +301,6 @@ namespace TweetStation
 		
 		public override void Selected (DialogViewController dvc, UITableView tableView, NSIndexPath path)
 		{
-			// Replace the temporary search user info returned by twitter with the full info
-			if (Tweet.IsSearchResult){
-				Tweet.LoadFullTweet (Tweet.Id, fullTweet => {
-					Tweet = fullTweet;
-					ActivateFullTweet (dvc);
-				});
-			} else
-				ActivateFullTweet (dvc);
-		}
-		
-		void ActivateFullTweet (DialogViewController dvc)
-		{
 			var profile = new DetailTweetViewController (Tweet);
 			dvc.ActivateController (profile);
 		}
