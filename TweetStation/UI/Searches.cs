@@ -44,7 +44,7 @@ namespace TweetStation
 		
 		protected override IEnumerable<Tweet> GetTweetStream (byte[] result)
 		{
-			return Tweet.TweetsFromSearchResults (new MemoryStream (result));
+			return Tweet.TweetsFromSearchResults (new MemoryStream (result), ReferenceUser);
 		}
 	}
 	
@@ -60,7 +60,7 @@ namespace TweetStation
 
 		protected override IEnumerable<Tweet> GetTweetStream (byte[] result)
 		{
-			return Tweet.TweetsFromSearchResults (new MemoryStream (result));
+			return Tweet.TweetsFromSearchResults (new MemoryStream (result), ReferenceUser);
 		}
 	}
 	

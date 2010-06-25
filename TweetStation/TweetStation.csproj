@@ -59,7 +59,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <MtouchI18n />
     <CodesignProvision>33E9B397-0B73-42C3-9F09-3308F8EDB09F</CodesignProvision>
-    <MtouchSdkVersion>3.2</MtouchSdkVersion>
+    <MtouchSdkVersion>4.0</MtouchSdkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhone' ">
     <DebugType>none</DebugType>
@@ -73,7 +73,7 @@
     <MtouchI18n />
     <MtouchSdkVersion>4.0</MtouchSdkVersion>
     <DefineConstants>TRACE</DefineConstants>
-    <CodesignProvision>33E9B397-0B73-42C3-9F09-3308F8EDB09F</CodesignProvision>
+    <CodesignProvision>20AAB69C-80C0-4785-B694-8A4A2DBC489C</CodesignProvision>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'AdHoc|iPhone' ">
     <DebugType>none</DebugType>

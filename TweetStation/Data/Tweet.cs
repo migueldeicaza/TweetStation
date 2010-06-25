@@ -263,8 +263,8 @@ namespace TweetStation
 		// not really complete and have the UserId busted (negative
 		// numbers) since the userids returned by twitter for
 		// searches have no relationship with the rest of the system
-		public static IEnumerable<Tweet> TweetsFromSearchResults (Stream stream)
-		{
+		public static IEnumerable<Tweet> TweetsFromSearchResults (Stream stream, User reference)
+		{ 
 			JsonValue root;
 			
 			try {
@@ -284,8 +284,8 @@ namespace TweetStation
 						Text = ParseText (result),
 						Source = Util.StripHtml (HttpUtility.HtmlDecode (result ["source"]) ?? ""),
 						UserId = serial++,
-						Screename = (string) result ["from_user"],
-						PicUrl = (string) result ["profile_image_url"]
+						Screename = reference == null ? (string) result ["from_user"] : reference.Screenname,
+						PicUrl = reference == null ? (string) result ["profile_image_url"] : reference.PicUrl
 					};
 				} catch (Exception e){
 					Console.WriteLine (e);

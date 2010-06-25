@@ -31,17 +31,16 @@ namespace TweetStation
 {
 	public class FullProfileView : DialogViewController 
 	{
-		const string lookup = "http://api.twitter.com/1/users/lookup.json";
 		const int PadX = 4;
 		StyledStringElement followButton, blockUnblockButton;
 		User user;
 		bool following, blocking;
 		
-			public FullProfileView (long id) : base (UITableViewStyle.Grouped, null, true)
+		public FullProfileView (long id) : base (UITableViewStyle.Grouped, null, true)
 		{
 			user = User.FromId (id);
 			if (user == null)
-				Fetch ("?user_id=" + id, id.ToString ());
+				User.FetchUser (id, u => ProcessUserReturn (u));
 			else 
 				CreateUI ();
 		}
@@ -50,28 +49,18 @@ namespace TweetStation
 		{
 			user = User.FromName (name);
 			if (user == null)
-				Fetch ("?screen_name=" + name, name);
+				User.FetchUser (name, u => ProcessUserReturn (u));
 			else
 				CreateUI ();
 		}
 		
-		void Fetch (string suffix, string diagMsg)
+		void ProcessUserReturn (User user)
 		{
-			TwitterAccount.CurrentAccount.Download (lookup + suffix, res => { ProcessUserReturn (res, diagMsg); });
-		}
-		
-		void ProcessUserReturn (byte [] res, string diagMsg)
-		{
-			if (res == null){
-				Root = Util.MakeError (diagMsg);
+			if (user == null){
+				Root = Util.MakeError (Locale.GetText ("Could not get information on user"));
 				return;
 			}
-			lock (Database.Main)
-				user = User.UnlockedLoadUsers (new MemoryStream (res)).FirstOrDefault ();
-			if (user == null)
-				Root = Util.MakeError (diagMsg);
-			else
-				CreateUI ();
+			CreateUI ();
 		}
 		
 		void CreateUI ()

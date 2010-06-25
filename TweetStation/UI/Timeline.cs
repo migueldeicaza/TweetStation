@@ -333,20 +333,36 @@ namespace TweetStation {
 			
 			this.NavigationItem.Title = title;
 			EnableSearch = true;
+			
+			if (reference != null && reference.Id > ImageStore.TempStartId){
+				User.FetchUser (reference.Screenname, u => UserUpdated (u));
+			}
+		}
+		
+		protected virtual void UserUpdated (User u)
+		{
+			if (u == null)
+				return;
+			ReferenceUser = u;
+			UpdateUserInfo ();
 		}
 		
 		protected override string TimelineTitle { get { return StreamedTitle; } }
 		
 		protected override void ResetState ()
 		{
-			if (ReferenceUser != null){
-				var profileRect = new RectangleF (PadX, 0, View.Bounds.Width-30-PadX*2, 100);
-				shortProfileView = new ShortProfileView (profileRect, ReferenceUser.Id, true);
-				shortProfileView.PictureTapped += delegate { PictureViewer.Load (this, ReferenceUser.Id); };
-				shortProfileView.UrlTapped += delegate { WebViewController.OpenUrl (this, ReferenceUser.Url); };
-				shortProfileView.Tapped += delegate { ActivateController (new FullProfileView (ReferenceUser.Id)); };
-				TableView.TableHeaderView = shortProfileView;
-			}
+			if (ReferenceUser != null)
+				UpdateUserInfo ();
+		}
+		
+		void UpdateUserInfo ()
+		{
+			var profileRect = new RectangleF (PadX, 0, View.Bounds.Width-30-PadX*2, 100);
+			shortProfileView = new ShortProfileView (profileRect, ReferenceUser.Id, true);
+			shortProfileView.PictureTapped += delegate { PictureViewer.Load (this, ReferenceUser.Id); };
+			shortProfileView.UrlTapped += delegate { WebViewController.OpenUrl (this, ReferenceUser.Url); };
+			shortProfileView.Tapped += delegate { ActivateController (new FullProfileView (ReferenceUser.Id)); };
+			TableView.TableHeaderView = shortProfileView;
 		}
 		
 		public override void ViewWillAppear (bool animated)
@@ -522,7 +538,7 @@ namespace TweetStation {
 	// A MonoTouch.Dialog Element that can be inserted in dialogs
 	//
 	public class TimelineRootElement : RootElement {
-		User reference;
+		public User UserReference;
 		string nestedCaption;
 		string url, countStr, pageStr, sinceStr;
 		int count;
@@ -530,7 +546,7 @@ namespace TweetStation {
 		public TimelineRootElement (string nestedCaption, string caption, string url, string countStr, int count, string sinceStr, string pageStr, User reference) : base (caption)
 		{
 			this.nestedCaption = nestedCaption;
-			this.reference = reference;
+			this.UserReference = reference;
 			this.url = url;
 			this.pageStr = pageStr;
 			this.countStr = countStr;
@@ -555,7 +571,7 @@ namespace TweetStation {
 		
 		protected override UIViewController MakeViewController ()
 		{						
-			return new StreamedTimelineViewController (nestedCaption, url, countStr, count, sinceStr, pageStr, reference) {
+			return new StreamedTimelineViewController (nestedCaption, url, countStr, count, sinceStr, pageStr, UserReference) {
 				Account = TwitterAccount.CurrentAccount
 			};
 		}

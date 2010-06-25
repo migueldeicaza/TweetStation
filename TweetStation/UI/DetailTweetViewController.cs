@@ -35,6 +35,7 @@ using MonoTouch.CoreGraphics;
 namespace TweetStation
 {
 	public class DetailTweetViewController : DialogViewController {
+		TimelineRootElement userTimeline;
 		Section main;
 		ShortProfileView shortProfileView;
 		const int PadX = 4;
@@ -78,15 +79,17 @@ namespace TweetStation
 					Flags = UIViewElement.CellFlags.DisableSelection | UIViewElement.CellFlags.Transparent
 				});
 			
+			userTimeline = TimelineRootElement.MakeTimeline (partialTweet.Screename, Locale.GetText ("User's timeline"), "http://api.twitter.com/1/statuses/user_timeline.json?skip_user=true&screen_name=" + partialTweet.Screename, User.FromTweet (partialTweet));
+
 			tweet = partialTweet;
 			if (!partialTweet.IsSearchResult)
 				SetTweet (partialTweet);
-			
+
 			Root = new RootElement (partialTweet.Screename){
 				main,
 				replySection,
 				new Section () {
-					TimelineRootElement.MakeTimeline (partialTweet.Screename, Locale.GetText ("User's timeline"), "http://api.twitter.com/1/statuses/user_timeline.json?skip_user=true&screen_name=" + partialTweet.Screename, User.FromId (partialTweet.UserId))
+					userTimeline
 				}
 			};
 		}
@@ -95,6 +98,7 @@ namespace TweetStation
 		void SetTweet (Tweet fullTweet)
 		{
 			this.tweet = fullTweet;
+			userTimeline.UserReference = User.FromId (tweet.UserId);
 			
 			shortProfileView.UpdateFromUserId (tweet.UserId);
 			shortProfileView.PictureTapped += delegate { PictureViewer.Load (this, tweet.UserId); };

@@ -235,6 +235,45 @@ namespace TweetStation
 				return Database.Main.Query<User> ("SELECT * FROM User WHERE Id = ?", id).FirstOrDefault ();
 		}
 		
+		public static User FromTweet (Tweet tweet)
+		{
+			if (tweet.UserId >= ImageStore.TempStartId){
+				Console.WriteLine ("This tweet should have been pre-loaded with full info before: {0}", Environment.StackTrace);
+				var u = new User ();
+				u.Screenname = tweet.Screename;
+				u.Id = tweet.UserId;
+				u.PicUrl = tweet.PicUrl;
+				return u;
+			}
+			return FromId (tweet.UserId);
+		}
+		
+		const string lookup = "http://api.twitter.com/1/users/lookup.json";
+		public static void FetchUser (long id, Action<User> cback)
+		{
+			FetchUserFromUrl (lookup + "?user_id=" + id, cback);
+		}
+		
+		public static void FetchUser (string screenName, Action<User> cback)
+		{
+			FetchUserFromUrl (lookup + "?screen_name=" + screenName, cback);
+		}
+		
+		static void FetchUserFromUrl (string url, Action<User> cback)
+		{
+			TwitterAccount.CurrentAccount.Download (url, res => { 
+				if (res == null){
+					cback (null);
+					return;
+				}
+				User user;
+				lock (Database.Main){
+					user = User.UnlockedLoadUsers (new MemoryStream (res)).FirstOrDefault ();
+				}
+				cback (user);
+			});
+		}
+		
 		public static User FromName (string screenname)
 		{
 			lock (Database.Main)

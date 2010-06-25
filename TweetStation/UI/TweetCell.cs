@@ -167,6 +167,10 @@ namespace TweetStation
 					xPic = PicXPad;
 				}
 				
+				if (userText == null){
+					userText = "Unknown";
+				}
+				
 				textColor.SetColor ();
 				DrawString (userText, new RectangleF (xText, TextHeightPadding, bounds.Width-PicAreaWidth-TextWidthPadding-TimeWidth, userSize), userFont);
 				DrawString (tweet.Text, new RectangleF (xText, bounds.Y + TextYOffset, bounds.Width-PicAreaWidth-TextWidthPadding, bounds.Height-TextYOffset), textFont, UILineBreakMode.WordWrap);
@@ -296,6 +300,18 @@ namespace TweetStation
 		}
 		
 		public override void Selected (DialogViewController dvc, UITableView tableView, NSIndexPath path)
+		{
+			// Replace the temporary search user info returned by twitter with the full info
+			if (Tweet.IsSearchResult){
+				Tweet.LoadFullTweet (Tweet.Id, fullTweet => {
+					Tweet = fullTweet;
+					ActivateFullTweet (dvc);
+				});
+			} else
+				ActivateFullTweet (dvc);
+		}
+		
+		void ActivateFullTweet (DialogViewController dvc)
 		{
 			var profile = new DetailTweetViewController (Tweet);
 			dvc.ActivateController (profile);
