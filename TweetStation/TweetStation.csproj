@@ -18,6 +18,7 @@
     <BundleDisplayName>TweetStation</BundleDisplayName>
     <BundleIcon>Icon.png</BundleIcon>
     <BundleIconSpotlight>IconSpotlight.png</BundleIconSpotlight>
+    <BundleIconHigh>Icon@2x.png</BundleIconHigh>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|iPhoneSimulator' ">
     <DebugSymbols>true</DebugSymbols>
@@ -192,6 +193,8 @@
     <Content Include="Images\back.png" />
     <Content Include="Images\forward.png" />
     <Content Include="Default.png" />
+    <Content Include="Default%402x.png" />
+    <Content Include="Icon%402x.png" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\MonoTouch.Dialog\MonoTouch.Dialog\MonoTouch.Dialog.csproj">
