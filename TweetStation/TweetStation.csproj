@@ -33,7 +33,7 @@
     <MtouchExtraArgs>-i18n=west</MtouchExtraArgs>
     <MtouchI18n />
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <MtouchSdkVersion>3.2</MtouchSdkVersion>
+    <MtouchSdkVersion>4.0</MtouchSdkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhoneSimulator' ">
     <DebugType>none</DebugType>
@@ -195,6 +195,16 @@
     <Content Include="Default.png" />
     <Content Include="Default%402x.png" />
     <Content Include="Icon%402x.png" />
+    <Content Include="Images\replies%402x.png" />
+    <Content Include="Images\home%402x.png" />
+    <Content Include="Images\messages%402x.png" />
+    <Content Include="Images\fav%402x.png" />
+    <Content Include="Images\arrow.png" />
+    <Content Include="Images\lupa%402x.png" />
+    <Content Include="Images\star-off%402x.png" />
+    <Content Include="Images\star-on%402x.png" />
+    <Content Include="Images\mini-star-on%402x.png" />
+    <Content Include="Images\settings%402x.png" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\MonoTouch.Dialog\MonoTouch.Dialog\MonoTouch.Dialog.csproj">

@@ -169,10 +169,10 @@ namespace TweetStation
 					optionalUrl = user.PicUrl;
 				}
 			}
-			if (id < 0){
+			if (id < 0 || Graphics.HighRes){
 				int _normalIdx = optionalUrl.LastIndexOf ("_normal");	
 				if (_normalIdx != -1)
-					optionalUrl = optionalUrl.Substring (0, _normalIdx) + optionalUrl.Substring (optionalUrl.Length-4);
+					optionalUrl = optionalUrl.Substring (0, _normalIdx) + "_bigger" + optionalUrl.Substring (optionalUrl.Length-4);
 			}
 			if (!Uri.TryCreate (optionalUrl, UriKind.Absolute, out url))
 				return null;

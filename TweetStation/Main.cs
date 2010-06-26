@@ -95,19 +95,19 @@ namespace TweetStation
 			
 			navigationRoots = new UINavigationController [5] {
 				new UINavigationController (main) {
-					TabBarItem = new UITabBarItem ("Friends", UIImage.FromFileUncached ("Images/home.png"), 0),
+					TabBarItem = new UITabBarItem ("Friends", UIImage.FromBundle ("Images/home.png"), 0),
 				},
 				new UINavigationController (mentions) {
-					TabBarItem = new UITabBarItem ("Mentions", UIImage.FromFileUncached ("Images/replies.png"), 1)
+					TabBarItem = new UITabBarItem ("Mentions", UIImage.FromBundle ("Images/replies.png"), 1)
 				},
 				new UINavigationController (messages) {
-					TabBarItem = new UITabBarItem ("Messages", UIImage.FromFileUncached ("Images/messages.png"), 2)
+					TabBarItem = new UITabBarItem ("Messages", UIImage.FromBundle ("Images/messages.png"), 2)
 				},
 				new UINavigationController (favorites) {
-					TabBarItem = new UITabBarItem ("Favorites", UIImage.FromFileUncached ("Images/fav.png"), 3)
+					TabBarItem = new UITabBarItem ("Favorites", UIImage.FromBundle ("Images/fav.png"), 3)
 				},
 				new UINavigationController (searches) {
-					TabBarItem = new UITabBarItem ("Search", UIImage.FromFileUncached ("Images/lupa.png"), 4)
+					TabBarItem = new UITabBarItem ("Search", UIImage.FromBundle ("Images/lupa.png"), 4)
 				}
 			};
 	

@@ -119,7 +119,7 @@ namespace TweetStation {
 	public class TimelineViewController : BaseTimelineViewController {
 		Section mainSection;
 		string timelineTitle;
-		static UIImage settingsImage = UIImage.FromFile ("Images/settings.png");
+		static UIImage settingsImage = UIImage.FromBundle ("Images/settings.png");
 		
 		public TimelineViewController (string title, TweetKind kind, bool pushing) : base (pushing)
 		{

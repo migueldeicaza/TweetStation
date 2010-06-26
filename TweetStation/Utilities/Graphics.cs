@@ -31,6 +31,7 @@ namespace TweetStation
 	{
 		static CGPath smallPath = MakeRoundedPath (48);
 		static CGPath largePath = MakeRoundedPath (73);
+		public static bool HighRes = UIScreen.MainScreen.Scale > 1;
 		
         // Child proof the image by rounding the edges of the image
         internal static UIImage RemoveSharpEdges (UIImage image)
@@ -38,13 +39,19 @@ namespace TweetStation
 			if (image == null)
 				throw new ArgumentNullException ("image");
 			
-            UIGraphics.BeginImageContext (new SizeF (48, 48));
-            var c = UIGraphics.GetCurrentContext ();
+			float size = HighRes ? 73 : 48;
+			
+            UIGraphics.BeginImageContext (new SizeF (size, size));
+	        var c = UIGraphics.GetCurrentContext ();
 
-			c.AddPath (smallPath);
-            c.Clip ();
+			if (HighRes)
+				c.AddPath (largePath);
+			else 
+				c.AddPath (smallPath);
+			
+        	c.Clip ();
 
-            image.Draw (new RectangleF (0, 0, 48, 48));
+        	image.Draw (new RectangleF (0, 0, size, size));
             var converted = UIGraphics.GetImageFromCurrentImageContext ();
             UIGraphics.EndImageContext ();
             return converted;

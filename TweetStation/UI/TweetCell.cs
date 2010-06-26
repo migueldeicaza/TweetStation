@@ -92,7 +92,7 @@ namespace TweetStation
 		}
 		
 		public class TweetCellView : UIView, IImageUpdated {
-			static UIImage star = UIImage.FromFile ("Images/mini-star-on.png");	
+			static UIImage star = UIImage.FromBundle ("Images/mini-star-on.png");	
 			Tweet tweet;
 			string userText;
 			UIImage tweetImage, retweetImage;
