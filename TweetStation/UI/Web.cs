@@ -61,8 +61,8 @@ namespace TweetStation
 				new UIBarButtonItem (Locale.GetText ("Close"), UIBarButtonItemStyle.Bordered, (o, e) => { DismissModalViewControllerAnimated (true);} )
 			};
 			
-			backButton = new UIBarButtonItem (UIImage.FromFile ("Images/back.png"), UIBarButtonItemStyle.Plain, (o, e) => { WebView.GoBack (); });
-			forwardButton = new UIBarButtonItem (UIImage.FromFile ("Images/forward.png"), UIBarButtonItemStyle.Plain, (o, e) => { WebView.GoForward (); });
+			backButton = new UIBarButtonItem (UIImage.FromBundle ("Images/back.png"), UIBarButtonItemStyle.Plain, (o, e) => { WebView.GoBack (); });
+			forwardButton = new UIBarButtonItem (UIImage.FromBundle ("Images/forward.png"), UIBarButtonItemStyle.Plain, (o, e) => { WebView.GoForward (); });
 			refreshButton = new UIBarButtonItem (UIBarButtonSystemItem.Refresh, (o, e) => { WebView.Reload (); });
 			stopButton = new UIBarButtonItem (UIBarButtonSystemItem.Stop, (o, e) => { WebView.StopLoading (); });
 

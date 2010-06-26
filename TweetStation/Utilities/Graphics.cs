@@ -31,7 +31,10 @@ namespace TweetStation
 	{
 		static CGPath smallPath = MakeRoundedPath (48);
 		static CGPath largePath = MakeRoundedPath (73);
-		public static bool HighRes = UIScreen.MainScreen.Scale > 1;
+		
+		// Check for multi-tasking as a way to determine if we can probe for the "Scale" property,
+		// only available on iOS4 
+		public static bool HighRes = UIDevice.CurrentDevice.IsMultitaskingSupported && UIScreen.MainScreen.Scale > 1;
 		
         // Child proof the image by rounding the edges of the image
         internal static UIImage RemoveSharpEdges (UIImage image)

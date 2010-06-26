@@ -59,7 +59,7 @@
     <MtouchDebug>True</MtouchDebug>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <MtouchI18n />
-    <CodesignProvision>33E9B397-0B73-42C3-9F09-3308F8EDB09F</CodesignProvision>
+    <CodesignProvision>CD7CE718-F7A1-4858-A956-9B9A161C239C</CodesignProvision>
     <MtouchSdkVersion>4.0</MtouchSdkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhone' ">
@@ -205,6 +205,10 @@
     <Content Include="Images\star-on%402x.png" />
     <Content Include="Images\mini-star-on%402x.png" />
     <Content Include="Images\settings%402x.png" />
+    <Content Include="Images\back%402x.png" />
+    <Content Include="Images\forward%402x.png" />
+    <Content Include="Images\gps%402x.png" />
+    <Content Include="Images\arrows%402x.png" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\MonoTouch.Dialog\MonoTouch.Dialog\MonoTouch.Dialog.csproj">
