@@ -238,7 +238,6 @@ namespace TweetStation
 		public static User FromTweet (Tweet tweet)
 		{
 			if (tweet.UserId >= ImageStore.TempStartId){
-				Console.WriteLine ("This tweet should have been pre-loaded with full info before: {0}", Environment.StackTrace);
 				var u = new User ();
 				u.Screenname = tweet.Screename;
 				u.Id = tweet.UserId;
