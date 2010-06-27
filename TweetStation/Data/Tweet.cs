@@ -335,6 +335,7 @@ namespace TweetStation
 		public string GetRecipients ()
 		{
 			string text = Text;
+			
 			if (text.IndexOf ('@') == -1)
 				return '@' + Screename;
 			
@@ -346,9 +347,10 @@ namespace TweetStation
 					continue;
 				
 				var res = new StringBuilder ();
-				for (i++; i < text.Length && Char.IsLetterOrDigit (text [i]) || text [i] == '_'; i++){
+				for (i++; i < text.Length && (Char.IsLetterOrDigit (text [i]) || text [i] == '_'); i++){
 					res.Append (text [i]);
 				}
+				
 				recipients.Add (res.ToString ());
 			}
 			recipients.Remove (TwitterAccount.CurrentAccount.Username);

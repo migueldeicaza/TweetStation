@@ -243,6 +243,8 @@ namespace TweetStation
 		
 		static bool Download (Uri url, string target)
 		{
+			var buffer = new byte [4*1024];
+			
 			try {
 				using (var file = new FileStream (target, FileMode.Create, FileAccess.Write, FileShare.Read)) {
 	                	var req = WebRequest.Create (url) as HttpWebRequest;
@@ -280,13 +282,12 @@ namespace TweetStation
 		static void _StartPicDownload (long id, Uri url)
 		{
 			do {
-				var buffer = new byte [4*1024];
 				string picdir = id < TempStartId ? PicDir : TmpDir;
 				bool downloaded = false;
 				
 				downloaded = Download (url, picdir + id + ".png");
 				if (!downloaded)
-					Console.WriteLine ("{0} Error fetching picture for {1} from {2}", e, id, url);
+					Console.WriteLine ("Error fetching picture for {0} from {1}", id, url);
 				
 				// Cluster all updates together
 				bool doInvoke = false;
