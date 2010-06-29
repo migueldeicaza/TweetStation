@@ -43,7 +43,12 @@ namespace TweetStation
 			inited = true;
 			AudioSession.Initialize ();
 			AudioSession.Category = AudioSessionCategory.AmbientSound;
-			AudioSession.OverrideCategoryMixWithOthers = true;
+			
+			try {
+				AudioSession.OverrideCategoryMixWithOthers = true;
+			} catch {
+				// Not available in older OSes
+			}
 		}
 		
 		static AudioPlay ()

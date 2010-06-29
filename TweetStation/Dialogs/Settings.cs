@@ -55,6 +55,7 @@ namespace TweetStation
 			{
 				var account = (parent.Root [indexPath.Section][indexPath.Row] as AccountElement).Account;
 				
+				parent.Root [indexPath.Section].Remove (indexPath.Row);
 				TwitterAccount.Remove (account);
 			}
 		}
@@ -199,6 +200,7 @@ namespace TweetStation
 						},
 						new Section ("Includes X11 code from") {
 							Twitterista ("escoz"),
+							Twitterista ("praeclarum"),
 						}
 					}
 				}

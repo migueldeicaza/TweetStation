@@ -158,7 +158,7 @@ namespace TweetStation {
 	public class TimelineViewController : BaseTimelineViewController {
 		Section mainSection;
 		string timelineTitle;
-		static UIImage settingsImage = UIImage.FromFile ("Images/settings.png");
+		static UIImage settingsImage = UIImage.FromBundle ("Images/settings.png");
 		
 		public TimelineViewController (string title, TweetKind kind, bool pushing) : base (pushing)
 		{
@@ -234,9 +234,15 @@ namespace TweetStation {
 			Account.ReloadTimeline (kind, since, max_id, count => {
 				mainSection.Remove (removeOnInsert);
 				if (count == -1){
-					mainSection.Insert (insertPoint, new StyledStringElement (Locale.Format ("Net failure on {0}", DateTime.Now)){
-						Font = UIFont.SystemFontOfSize (14)
-					});
+					var msg = Locale.Format ("Net failure on {0}", DateTime.Now);
+					Element insertElement;
+					
+					if (mainSection.Count > 0 && (insertElement = mainSection [insertPoint] as StyledStringElement) != null)
+						insertElement.Caption = msg;
+					else
+						mainSection.Insert (insertPoint, new StyledStringElement (msg){
+							Font = UIFont.SystemFontOfSize (14)
+						});
 					count = 1;
 				} else {
 					// If we find an overlapping value, the timeline is continous, otherwise, we offer to load more
@@ -253,9 +259,11 @@ namespace TweetStation {
 						nParsed = mainSection.Insert (insertPoint, UITableViewRowAnimation.None, UnlockedFetchTweets (count, lastId, insertPoint));
 					Util.ReportTime ("Time spent loading tweets");
 					
-					NavigationController.TabBarItem.BadgeValue = (nParsed > 1) ? nParsed.ToString () : null;
+					NSTimer.CreateScheduledTimer (TimeSpan.FromSeconds (0.3), delegate {
+						NavigationController.TabBarItem.BadgeValue = (nParsed > 0) ? nParsed.ToString () : null;
+					});
 
-					if (!continuous){
+					if (!continuous && nParsed > 0){
 						LoadMoreElement more = null;
 						more = new LoadMoreElement (Locale.GetText ("Load more tweets"), Locale.GetText ("Loading"), delegate {
 							more.Animating = true;
@@ -337,20 +345,36 @@ namespace TweetStation {
 			
 			this.NavigationItem.Title = title;
 			EnableSearch = true;
+			
+			if (reference != null && reference.Id > ImageStore.TempStartId){
+				User.FetchUser (reference.Screenname, u => UserUpdated (u));
+			}
+		}
+		
+		protected virtual void UserUpdated (User u)
+		{
+			if (u == null)
+				return;
+			ReferenceUser = u;
+			UpdateUserInfo ();
 		}
 		
 		protected override string TimelineTitle { get { return StreamedTitle; } }
 		
 		protected override void ResetState ()
 		{
-			if (ReferenceUser != null){
-				var profileRect = new RectangleF (PadX, 0, View.Bounds.Width-30-PadX*2, 100);
-				shortProfileView = new ShortProfileView (profileRect, ReferenceUser.Id, true);
-				shortProfileView.PictureTapped += delegate { PictureViewer.Load (this, ReferenceUser.Id); };
-				shortProfileView.UrlTapped += delegate { WebViewController.OpenUrl (this, ReferenceUser.Url); };
-				shortProfileView.Tapped += delegate { ActivateController (new FullProfileView (ReferenceUser.Id)); };
-				TableView.TableHeaderView = shortProfileView;
-			}
+			if (ReferenceUser != null)
+				UpdateUserInfo ();
+		}
+		
+		void UpdateUserInfo ()
+		{
+			var profileRect = new RectangleF (PadX, 0, View.Bounds.Width-30-PadX*2, 100);
+			shortProfileView = new ShortProfileView (profileRect, ReferenceUser.Id, true);
+			shortProfileView.PictureTapped += delegate { PictureViewer.Load (this, ReferenceUser.Id); };
+			shortProfileView.UrlTapped += delegate { WebViewController.OpenUrl (this, ReferenceUser.Url); };
+			shortProfileView.Tapped += delegate { ActivateController (new FullProfileView (ReferenceUser.Id)); };
+			TableView.TableHeaderView = shortProfileView;
 		}
 		
 		public override void ViewWillAppear (bool animated)
@@ -526,7 +550,7 @@ namespace TweetStation {
 	// A MonoTouch.Dialog Element that can be inserted in dialogs
 	//
 	public class TimelineRootElement : RootElement {
-		User reference;
+		public User UserReference;
 		string nestedCaption;
 		string url, countStr, pageStr, sinceStr;
 		int count;
@@ -534,7 +558,7 @@ namespace TweetStation {
 		public TimelineRootElement (string nestedCaption, string caption, string url, string countStr, int count, string sinceStr, string pageStr, User reference) : base (caption)
 		{
 			this.nestedCaption = nestedCaption;
-			this.reference = reference;
+			this.UserReference = reference;
 			this.url = url;
 			this.pageStr = pageStr;
 			this.countStr = countStr;
@@ -559,7 +583,7 @@ namespace TweetStation {
 		
 		protected override UIViewController MakeViewController ()
 		{						
-			return new StreamedTimelineViewController (nestedCaption, url, countStr, count, sinceStr, pageStr, reference) {
+			return new StreamedTimelineViewController (nestedCaption, url, countStr, count, sinceStr, pageStr, UserReference) {
 				Account = TwitterAccount.CurrentAccount
 			};
 		}

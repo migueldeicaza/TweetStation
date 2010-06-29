@@ -61,8 +61,8 @@ namespace TweetStation
 				new UIBarButtonItem (Locale.GetText ("Close"), UIBarButtonItemStyle.Bordered, (o, e) => { DismissModalViewControllerAnimated (true);} )
 			};
 			
-			backButton = new UIBarButtonItem (UIImage.FromFile ("Images/back.png"), UIBarButtonItemStyle.Plain, (o, e) => { WebView.GoBack (); });
-			forwardButton = new UIBarButtonItem (UIImage.FromFile ("Images/forward.png"), UIBarButtonItemStyle.Plain, (o, e) => { WebView.GoForward (); });
+			backButton = new UIBarButtonItem (UIImage.FromBundle ("Images/back.png"), UIBarButtonItemStyle.Plain, (o, e) => { WebView.GoBack (); });
+			forwardButton = new UIBarButtonItem (UIImage.FromBundle ("Images/forward.png"), UIBarButtonItemStyle.Plain, (o, e) => { WebView.GoForward (); });
 			refreshButton = new UIBarButtonItem (UIBarButtonSystemItem.Refresh, (o, e) => { WebView.Reload (); });
 			stopButton = new UIBarButtonItem (UIBarButtonSystemItem.Stop, (o, e) => { WebView.StopLoading (); });
 
@@ -74,8 +74,16 @@ namespace TweetStation
 
 		void UpdateNavButtons ()
 		{
+			if (WebView == null)
+				return;
+			
 			backButton.Enabled = WebView.CanGoBack;
 			forwardButton.Enabled = WebView.CanGoForward;
+		}
+		
+		protected virtual string UpdateTitle ()
+		{
+			return WebView.EvaluateJavascript ("document.title");			
 		}
 		
 		public void SetupWeb (string initialTitle)
@@ -98,7 +106,7 @@ namespace TweetStation
 				Util.PopNetworkActive (); 
 				UpdateNavButtons ();
 				
-				title.Text = WebView.EvaluateJavascript ("document.title");
+				title.Text = UpdateTitle ();
 			};
 			
 			title.Text = initialTitle;
@@ -129,9 +137,9 @@ namespace TweetStation
 			
 			topBar.Frame = new RectangleF (0, top, sbounds.Width, 44);
 			toolbar.Frame =  new RectangleF (0, sbounds.Height-44, sbounds.Width, 44);
-			WebView.Frame = new RectangleF (0, top+44, sbounds.Width, sbounds.Height-88);
+			WebView.Frame = new RectangleF (0, top+44, sbounds.Width, sbounds.Height-88-top);
 			
-			title.Frame = new RectangleF (0, 0, sbounds.Width-80, 38);
+			title.Frame = new RectangleF (10, 0, sbounds.Width-80, 38);
 		}
 		
 		public override void ViewWillAppear (bool animated)

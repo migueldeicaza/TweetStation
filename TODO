@@ -1,3 +1,15 @@
+*iPhone4
+
+	Missing @2x icons
+
+	Download the large version of the image for the ShortProfile
+	and show at 146x146 instead of the _bigger version which is only
+	73x73
+
+	Perhaps it is time to abandon the idea of ImageStore tied to the
+	ID, this optimization makes it hard to support all 3 image formats
+	and prevents the code from being reusable
+
 * Usage Observations
 
 	neds to save draft
@@ -12,6 +24,13 @@
 		Open (for links)
 		Quote
 
+* Would be nice
+
+	Upload images in background, like "POSTs" do.
+
+	Compress image in background, without blocking with the HUD display
+
+	
 *  Missing Stuff
 
 	Refresh user pictures when they change.  

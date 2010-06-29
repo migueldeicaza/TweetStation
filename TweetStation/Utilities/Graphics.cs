@@ -32,19 +32,29 @@ namespace TweetStation
 		static CGPath smallPath = MakeRoundedPath (48);
 		static CGPath largePath = MakeRoundedPath (73);
 		
+		// Check for multi-tasking as a way to determine if we can probe for the "Scale" property,
+		// only available on iOS4 
+		public static bool HighRes = UIDevice.CurrentDevice.IsMultitaskingSupported && UIScreen.MainScreen.Scale > 1;
+		
         // Child proof the image by rounding the edges of the image
         internal static UIImage RemoveSharpEdges (UIImage image)
         {
 			if (image == null)
 				throw new ArgumentNullException ("image");
 			
-            UIGraphics.BeginImageContext (new SizeF (48, 48));
-            var c = UIGraphics.GetCurrentContext ();
+			float size = HighRes ? 73 : 48;
+			
+            UIGraphics.BeginImageContext (new SizeF (size, size));
+	        var c = UIGraphics.GetCurrentContext ();
 
-			c.AddPath (smallPath);
-            c.Clip ();
+			if (HighRes)
+				c.AddPath (largePath);
+			else 
+				c.AddPath (smallPath);
+			
+        	c.Clip ();
 
-            image.Draw (new RectangleF (0, 0, 48, 48));
+        	image.Draw (new RectangleF (0, 0, size, size));
             var converted = UIGraphics.GetImageFromCurrentImageContext ();
             UIGraphics.EndImageContext ();
             return converted;
@@ -105,4 +115,35 @@ namespace TweetStation
 			return path;
 		}
 	}
+	
+	public class TriangleView : UIView {
+		UIColor fill, stroke;
+		
+		public TriangleView (UIColor fill, UIColor stroke) 
+		{
+			Opaque = false;
+			this.fill = fill;
+			this.stroke = stroke;
+		}
+		
+		public override void Draw (RectangleF rect)
+		{
+			var context = UIGraphics.GetCurrentContext ();
+			var b = Bounds;
+			
+			fill.SetColor ();
+			context.MoveTo (0, b.Height);
+			context.AddLineToPoint (b.Width/2, 0);
+			context.AddLineToPoint (b.Width, b.Height);
+			context.ClosePath ();
+			context.FillPath ();
+			
+			stroke.SetColor ();
+			context.MoveTo (0, b.Width/2);
+			context.AddLineToPoint (b.Width/2, 0);
+			context.AddLineToPoint (b.Width, b.Width/2);
+			context.StrokePath ();
+		}
+	}
+	
 }

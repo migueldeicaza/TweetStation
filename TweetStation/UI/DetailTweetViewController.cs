@@ -35,6 +35,7 @@ using MonoTouch.CoreGraphics;
 namespace TweetStation
 {
 	public class DetailTweetViewController : DialogViewController {
+		TimelineRootElement userTimeline;
 		Section main;
 		ShortProfileView shortProfileView;
 		const int PadX = 4;
@@ -52,10 +53,19 @@ namespace TweetStation
 			var handlers = new EventHandler [] { Reply, Retweet, Direct };
 			var profileRect = new RectangleF (PadX, 0, View.Bounds.Width-30-PadX*2, 100);
 			var detailRect = new RectangleF (PadX, 0, View.Bounds.Width-30-PadX*2, 0);
-			 
-			shortProfileView = new ShortProfileView (profileRect, partialTweet, true);
 			
-			main = new Section (shortProfileView){
+			shortProfileView = new ShortProfileView (profileRect, partialTweet, true);
+			profileRect.Height += 8;
+			
+			var triangle = new TriangleView (UIColor.White, UIColor.FromRGB (171, 171, 171)) {
+				Frame = new RectangleF (43, shortProfileView.Bounds.Height+1, 16, 8)
+			};
+			
+			var containerView = new UIView (profileRect);
+			containerView.Add (shortProfileView);
+			containerView.Add (triangle);
+			
+			main = new Section (containerView){
 				new UIViewElement (null, new DetailTweetView (detailRect, partialTweet, TapHandler, TapAndHoldHandler, this), false) { 
 					Flags = UIViewElement.CellFlags.DisableSelection 
 				}
@@ -69,14 +79,17 @@ namespace TweetStation
 					Flags = UIViewElement.CellFlags.DisableSelection | UIViewElement.CellFlags.Transparent
 				});
 			
+			userTimeline = TimelineRootElement.MakeTimeline (partialTweet.Screename, Locale.GetText ("User's timeline"), "http://api.twitter.com/1/statuses/user_timeline.json?skip_user=true&screen_name=" + partialTweet.Screename, User.FromTweet (partialTweet));
+
+			tweet = partialTweet;
 			if (!partialTweet.IsSearchResult)
 				SetTweet (partialTweet);
-			
+
 			Root = new RootElement (partialTweet.Screename){
 				main,
 				replySection,
 				new Section () {
-					TimelineRootElement.MakeTimeline (partialTweet.Screename, Locale.GetText ("User's timeline"), "http://api.twitter.com/1/statuses/user_timeline.json?skip_user=true&screen_name=" + partialTweet.Screename, User.FromId (partialTweet.UserId))
+					userTimeline
 				}
 			};
 		}
@@ -85,6 +98,7 @@ namespace TweetStation
 		void SetTweet (Tweet fullTweet)
 		{
 			this.tweet = fullTweet;
+			userTimeline.UserReference = User.FromId (tweet.UserId);
 			
 			shortProfileView.UpdateFromUserId (tweet.UserId);
 			shortProfileView.PictureTapped += delegate { PictureViewer.Load (this, tweet.UserId); };
@@ -209,8 +223,8 @@ namespace TweetStation
 	
 	public class DetailTweetView : UIView, IImageUpdated {
 		static CGPath borderPath = Graphics.MakeRoundedPath (78);
-		static UIImage off = UIImage.FromFileUncached ("Images/star-off.png");
-		public static UIImage on = UIImage.FromFileUncached ("Images/star-on.png");
+		static UIImage off = UIImage.FromBundle ("Images/star-off.png");
+		public static UIImage on = UIImage.FromBundle ("Images/star-on.png");
 		const int PadY = 4;
 		const int smallSize = 12;
 		
@@ -293,7 +307,6 @@ namespace TweetStation
 
 		public override void Draw (RectangleF rect)
 		{
-			Console.WriteLine (rect);
 			if (borderAt < 1)
 				return;
 				

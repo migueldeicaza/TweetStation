@@ -35,16 +35,17 @@ using System.Threading;
 namespace TweetStation
 {
 	public class SearchViewController : StreamedTimelineViewController {
+		
 		public SearchViewController (string search) :
 			base (search, "http://search.twitter.com/search.json?q=" + OAuth.PercentEncode (search), "rpp=", 50, "since_id=", "page=", null)
 		{
+			//View.AddSubview (bottomBar);
 		}
 		
 		protected override IEnumerable<Tweet> GetTweetStream (byte[] result)
 		{
-			return Tweet.TweetsFromSearchResults (new MemoryStream (result));
+			return Tweet.TweetsFromSearchResults (new MemoryStream (result), ReferenceUser);
 		}
-		
 	}
 	
 	public class SearchFromGeo : StreamedTimelineViewController {
@@ -59,7 +60,7 @@ namespace TweetStation
 
 		protected override IEnumerable<Tweet> GetTweetStream (byte[] result)
 		{
-			return Tweet.TweetsFromSearchResults (new MemoryStream (result));
+			return Tweet.TweetsFromSearchResults (new MemoryStream (result), ReferenceUser);
 		}
 	}
 	

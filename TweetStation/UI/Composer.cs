@@ -64,8 +64,8 @@ namespace TweetStation
 			};
 
 			toolbar = new UIToolbar (RectangleF.Empty);
-			GpsButtonItem = new UIBarButtonItem (UIImage.FromFile ("Images/gps.png"), style, InsertGeo);
-			ShrinkItem = new UIBarButtonItem (UIImage.FromFile ("Images/arrows.png"), style, OnShrinkTapped);
+			GpsButtonItem = new UIBarButtonItem (UIImage.FromBundle ("Images/gps.png"), style, InsertGeo);
+			ShrinkItem = new UIBarButtonItem (UIImage.FromBundle ("Images/arrows.png"), style, OnShrinkTapped);
 			
 			toolbar.SetItems (new UIBarButtonItem [] {
 				new UIBarButtonItem (UIBarButtonSystemItem.Trash, delegate { textView.Text = ""; } ) { Style = style },
@@ -409,6 +409,10 @@ namespace TweetStation
 			
 			ThreadPool.QueueUserWorkItem (delegate {
 				TwitterAccount.CurrentAccount.UploadPicture (stream, PicUploadComplete);
+				
+				// This captures the variable and handle of jpeg, and then we clear it
+				// to release it
+				jpeg = null;
 			});
 		}
 		

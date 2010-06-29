@@ -281,7 +281,7 @@ namespace TweetStation
 
 			headers.Add ("oauth_signature", OAuth.PercentEncode (oauth_signature));
 
-			Console.WriteLine ("Headers: " + HeadersToOAuth (headers));
+			Util.Log ("Headers: " + HeadersToOAuth (headers));
 			wc.Headers.Add ("X-Verify-Credentials-Authorization", HeadersToOAuth (headers));
 			wc.Headers.Add ("X-Auth-Service-Provider", signurl);
 		}
@@ -296,16 +296,18 @@ namespace TweetStation
 				this.url = url;
 				this.container = oauth;
 				this.callback = callback;
-				
-				NavigationItem.Title = Locale.GetText ("Login to Twitter");
-				NavigationItem.LeftBarButtonItem = new UIBarButtonItem (UIBarButtonSystemItem.Cancel, delegate {
-					DismissModalViewControllerAnimated (false);
-				});
+			
+				SetupWeb (url);
 			}
 				  
+			protected override string UpdateTitle ()
+			{
+				return "Authorization";
+			}
+			
 			public override void ViewWillAppear (bool animated)
 			{
-				SetupWeb ("Authorize");
+				SetupWeb ("Authorization");
 				WebView.ShouldStartLoad = LoadHook;
 				WebView.LoadRequest (new NSUrlRequest (new NSUrl (url)));
 				base.ViewWillAppear (animated);
@@ -332,7 +334,7 @@ namespace TweetStation
 		{
 			var authweb = new AuthorizationViewController (this, config.AuthorizeUrl + "?oauth_token=" + RequestToken, callback);
 			
-			parent.ActivateController (authweb);
+			parent.PresentModalViewController (authweb, true);
 		}
 	}
 	

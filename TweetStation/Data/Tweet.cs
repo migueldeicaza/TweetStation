@@ -24,7 +24,6 @@ using System.Globalization;
 using System.IO;
 using System.Json;
 using System.Linq;
-using SQLite;
 using System.Text;
 using System.Web;
 
@@ -34,15 +33,11 @@ namespace TweetStation
 	///   Represents a tweet in memory.   Not all the data from the original tweet
 	///   is kept around, most of the data is discarded.
 	/// </summary>
-	public class Tweet {
+	public partial class Tweet {
 		
-		[PrimaryKey]
-		public long Id { get; set; }
 		public int LocalAccountId { get; set; }
 		public TweetKind Kind { get; set; }
 		
-		[Indexed]
-		public long CreatedAt { get; set; }
 		public string Text { get; set; }
 		public string Source { get; set; }
 		public bool Favorited { get; set; }
@@ -118,8 +113,9 @@ namespace TweetStation
 					Retweeter = subuser ["screen_name"];
 					RetweeterPicUrl = subuser ["profile_image_url"];
 					RetweeterId = subuser ["id"];
-					if (Text.StartsWith ("RT "))
-						Text = Text.Substring (3);
+					var subText = sub ["text"];
+					if (subText != null)
+						Text = subText;
 				} else {
 					RetweeterPicUrl = null;
 					Retweeter = null;
@@ -145,94 +141,6 @@ namespace TweetStation
 			}
 		}
 
-		/// <summary>
-		///    Saves the tweet into the database
-		/// </summary>
-		void Insert (Database db)
-		{
-			db.Insert (this, "OR IGNORE");
-		}
-		
-		public void Replace (Database db)
-		{
-			db.Insert (this, "OR REPLACE");
-		}
-		
-		static bool ParseUser (JsonObject juser, User user, HashSet<long> usersSeen)
-		{
-			try {
-				user.UpdateFromJson ((JsonObject) juser);
-				if (!usersSeen.Contains (user.Id)){
-					usersSeen.Add (user.Id);
-					Database.Main.Insert (user, "OR REPLACE");
-				}
-			} catch {
-				return false;
-			}
-			return true;
-		}
-		
-		/// <summary>
-		///   Loads the tweets encoded in the JSon response from the server
-		///   into the database.   Users that are detected in the stream
-		///   are entered in the user database as well.
-		/// </summary>
-		static public int LoadJson (Stream stream, int localAccount, TweetKind kind)
-		{
-			Database db = Database.Main;
-			int count = 0;
-			JsonValue root;
-			string userKey;
-			
-			try {
-				root = JsonValue.Load (stream);
-				if (kind == TweetKind.Direct)
-					userKey = "sender";
-				else 
-					userKey = "user";
-			} catch (Exception e) {
-				Console.WriteLine (e);
-				return -1;
-			}
-			
-			// These are reusable instances that we used during population
-			var tweet = new Tweet () { Kind = kind, LocalAccountId = localAccount };
-			var user = new User ();
-			
-			var start = DateTime.UtcNow;
-			
-			var usersSeen = new HashSet<long> ();
-			
-			lock (db){
-				db.Execute ("BEGIN");
-				foreach (JsonObject jentry in root){
-					var juser = jentry [userKey];
-					bool result;
-					
-					if (!ParseUser ((JsonObject) juser, user, usersSeen))
-						continue;
-					
-					if (kind == TweetKind.Direct)
-						result = tweet.TryPopulateDirect (jentry);
-					else
-						result = tweet.TryPopulate (jentry);
-					
-					if (result){
-						PopulateUser (tweet, user);
-						tweet.Insert (db);
-						count++;
-					}	
-					
-					// Repeat user loading for the retweet info
-					if (tweet.Retweeter != null)
-						ParseUser ((JsonObject)(jentry ["retweeted_status"]["user"]), user, usersSeen);
-				}
-				db.Execute ("COMMIT");
-			}
-			var end = DateTime.UtcNow;
-			Console.WriteLine ("With transactions: Spent {0} ticks in inserting {1} elements", (end-start).Ticks, count);
-			return count;
-		}
 
 		// 
 		// Alternative version that just parses the users and tweets and returns them as lists
@@ -301,7 +209,7 @@ namespace TweetStation
 				}
 			}
 			var end = DateTime.UtcNow;		
-			Console.WriteLine ("Parsing time for tweet stream: {0} for {1} tweets", end-start, tweets.Count);
+			Util.Log ("Parsing time for tweet stream: {0} for {1} tweets", end-start, tweets.Count);
 		}
 
 		/// <summary>
@@ -355,8 +263,8 @@ namespace TweetStation
 		// not really complete and have the UserId busted (negative
 		// numbers) since the userids returned by twitter for
 		// searches have no relationship with the rest of the system
-		public static IEnumerable<Tweet> TweetsFromSearchResults (Stream stream)
-		{
+		public static IEnumerable<Tweet> TweetsFromSearchResults (Stream stream, User reference)
+		{ 
 			JsonValue root;
 			
 			try {
@@ -376,8 +284,8 @@ namespace TweetStation
 						Text = ParseText (result),
 						Source = Util.StripHtml (HttpUtility.HtmlDecode (result ["source"]) ?? ""),
 						UserId = serial++,
-						Screename = (string) result ["from_user"],
-						PicUrl = (string) result ["profile_image_url"]
+						Screename = reference == null ? (string) result ["from_user"] : reference.Screenname,
+						PicUrl = reference == null ? (string) result ["profile_image_url"] : reference.PicUrl
 					};
 				} catch (Exception e){
 					Console.WriteLine (e);
@@ -387,47 +295,7 @@ namespace TweetStation
 					yield return tweet;
 			}
 		}
-		
-		static Tweet ParseTweet (Stream stream)
-		{
-			JsonObject jentry;
-			
-			try {
-				jentry = (JsonObject) JsonValue.Load (stream);
-			} catch (Exception e) {
-				Console.WriteLine (e);
-				return null;
-			}
-			try {
-				var user = new User ();
-				user.UpdateFromJson ((JsonObject) jentry ["user"]);
-				lock (Database.Main)
-					Database.Main.Insert (user, "OR REPLACE");
-				
-				return FromJsonEntry (jentry, user);
-			} catch (Exception e){
-				Console.WriteLine (e);
-				return null;
-			}
-		}
-		
-		static Tweet FromJsonEntry (JsonObject jentry, User user)
-		{
-			var tweet = new Tweet () { Kind = TweetKind.Transient };
-	
-			if (!tweet.TryPopulate (jentry))
-				return null;
-			
-			PopulateUser (tweet, user);
-			if (tweet.Retweeter != null){
-				user = new User ();
-				user.UpdateFromJson ((JsonObject)(jentry ["retweeted_status"]["user"]));
-				lock (Database.Main)
-					Database.Main.Insert (user, "OR REPLACE");
-			}
-			return tweet;
-		}
-	
+
 		// Populates a Tweet object with cached and useful user information
 		static void PopulateUser (Tweet tweet, User user)
 		{
@@ -439,25 +307,13 @@ namespace TweetStation
 				tweet.RetweeterId = user.Id;
 				tweet.Retweeter = user.Screenname;
 				tweet.RetweeterPicUrl = user.PicUrl;
-				if (tweet.RetweeterPicUrl == null)
-					Console.WriteLine ("TWEFF");
 			} else {
 				tweet.UserId = user.Id;
 				tweet.Screename = user.Screenname;
 				tweet.PicUrl = user.PicUrl;
 			}
 		}
-	
-
-		//
-		// Creates a tweet from a given ID
-		//
-		public static Tweet FromId (long id)
-		{
-			lock (Database.Main)
-				return Database.Main.Query<Tweet> ("SELECT * FROM Tweet WHERE Id = ?", id).FirstOrDefault ();
-		}
-		
+			
 		public delegate void LoadCallback (Tweet tweet);
 		
 		public static void LoadFullTweet (long id, LoadCallback callback)
@@ -479,6 +335,7 @@ namespace TweetStation
 		public string GetRecipients ()
 		{
 			string text = Text;
+			
 			if (text.IndexOf ('@') == -1)
 				return '@' + Screename;
 			
@@ -490,9 +347,10 @@ namespace TweetStation
 					continue;
 				
 				var res = new StringBuilder ();
-				for (i++; i < text.Length && Char.IsLetterOrDigit (text [i]) || text [i] == '_'; i++){
+				for (i++; i < text.Length && (Char.IsLetterOrDigit (text [i]) || text [i] == '_'); i++){
 					res.Append (text [i]);
 				}
+				
 				recipients.Add (res.ToString ());
 			}
 			recipients.Remove (TwitterAccount.CurrentAccount.Username);
@@ -510,12 +368,7 @@ namespace TweetStation
 	// Common fields are stored in the database, the rest is stored as the
 	// json string representation.  Load the uncommon data on demand
 	//
-	public class User {
-		[PrimaryKey]
-		public long Id { get; set; }
-		
-		[Indexed]
-		public string Screenname { get; set; }
+	public partial class User {
 		public string PicUrl { get; set; }		
 		public string JsonString { get; set; }
 
@@ -590,65 +443,6 @@ namespace TweetStation
 			} catch (Exception e){
 				Console.WriteLine (e);
 			}
-		}
-		
-		// 
-		// Loads the users from the stream, as a convenience, 
-		// returns the last user loaded (which during lookups is a single one)
-		//
-		// Requires datbase lock to be taken.
-		static public IEnumerable<User> UnlockedLoadUsers (Stream source)
-		{
-			JsonValue root;
-			
-			try {
-				root = (JsonValue) JsonValue.Load (source);
-			} catch (Exception e) {
-				Console.WriteLine (e);
-				yield break;
-			}
-			
-			foreach (JsonObject juser in root){
-				User user = new User ();
-				user.UpdateFromJson (juser);
-				Database.Main.Insert (user, "OR REPLACE");
-				yield return user;
-			}
-		}
-		
-		// 
-		// Loads a single user from the stream
-		//
-		static public User LoadUser (Stream source)
-		{
-			JsonValue root;
-			
-			try {
-				root = JsonValue.Load (source);
-			} catch (Exception e){
-				Console.WriteLine (e);
-				return null;
-			}
-			User user = new User ();
-			user.UpdateFromJson ((JsonObject) root);
-			lock (Database.Main)
-				Database.Main.Insert (user, "OR REPLACE");
-			return user;
-		}
-		
-		// 
-		// Loads a user from the database
-		//
-		public static User FromId (long id)
-		{
-			lock (Database.Main)
-				return Database.Main.Query<User> ("SELECT * FROM User WHERE Id = ?", id).FirstOrDefault ();
-		}
-		
-		public static User FromName (string screenname)
-		{
-			lock (Database.Main)
-				return Database.Main.Query<User> ("SELECT * From User WHERE Screenname = ?", screenname).FirstOrDefault ();
 		}
 	}
 }

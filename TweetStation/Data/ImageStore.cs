@@ -60,7 +60,7 @@ namespace TweetStation
 		static HashSet<long> queuedUpdates;
 		
 		// A queue used to avoid flooding the network stack with HTTP requests
-		static Queue<long> requestQueue;
+		static Stack<long> requestQueue;
 		
 		// Keeps id -> url mappings around
 		static Dictionary<long, string> idToUrl;
@@ -88,7 +88,7 @@ namespace TweetStation
 			pendingRequests = new Dictionary<long,List<IImageUpdated>> ();
 			idToUrl = new Dictionary<long,string> ();
 			queuedUpdates = new HashSet<long>();
-			requestQueue = new Queue<long> ();
+			requestQueue = new Stack<long> ();
 		}
 		
 		public static UIImage GetLocalProfilePicture (long id)
@@ -100,9 +100,11 @@ namespace TweetStation
 				if (ret != null)
 					return ret;
 			}
-			
-			if (pendingRequests.ContainsKey (id))
-				return null;
+
+			lock (requestQueue){
+				if (pendingRequests.ContainsKey (id))
+					return null;
+			}
 
 			string picfile;
 			if (id >= TempStartId){
@@ -144,6 +146,7 @@ namespace TweetStation
 			if (pic == null){
 				QueueRequestForPicture (id, optionalUrl, notify); 
 				
+				// return low-res version of the picture while waiting for the high-res version to come
 				if (id < 0)
 					pic = GetLocalProfilePicture (-id);
 				if (pic != null)
@@ -167,10 +170,10 @@ namespace TweetStation
 					optionalUrl = user.PicUrl;
 				}
 			}
-			if (id < 0){
+			if (id < 0 || Graphics.HighRes){
 				int _normalIdx = optionalUrl.LastIndexOf ("_normal");	
 				if (_normalIdx != -1)
-					optionalUrl = optionalUrl.Substring (0, _normalIdx) + optionalUrl.Substring (optionalUrl.Length-4);
+					optionalUrl = optionalUrl.Substring (0, _normalIdx) + "_bigger" + optionalUrl.Substring (_normalIdx + 7);
 			}
 			if (!Uri.TryCreate (optionalUrl, UriKind.Absolute, out url))
 				return null;
@@ -201,24 +204,28 @@ namespace TweetStation
 			if (url == null)
 				return;
 
-			if (pendingRequests.ContainsKey (id)){
-				pendingRequests [id].Add (notify);
-				return;
-			}
-			var slot = new List<IImageUpdated> (4);
-			slot.Add (notify);
-			pendingRequests [id] = slot;
-			if (pendingRequests.Count >= MaxRequests){
-				lock (requestQueue)
-					requestQueue.Enqueue (id);
-			} else {
-				ThreadPool.QueueUserWorkItem (delegate { 
-					try {
-						StartPicDownload (id, url); 
-					} catch (Exception e){
-						Console.WriteLine (e);
-					}
-				});
+			lock (requestQueue){
+				if (pendingRequests.ContainsKey (id)){
+					Util.Log ("pendingRequest: added new listener for {0}", id);
+					pendingRequests [id].Add (notify);
+					return;
+				}
+				var slot = new List<IImageUpdated> (4);
+				slot.Add (notify);
+				pendingRequests [id] = slot;
+				
+				if (requestQueue.Count >= MaxRequests){
+					Console.WriteLine ("Queuing Image request because {0} >= {1} {2}", requestQueue.Count, MaxRequests, picDownloaders);
+					requestQueue.Push (id);
+				} else {
+					ThreadPool.QueueUserWorkItem (delegate { 
+							try {
+								StartPicDownload (id, url); 
+							} catch (Exception e){
+								Console.WriteLine (e);
+							}
+						});
+				}
 			}
 		}
 
@@ -234,79 +241,106 @@ namespace TweetStation
 		
 		static bool TmpCleaned;
 		
+		static bool Download (Uri url, string target)
+		{
+			var buffer = new byte [4*1024];
+			
+			try {
+				using (var file = new FileStream (target, FileMode.Create, FileAccess.Write, FileShare.Read)) {
+	                	var req = WebRequest.Create (url) as HttpWebRequest;
+					
+	                using (var resp = req.GetResponse()) {
+						using (var s = resp.GetResponseStream()) {
+							int n;
+							while ((n = s.Read (buffer, 0, buffer.Length)) > 0){
+								file.Write (buffer, 0, n);
+	                        }
+						}
+	                }
+				}
+				return true;
+			} catch (Exception e) {
+				Console.WriteLine (e);
+				return false;
+			}
+		}
+		
+		static long picDownloaders;
+		
 		static void StartPicDownload (long id, Uri url)
 		{
+			Interlocked.Increment (ref picDownloaders);
+			try {
+				_StartPicDownload (id, url);
+			} catch (Exception e){
+				Util.Log ("CRITICAL: should have never happened {0}", e);
+			}
+			Util.Log ("Leaving StartPicDownload {0}", picDownloaders);
+			Interlocked.Decrement (ref picDownloaders);
+		}
+		
+		static void _StartPicDownload (long id, Uri url)
+		{
 			do {
-				var buffer = new byte [4*1024];
 				string picdir = id < TempStartId ? PicDir : TmpDir;
 				bool downloaded = false;
 				
-				try {
-					using (var file = new FileStream (picdir + id + ".png", FileMode.Create, FileAccess.Write, FileShare.Read)) {
-		                	var req = WebRequest.Create (url) as HttpWebRequest;
-						
-		                using (var resp = req.GetResponse()) {
-							using (var s = resp.GetResponseStream()) {
-								int n;
-								while ((n = s.Read (buffer, 0, buffer.Length)) > 0){
-									file.Write (buffer, 0, n);
-		                        }
-							}
-		                }
-					}
-					downloaded = true;
-				} catch (Exception e) {
-					Console.WriteLine ("{0} Error fetching picture for {1}", e, id);
-				}
+				downloaded = Download (url, picdir + id + ".png");
+				if (!downloaded)
+					Console.WriteLine ("Error fetching picture for {0} from {1}", id, url);
+				
 				// Cluster all updates together
 				bool doInvoke = false;
 				
-				lock (queuedUpdates){
+				lock (requestQueue){
 					if (downloaded){
 						queuedUpdates.Add (id);
 					
 						// If this is the first queued update, must notify
 						if (queuedUpdates.Count == 1)
 							doInvoke = true;
-					}
-				}
-				
-				lock (requestQueue){
+					} else
+						pendingRequests.Remove (id);
+
 					idToUrl.Remove (id);
 
 					// Try to get more jobs.
 					if (requestQueue.Count > 0){
-						id = requestQueue.Dequeue ();
+						id = requestQueue.Pop ();
 						url = GetPicUrlFromId (id, null);
 						if (url == null){
+							Console.WriteLine ("Dropping request {0} because url is null", id);
 							pendingRequests.Remove (id);
 							id = -1;
 						}
-					} else
+					} else {
+						Util.Log ("Leaving because requestQueue.Count = {0} NOTE: {1}", requestQueue.Count, pendingRequests.Count);
 						id = -1;
+					}
 				}	
 				if (doInvoke)
 					nsDispatcher.BeginInvokeOnMainThread (NotifyImageListeners);
+				
 			} while (id != -1);
 		}
 		
 		// Runs on the main thread
 		static void NotifyImageListeners ()
 		{
-			try {
-			lock (queuedUpdates){
+			lock (requestQueue){
 				foreach (var qid in queuedUpdates){
 					var list = pendingRequests [qid];
 					pendingRequests.Remove (qid);
-					foreach (var pr in list)
-						pr.UpdatedImage (qid);
+					foreach (var pr in list){
+						try {
+							pr.UpdatedImage (qid);
+						} catch (Exception e){
+							Console.WriteLine (e);
+						}
+					}
 				}
 				queuedUpdates.Clear ();
 			}
-			} catch (Exception e){
-				Console.WriteLine (e);
-			}
-			         
 		}
 		
 		static UIImage RoundedPic (string picfile, long id)

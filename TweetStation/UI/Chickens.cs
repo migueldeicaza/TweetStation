@@ -63,7 +63,6 @@ namespace TweetStation
 					if (chickenStart == null)
 						chickenStart = AVAudioPlayer.FromUrl (new NSUrl ("Audio/chicken1.caf"));
 					if (chickenStart != null){
-						Console.WriteLine ("Playing First");
 						chickenStart.CurrentTime = 0;
 						chickenStart.Volume = 0.5f;
 						chickenStart.Play ();
@@ -75,7 +74,6 @@ namespace TweetStation
 					if (chickenEnd == null)
 						chickenEnd = AVAudioPlayer.FromUrl (new NSUrl ("Audio/chicken2.caf"));
 					if (chickenEnd != null && playedFirstChicken){
-						Console.WriteLine ("Playing Second");
 						chickenEnd.CurrentTime = 0;
 						chickenEnd.Volume = 0.5f;
 						chickenEnd.Play ();

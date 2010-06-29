@@ -14,17 +14,18 @@
     <AssemblyName>TweetStation</AssemblyName>
     <MtouchMinimumOS>3.0</MtouchMinimumOS>
     <BundleIdentifier>org.tirania.tweetstation</BundleIdentifier>
-    <BundleVersion>1.0.0</BundleVersion>
+    <BundleVersion>1.2</BundleVersion>
     <BundleDisplayName>TweetStation</BundleDisplayName>
     <BundleIcon>Icon.png</BundleIcon>
     <BundleIconSpotlight>IconSpotlight.png</BundleIconSpotlight>
+    <BundleIconHigh>Icon@2x.png</BundleIconHigh>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|iPhoneSimulator' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\iPhoneSimulator\Debug</OutputPath>
-    <DefineConstants>DEBUG</DefineConstants>
+    <DefineConstants>DEBUG; TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <MtouchLink>None</MtouchLink>
@@ -32,7 +33,7 @@
     <MtouchExtraArgs>-i18n=west</MtouchExtraArgs>
     <MtouchI18n />
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <MtouchSdkVersion>3.2</MtouchSdkVersion>
+    <MtouchSdkVersion>4.0</MtouchSdkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhoneSimulator' ">
     <DebugType>none</DebugType>
@@ -51,15 +52,15 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\iPhone\Debug</OutputPath>
-    <DefineConstants>DEBUG</DefineConstants>
+    <DefineConstants>DEBUG; TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodesignKey>iPhone Developer</CodesignKey>
     <MtouchDebug>True</MtouchDebug>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <MtouchI18n />
-    <CodesignProvision>33E9B397-0B73-42C3-9F09-3308F8EDB09F</CodesignProvision>
-    <MtouchSdkVersion>3.2</MtouchSdkVersion>
+    <CodesignProvision>CD7CE718-F7A1-4858-A956-9B9A161C239C</CodesignProvision>
+    <MtouchSdkVersion>4.0</MtouchSdkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhone' ">
     <DebugType>none</DebugType>
@@ -72,6 +73,8 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <MtouchI18n />
     <MtouchSdkVersion>4.0</MtouchSdkVersion>
+    <DefineConstants>TRACE</DefineConstants>
+    <CodesignProvision>CD7CE718-F7A1-4858-A956-9B9A161C239C</CodesignProvision>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'AdHoc|iPhone' ">
     <DebugType>none</DebugType>
@@ -84,6 +87,7 @@
     <CodesignProvision>81CC6220-6404-46B6-BAC0-6F4C5E8C7C34</CodesignProvision>
     <CodesignKey>iPhone Distribution</CodesignKey>
     <MtouchSdkVersion>4.0</MtouchSdkVersion>
+    <DefineConstants>TRACE</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'AppStore|iPhone' ">
     <DebugType>none</DebugType>
@@ -144,6 +148,8 @@
     <Compile Include="UI\SwipeSupport.cs" />
     <Compile Include="Utilities\LoadingHudView.cs" />
     <Compile Include="UI\Chickens.cs" />
+    <Compile Include="Data\TwitterAccountDatabase.cs" />
+    <Compile Include="Data\TweetDatabase.cs" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="MainWindow.xib" />
@@ -187,6 +193,22 @@
     <Content Include="Images\back.png" />
     <Content Include="Images\forward.png" />
     <Content Include="Default.png" />
+    <Content Include="Default%402x.png" />
+    <Content Include="Icon%402x.png" />
+    <Content Include="Images\replies%402x.png" />
+    <Content Include="Images\home%402x.png" />
+    <Content Include="Images\messages%402x.png" />
+    <Content Include="Images\fav%402x.png" />
+    <Content Include="Images\arrow.png" />
+    <Content Include="Images\lupa%402x.png" />
+    <Content Include="Images\star-off%402x.png" />
+    <Content Include="Images\star-on%402x.png" />
+    <Content Include="Images\mini-star-on%402x.png" />
+    <Content Include="Images\settings%402x.png" />
+    <Content Include="Images\back%402x.png" />
+    <Content Include="Images\forward%402x.png" />
+    <Content Include="Images\gps%402x.png" />
+    <Content Include="Images\arrows%402x.png" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\MonoTouch.Dialog\MonoTouch.Dialog\MonoTouch.Dialog.csproj">

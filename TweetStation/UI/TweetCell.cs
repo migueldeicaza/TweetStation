@@ -92,7 +92,7 @@ namespace TweetStation
 		}
 		
 		public class TweetCellView : UIView, IImageUpdated {
-			static UIImage star = UIImage.FromFile ("Images/mini-star-on.png");	
+			static UIImage star = UIImage.FromBundle ("Images/mini-star-on.png");	
 			Tweet tweet;
 			string userText;
 			UIImage tweetImage, retweetImage;
@@ -137,7 +137,7 @@ namespace TweetStation
 			
 			public override void Draw (RectangleF rect)
 			{
-		        var context = UIGraphics.GetCurrentContext ();
+				var context = UIGraphics.GetCurrentContext ();
 
 				// Superview is the container, its superview the uitableviewcell
 				bool highlighted = (Superview.Superview as UITableViewCell).Highlighted;
@@ -165,6 +165,10 @@ namespace TweetStation
 				} else {
 					xText = PicAreaWidth;
 					xPic = PicXPad;
+				}
+				
+				if (userText == null){
+					userText = "Unknown";
 				}
 				
 				textColor.SetColor ();

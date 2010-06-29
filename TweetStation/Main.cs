@@ -16,7 +16,11 @@ namespace TweetStation
 	{
 		static void Main (string[] args)
 		{
-			UIApplication.Main (args);
+			try {
+				UIApplication.Main (args);
+			} catch (Exception e){
+				Console.WriteLine ("Toplevel exception: {0}", e);
+			}
 		}
 	}
 
@@ -54,9 +58,6 @@ namespace TweetStation
 			} catch {}				
 #else
 			var cfg = TwitterAccount.OAuthConfig;
-			
-			// Paste ~/xauth.cs here
-			
 			useXauth = true;
 #endif
 			
@@ -94,19 +95,19 @@ namespace TweetStation
 			
 			navigationRoots = new UINavigationController [5] {
 				new UINavigationController (main) {
-					TabBarItem = new UITabBarItem ("Friends", UIImage.FromFileUncached ("Images/home.png"), 0),
+					TabBarItem = new UITabBarItem ("Friends", UIImage.FromBundle ("Images/home.png"), 0),
 				},
 				new UINavigationController (mentions) {
-					TabBarItem = new UITabBarItem ("Mentions", UIImage.FromFileUncached ("Images/replies.png"), 1)
+					TabBarItem = new UITabBarItem ("Mentions", UIImage.FromBundle ("Images/replies.png"), 1)
 				},
 				new UINavigationController (messages) {
-					TabBarItem = new UITabBarItem ("Messages", UIImage.FromFileUncached ("Images/messages.png"), 2)
+					TabBarItem = new UITabBarItem ("Messages", UIImage.FromBundle ("Images/messages.png"), 2)
 				},
 				new UINavigationController (favorites) {
-					TabBarItem = new UITabBarItem ("Favorites", UIImage.FromFileUncached ("Images/fav.png"), 3)
+					TabBarItem = new UITabBarItem ("Favorites", UIImage.FromBundle ("Images/fav.png"), 3)
 				},
 				new UINavigationController (searches) {
-					TabBarItem = new UITabBarItem ("Search", UIImage.FromFileUncached ("Images/lupa.png"), 3)
+					TabBarItem = new UITabBarItem ("Search", UIImage.FromBundle ("Images/lupa.png"), 4)
 				}
 			};
 	
@@ -146,6 +147,13 @@ namespace TweetStation
 			}
 		}
 		
+		public override void WillEnterForeground (UIApplication application)
+		{
+			main.ReloadTimeline ();
+			mentions.ReloadTimeline ();
+			messages.ReloadTimeline ();
+		}
+		
 		//
 		// Dispatcher that can open various assorted link-like text entries
 		//
@@ -166,12 +174,14 @@ namespace TweetStation
 		// Replies to a tweet
 		public void Reply (UIViewController controller, Tweet tweet)
 		{
+			if (tweet == null)
+				throw new ArgumentNullException ("tweet");
+			
 			int p = tweet.Text.IndexOf ('@');
 			if (p == -1){
 				Composer.Main.ReplyTo (controller, tweet, false);
 				return;
 			}
-			
 			// If we have a '@' make sure it is not just @user
 			// but someone else is included
 			if (tweet.Text.Substring (p+1).StartsWith (TwitterAccount.CurrentAccount.Username)){
@@ -181,13 +191,11 @@ namespace TweetStation
 					return;
 				}
 			}
-			
 			var sheet = Util.GetSheet ("");
 			sheet.AddButton (Locale.GetText ("Reply"));
 			sheet.AddButton (Locale.GetText ("Reply All"));
 			sheet.AddButton (Locale.GetText ("Cancel"));
 			sheet.CancelButtonIndex = 2;
-			
 			sheet.Clicked += delegate(object s, UIButtonEventArgs e) {
 				if (e.ButtonIndex == 0)
 					Composer.Main.ReplyTo (controller, tweet, false);
@@ -216,8 +224,13 @@ namespace TweetStation
 			if (parent == null){
 				loginRoot = new UINavigationController (loginDialog);
 				window.AddSubview (loginRoot.View);
-			} else
+			} else {
+				loginDialog.NavigationItem.RightBarButtonItem = 
+					new UIBarButtonItem (Locale.GetText ("Close"),
+                                         UIBarButtonItemStyle.Plain, 
+					                     delegate { loginDialog.DismissModalViewControllerAnimated (true); });
 				parent.ActivateController (loginDialog);
+			}
 		}
 		
 		void StartupAfterAuthorization (OAuthAuthorizer oauth)
@@ -359,6 +372,9 @@ namespace TweetStation
 		}
 		
 		public class RotatingTabBar : UITabBarController {
+			UIView indicator;
+			int selected;
+			
 			public RotatingTabBar () : base ()
 			{
 			}
@@ -367,7 +383,54 @@ namespace TweetStation
 			{
 				return (toInterfaceOrientation != UIInterfaceOrientation.PortraitUpsideDown);
 			}
+
+			void UpdatePosition (bool animate)
+			{
+				var w = View.Bounds.Width/5;
+				var x = w * selected;
+				
+				if (animate){
+					UIView.BeginAnimations (null);
+					UIView.SetAnimationCurve (UIViewAnimationCurve.EaseInOut);
+				}
+				
+				indicator.Frame = new RectangleF (x+((w-10)/2), View.Bounds.Height-TabBar.Bounds.Height-4, 10, 6);
+				
+				if (animate)
+					UIView.CommitAnimations ();
+			}
+			
+			public override void DidRotate (UIInterfaceOrientation fromInterfaceOrientation)
+			{
+				base.DidRotate (fromInterfaceOrientation);
+				
+				UpdatePosition (false);
+			}
+			
+			public override void ViewWillAppear (bool animated)
+			{
+				base.ViewWillAppear (animated);
+			
+				if (indicator == null){
+					indicator = new TriangleView (UIColor.FromRGB (0.26f, 0.26f, 0.26f), UIColor.Black);
+					View.AddSubview (indicator);
+					ViewControllerSelected += OnSelected;
+					UpdatePosition (false);
+				}
+			}
+			
+			public void OnSelected (object sender, UITabBarSelectionEventArgs a)
+			{
+				var vc = ViewControllers;
+				
+				for (int i = 0; i < vc.Length; i++){
+					if (vc [i] == a.ViewController){
+						selected = i;
+						UpdatePosition (true);
+						return;
+					}
+				}
+			}
 		}
-		
 	}
 }
