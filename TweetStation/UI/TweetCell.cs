@@ -137,7 +137,7 @@ namespace TweetStation
 			
 			public override void Draw (RectangleF rect)
 			{
-		        var context = UIGraphics.GetCurrentContext ();
+				var context = UIGraphics.GetCurrentContext ();
 
 				// Superview is the container, its superview the uitableviewcell
 				bool highlighted = (Superview.Superview as UITableViewCell).Highlighted;

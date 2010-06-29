@@ -60,7 +60,7 @@ namespace TweetStation
 		static HashSet<long> queuedUpdates;
 		
 		// A queue used to avoid flooding the network stack with HTTP requests
-		static Queue<long> requestQueue;
+		static Stack<long> requestQueue;
 		
 		// Keeps id -> url mappings around
 		static Dictionary<long, string> idToUrl;
@@ -88,7 +88,7 @@ namespace TweetStation
 			pendingRequests = new Dictionary<long,List<IImageUpdated>> ();
 			idToUrl = new Dictionary<long,string> ();
 			queuedUpdates = new HashSet<long>();
-			requestQueue = new Queue<long> ();
+			requestQueue = new Stack<long> ();
 		}
 		
 		public static UIImage GetLocalProfilePicture (long id)
@@ -216,7 +216,7 @@ namespace TweetStation
 				
 				if (requestQueue.Count >= MaxRequests){
 					Console.WriteLine ("Queuing Image request because {0} >= {1} {2}", requestQueue.Count, MaxRequests, picDownloaders);
-					requestQueue.Enqueue (id);
+					requestQueue.Push (id);
 				} else {
 					ThreadPool.QueueUserWorkItem (delegate { 
 							try {
@@ -306,7 +306,7 @@ namespace TweetStation
 
 					// Try to get more jobs.
 					if (requestQueue.Count > 0){
-						id = requestQueue.Dequeue ();
+						id = requestQueue.Pop ();
 						url = GetPicUrlFromId (id, null);
 						if (url == null){
 							Console.WriteLine ("Dropping request {0} because url is null", id);
