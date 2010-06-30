@@ -37,7 +37,6 @@ namespace TweetStation
 		///   A shortcut to the main application
 		/// </summary>
 		public static UIApplication MainApp = UIApplication.SharedApplication;
-		public static AppDelegate MainAppDelegate = UIApplication.SharedApplication.Delegate as AppDelegate;
 		
 		public readonly static string BaseDir = Path.Combine (Environment.GetFolderPath (Environment.SpecialFolder.Personal), "..");
 

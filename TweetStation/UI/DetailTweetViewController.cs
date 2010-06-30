@@ -117,7 +117,7 @@ namespace TweetStation
 		//
 		void TapHandler (string data)
 		{
-			Util.MainAppDelegate.Open (this, data);
+			AppDelegate.MainAppDelegate.Open (this, data);
 		}
 		
 		void TapAndHoldHandler (string data)
@@ -135,7 +135,7 @@ namespace TweetStation
 				
 				sheet.Clicked += delegate(object sender, UIButtonEventArgs e) {
 					if (e.ButtonIndex == 0)
-						Util.MainAppDelegate.Open (this, data);
+						AppDelegate.MainAppDelegate.Open (this, data);
 					else if (e.ButtonIndex == 1)
 						UIApplication.SharedApplication.OpenUrl (new NSUrl (data));
 					else if (e.ButtonIndex == 2)
@@ -159,7 +159,7 @@ namespace TweetStation
 						Composer.Main.Direct (this, data.Substring (1));
 						break;
 					case 2:
-						Util.MainAppDelegate.Open (this, data);
+						AppDelegate.MainAppDelegate.Open (this, data);
 						break;
 					case 3:
 						ActivateController (new SearchViewController (data) { Account = TwitterAccount.CurrentAccount });
@@ -183,7 +183,7 @@ namespace TweetStation
 			} else 
 				return;
 			
-			sheet.ShowInView (Util.MainAppDelegate.MainView);
+			sheet.ShowInView (AppDelegate.MainAppDelegate.MainView);
 		}
 		
 		void LoadFullProfile ()
@@ -193,7 +193,7 @@ namespace TweetStation
 		
 		void Reply (object sender, EventArgs args)
 		{
-			Util.MainAppDelegate.Reply (this, tweet);
+			AppDelegate.MainAppDelegate.Reply (this, tweet);
 		}
 		
 		void Direct (object sender, EventArgs args)
@@ -217,7 +217,7 @@ namespace TweetStation
 					Composer.Main.Quote (this, tweet);
 				}
 			};
-			sheet.ShowInView (Util.MainAppDelegate.MainView);
+			sheet.ShowInView (AppDelegate.MainAppDelegate.MainView);
 		}
 	}
 	
@@ -278,7 +278,7 @@ namespace TweetStation
 
 				buttonView.TouchDown += delegate {
 					tweet.Favorited = !tweet.Favorited;
-					Util.MainAppDelegate.FavoriteChanged (tweet);
+					AppDelegate.MainAppDelegate.FavoriteChanged (tweet);
 					TwitterAccount.CurrentAccount.Post (String.Format ("http://api.twitter.com/1/favorites/{0}/{1}.json", tweet.Favorited ? "create" : "destroy", tweet.Id),"");
 					UpdateButtonImage (tweet);
 					

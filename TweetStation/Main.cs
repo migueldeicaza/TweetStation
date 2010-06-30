@@ -27,6 +27,8 @@ namespace TweetStation
 	// The name AppDelegate is referenced in the MainWindow.xib file.
 	public partial class AppDelegate : UIApplicationDelegate, IAccountContainer
 	{
+		public static AppDelegate MainAppDelegate;
+		
 		static bool useXauth;
 		TwitterAccount account;
 		TimelineViewController main, mentions, messages;
@@ -39,6 +41,7 @@ namespace TweetStation
 		public override bool FinishedLaunching (UIApplication app, NSDictionary options)
 		{
 			Util.ReportTime ("Entering Finished");
+			MainAppDelegate = this;
 			window.MakeKeyAndVisible ();
 
 			// Required by some HTTP calls to Twitter
@@ -203,7 +206,7 @@ namespace TweetStation
 					Composer.Main.ReplyTo (controller, tweet, true);
 				}
 			};
-			sheet.ShowInView (Util.MainAppDelegate.MainView);
+			sheet.ShowInView (MainAppDelegate.MainView);
 		}
 		
 		// Broadcast the change, since tweets can be instantiated multiple times.
@@ -256,7 +259,7 @@ namespace TweetStation
 				},
 				new Section (){
 					new LoadMoreElement ("Login to Twitter", "Contacting twitter", delegate {
-						StartXauthLogin (login.Value, password.Value, callback); 
+						StartXauthLogin (login.Value.Trim (), password.Value.Trim (), callback); 
 					}, UIFont.BoldSystemFontOfSize (16), UIColor.Black)
 				}
 			};

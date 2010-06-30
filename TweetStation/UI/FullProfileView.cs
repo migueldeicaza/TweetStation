@@ -209,7 +209,7 @@ namespace TweetStation
 			// the "Cancel" event wont get events because the View is covered
 			// by the tab bar, so it wonget get events.   So we need to find
 			// the full root.
-			sheet.ShowInView (Util.MainAppDelegate.MainView);
+			sheet.ShowInView (AppDelegate.MainAppDelegate.MainView);
 		}		
 	}
 		
