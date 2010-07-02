@@ -17,7 +17,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-#if true|| SWIPE_SUPPORT
+#if true || SWIPE_SUPPORT
 
 using System;
 using MonoTouch.ObjCRuntime;
@@ -97,7 +97,7 @@ namespace TweetStation
 			view.Frame = frame;
 		}
 		
-		const double delay = 2;
+		const double delay = 0.5;
 		UIView currentMenuView;
 		UITableViewCell menuCell;
 	
@@ -140,13 +140,15 @@ namespace TweetStation
 			UIView.SetAnimationDelegate (this);
 			UIView.SetAnimationCurve (UIViewAnimationCurve.EaseInOut);			
 			
-			var animation = MakeBounceAnimation (-offset);
+			var animation = MakeBounceAnimation (Math.Abs (offset));
 			
 			foreach (var view in menuCell.ContentView.Subviews){
 				if (view == currentMenuView)
 					continue;
 				
-				view.Layer.AddAnimation (animation, "Foo");
+				var b = view.Bounds;
+				view.Layer.Position = new PointF (b.Width/2, b.Height/2);
+				view.Layer.AddAnimation (animation, "position");
 			}
 
 			UIView.CommitAnimations ();
@@ -157,28 +159,26 @@ namespace TweetStation
 		
 		CAAnimation MakeBounceAnimation (float offset)
 		{
-#if false
-			var animation = CABasicAnimation.FromKeyPath ("position.x");
-			animation.Duration = 3;
-			animation.RepeatCount = 100;
-			animation.AutoReverses = true;
-			animation.To = new NSNumber ((float) -offset);
-			return animation;
-#else
-			var nss = new NSString ("position.x");
-			
-			var animation = Runtime.GetNSObject (MonoTouch.ObjCRuntime.Messaging.intptr_objc_msgSend_intptr (Class.GetHandle ("CAKeyframeAnimation"),
-			                                                                                 Selector.GetHandle ("animationWithKeyPath:"),
-			                                                                                 nss.Handle)) as CAKeyFrameAnimation;
+			var animation = (CAKeyFrameAnimation) CAKeyFrameAnimation.FromKeyPath ("position.x");
 			
 			animation.Duration = delay;
+			float left = offset/2;
 			animation.Values = new NSNumber [] {
+				NSNumber.FromFloat (offset),
+				NSNumber.FromFloat (left-60),
+				NSNumber.FromFloat (left+40),
+				NSNumber.FromFloat (left-30),
+				NSNumber.FromFloat (left+10),
+				NSNumber.FromFloat (left-10),
+				NSNumber.FromFloat (left),
+				
+#if false
+				NSNumber.FromFloat (-40),
+				NSNumber.FromFloat (100),
+				NSNumber.FromFloat (-20),
+				NSNumber.FromFloat (20),
 				NSNumber.FromFloat (0),
-				NSNumber.FromFloat (offset-30),
-				NSNumber.FromFloat (-offset-50),
-				NSNumber.FromFloat (offset-10),
-				NSNumber.FromFloat (-offset-5),
-				NSNumber.FromFloat (0),
+#endif
 			};
 			
 			return animation;
@@ -226,5 +226,3 @@ namespace TweetStation
 		}
 	}
 }
-
-#endif
