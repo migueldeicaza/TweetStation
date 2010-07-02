@@ -70,7 +70,7 @@ namespace TweetStation {
 							PresentModalViewController (selector, true);
 						}
 					};
-					sheet.ShowInView (Util.MainAppDelegate.MainView);
+					sheet.ShowInView (AppDelegate.MainAppDelegate.MainView);
 				} else {
 					Composer.Main.NewTweet (this);
 				}

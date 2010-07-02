@@ -99,7 +99,7 @@ namespace TweetStation
 		
 		internal void OnShrinkTapped (object sender, EventArgs args)
 		{
-			// Double tapping on the shrink link removes bowels, idea from Nat.
+			// Double tapping on the shrink link removes vowels, idea from Nat.
 			// you -> u
 			// vowels removed
 			// and -> &
@@ -259,7 +259,7 @@ namespace TweetStation
 				else
 					TakePicture ();
 			};
-			sheet.ShowInView (Util.MainAppDelegate.MainView);
+			sheet.ShowInView (AppDelegate.MainAppDelegate.MainView);
 
 		}
 		
@@ -287,7 +287,7 @@ namespace TweetStation
 				} else
 					Camera.SelectPicture (this, PictureSelected);
 			};
-			sheet.ShowInView (Util.MainAppDelegate.MainView);
+			sheet.ShowInView (AppDelegate.MainAppDelegate.MainView);
 		}
 
 		UIImage Scale (UIImage image, SizeF size)

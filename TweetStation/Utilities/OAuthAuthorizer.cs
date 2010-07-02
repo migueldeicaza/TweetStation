@@ -188,10 +188,10 @@ namespace TweetStation
 				headers.Add ("oauth_token", AuthorizationToken);
 				headers.Add ("oauth_verifier", AuthorizationVerifier);
 			} else {
-				headers.Add ("x_auth_username", xAuthUsername);
-				headers.Add ("x_auth_password", xAuthPassword);
+				headers.Add ("x_auth_username", OAuth.PercentEncode (xAuthUsername));
+				headers.Add ("x_auth_password", OAuth.PercentEncode (xAuthPassword));
 				headers.Add ("x_auth_mode", "client_auth");
-				content = String.Format ("x_auth_mode=client_auth&x_auth_password={0}&x_auth_username={1}", xAuthPassword, xAuthUsername);
+				content = String.Format ("x_auth_mode=client_auth&x_auth_password={0}&x_auth_username={1}", OAuth.PercentEncode (xAuthPassword), OAuth.PercentEncode (xAuthUsername));
 			}
 			
 			string signature = MakeSignature ("POST", config.AccessTokenUrl, headers);

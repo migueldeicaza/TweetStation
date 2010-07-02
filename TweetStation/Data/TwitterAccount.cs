@@ -71,54 +71,7 @@ namespace TweetStation
 		static Dictionary<long, TwitterAccount> accounts = new Dictionary<long, TwitterAccount> ();
 		
 		public static TwitterAccount CurrentAccount { get; set; }
-		
-		public static TwitterAccount GetDefaultAccount ()
-		{		
-			var account = FromId (Util.Defaults.IntForKey (DEFAULT_ACCOUNT));
-			if (account == null || string.IsNullOrEmpty (account.OAuthToken))
-				return null;
-			
-			CurrentAccount = account;
-			
-			return account;
-		}
-		
-		public static void SetDefault (TwitterAccount account)
-		{
-			Util.Defaults.SetInt (account.LocalAccountId, DEFAULT_ACCOUNT);
-			CurrentAccount = account;
-		}
-
-		public void ReloadTimeline (TweetKind kind, long? since, long? max_id, Action<int> done)
-		{
-			string uri = null;
-			switch (kind){
-			case TweetKind.Home:
-				uri = timelineUri; break;
-			case TweetKind.Replies:
-				uri = mentionsUri; break;
-			case TweetKind.Direct:
-				uri = directUri; break;
-			}
-			var req = uri + "?count=200" + 
-				(since.HasValue ? "&since_id=" + since.Value : "") +
-				(max_id.HasValue ? "&max_id=" + max_id.Value : "");
 				
-			Download (req, false, result => {
-				int count = -1;
-				
-				if (result != null){
-					try {
-						count = Tweet.LoadJson (new MemoryStream (result), LocalAccountId, kind);
-					} catch (Exception e) { 
-						Console.WriteLine (e);
-					}
-				}
-
-				invoker.BeginInvokeOnMainThread (delegate { done (count); });
-			});
-		}
-		
 		internal struct Request {
 			public string Url;
 			public Action<byte []> Callback;
@@ -230,11 +183,6 @@ namespace TweetStation
 			client.DownloadDataAsync (uri);
 		}
 		
-		public void SetDefaultAccount ()
-		{
-			NSUserDefaults.StandardUserDefaults.SetInt (LocalAccountId, DEFAULT_ACCOUNT); 
-		}
-
 		static void Copy (Stream source, Stream dest)
 		{
 			var buffer = new byte [4096];

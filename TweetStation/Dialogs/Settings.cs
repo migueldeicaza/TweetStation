@@ -77,14 +77,14 @@ namespace TweetStation
 						DismissModalViewControllerAnimated (true);
 						
 						TwitterAccount.SetDefault (copy);
-						Util.MainAppDelegate.Account = copy;
+						AppDelegate.MainAppDelegate.Account = copy;
 					};
 					section.Add (element);
 				};
 			}
 			var addAccount = new StringElement (Locale.GetText ("Add account"));
 			addAccount.Tapped += delegate {
-				Util.MainAppDelegate.AddAccount (this, delegate {
+				AppDelegate.MainAppDelegate.AddAccount (this, delegate {
 					DismissModalViewControllerAnimated (false);
 				});
 			};

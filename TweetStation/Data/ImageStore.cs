@@ -215,7 +215,7 @@ namespace TweetStation
 				pendingRequests [id] = slot;
 				
 				if (requestQueue.Count >= MaxRequests){
-					Console.WriteLine ("Queuing Image request because {0} >= {1} {2}", requestQueue.Count, MaxRequests, picDownloaders);
+					Util.Log ("Queuing Image request because {0} >= {1} {2}", requestQueue.Count, MaxRequests, picDownloaders);
 					requestQueue.Push (id);
 				} else {
 					ThreadPool.QueueUserWorkItem (delegate { 
@@ -309,7 +309,7 @@ namespace TweetStation
 						id = requestQueue.Pop ();
 						url = GetPicUrlFromId (id, null);
 						if (url == null){
-							Console.WriteLine ("Dropping request {0} because url is null", id);
+							Util.Log ("Dropping request {0} because url is null", id);
 							pendingRequests.Remove (id);
 							id = -1;
 						}
