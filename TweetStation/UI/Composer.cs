@@ -99,7 +99,7 @@ namespace TweetStation
 		
 		internal void OnShrinkTapped (object sender, EventArgs args)
 		{
-			// Double tapping on the shrink link removes bowels, idea from Nat.
+			// Double tapping on the shrink link removes vowels, idea from Nat.
 			// you -> u
 			// vowels removed
 			// and -> &
