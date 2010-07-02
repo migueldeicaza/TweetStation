@@ -43,6 +43,7 @@ namespace TweetStation {
 		public BaseTimelineViewController (bool pushing) : base (null, pushing)
 		{			
 			Autorotate = true;
+			EnableSearch = true;
 			RefreshRequested += delegate {
 				ReloadTimeline ();
 			};
@@ -125,7 +126,6 @@ namespace TweetStation {
 		{
 			timelineTitle = title;
 			this.kind = kind;
-			EnableSearch = true;
 			
 			NavigationItem.LeftBarButtonItem = new UIBarButtonItem (settingsImage, UIBarButtonItemStyle.Plain, delegate {
 				PresentModalViewController (new UINavigationController (new Settings (this)), true);
