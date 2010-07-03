@@ -275,7 +275,7 @@ namespace TweetStation
 			} catch (Exception e){
 				Util.Log ("CRITICAL: should have never happened {0}", e);
 			}
-			Util.Log ("Leaving StartPicDownload {0}", picDownloaders);
+			//Util.Log ("Leaving StartPicDownload {0}", picDownloaders);
 			Interlocked.Decrement (ref picDownloaders);
 		}
 		
@@ -314,7 +314,7 @@ namespace TweetStation
 							id = -1;
 						}
 					} else {
-						Util.Log ("Leaving because requestQueue.Count = {0} NOTE: {1}", requestQueue.Count, pendingRequests.Count);
+						//Util.Log ("Leaving because requestQueue.Count = {0} NOTE: {1}", requestQueue.Count, pendingRequests.Count);
 						id = -1;
 					}
 				}	

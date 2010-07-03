@@ -209,6 +209,16 @@
     <Content Include="Images\forward%402x.png" />
     <Content Include="Images\gps%402x.png" />
     <Content Include="Images\arrows%402x.png" />
+    <Content Include="Images\swipe-reply.png" />
+    <Content Include="Images\swipe-reply%402x.png" />
+    <Content Include="Images\swipe-retweet.png" />
+    <Content Include="Images\swipe-retweet%402x.png" />
+    <Content Include="Images\swipe-star-off.png" />
+    <Content Include="Images\swipe-star-off%402x.png" />
+    <Content Include="Images\swipe-star-on.png" />
+    <Content Include="Images\swipe-star-on%402x.png" />
+    <Content Include="Images\swipe-profile.png" />
+    <Content Include="Images\swipe-profile%402x.png" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\MonoTouch.Dialog\MonoTouch.Dialog\MonoTouch.Dialog.csproj">

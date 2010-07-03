@@ -16,7 +16,20 @@
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// THE  SOFTWARE.
+
+//
+// TODO:
+//   * Sometimes it keeps a cell selected, this creates some sort of view that
+//     shows up as blue and prevents the grey background from being shown.
+//
+//   * Needs texture for the background image
+//
+//   * Needs actions hooked up
+//
+//   * Menu needs to be cancelled when items are added
+//
+
 #if true || SWIPE_SUPPORT
 
 using System;
@@ -171,14 +184,6 @@ namespace TweetStation
 				NSNumber.FromFloat (left+10),
 				NSNumber.FromFloat (left-10),
 				NSNumber.FromFloat (left),
-				
-#if false
-				NSNumber.FromFloat (-40),
-				NSNumber.FromFloat (100),
-				NSNumber.FromFloat (-20),
-				NSNumber.FromFloat (20),
-				NSNumber.FromFloat (0),
-#endif
 			};
 			
 			return animation;
@@ -196,6 +201,64 @@ namespace TweetStation
 			}
 		}
 		
+		UIImage imageReply, imageRetweet, imageStarOn, imageStarOff, imageProfile;
+		UIImage [] images;
+		
+		UIView MakeMenu (RectangleF frame)
+		{
+			var menu = new UIView (new RectangleF (0, 0, frame.Width, frame.Height)) {
+				BackgroundColor = UIColor.DarkGray
+			};
+	
+			if (imageReply == null){
+				imageReply   = UIImage.FromBundle ("Images/swipe-reply.png");
+				imageRetweet = UIImage.FromBundle ("Images/swipe-retweet.png");
+				imageStarOn  = UIImage.FromBundle ("Images/swipe-star-onf.png");
+				imageStarOff = UIImage.FromBundle ("Images/swipe-star-off.png");
+				imageProfile = UIImage.FromBundle ("Images/swipe-profile.png");
+				images = new UIImage [] { 
+					imageReply, imageRetweet, imageStarOff, imageProfile,
+				};
+			}
+			var views = new CALayer [images.Length];
+			
+			float slotsize = frame.Width/views.Length;
+			for (int i = 0; i < views.Length; i++){
+				var image = images [i];
+				var layer = views [i] = new CALayer ();
+				layer.Contents = images [i].CGImage;
+				
+				var alpha = (CABasicAnimation) CABasicAnimation.FromKeyPath ("opacity");
+				alpha.From = new NSNumber (0);
+				alpha.To = new NSNumber (1);
+				alpha.BeginTime = delay/views.Length*i;
+				
+#if DEBUG
+				var pos = (CABasicAnimation) CABasicAnimation.FromKeyPath ("position.y");
+				pos.From = new NSNumber (0);
+				pos.To = new NSNumber (frame.Height);
+#endif
+				
+				var size = (CAKeyFrameAnimation) CAKeyFrameAnimation.FromKeyPath ("transform.scale");
+				size.Values = new NSNumber [] {
+					NSNumber.FromFloat (0.8f),
+					NSNumber.FromFloat (1.2f),
+					NSNumber.FromFloat (1),
+				};
+				
+				var group = CAAnimationGroup.CreateAnimation ();
+				group.Animations = new CAAnimation [] { alpha, /* size, /*pos, */ };
+				group.Duration = delay; 
+				
+				layer.AddAnimation (group, "showup");
+				
+				layer.Frame = new RectangleF (slotsize*i+image.Size.Width/2, (frame.Height-image.Size.Height)/2, image.Size.Width, image.Size.Height);
+				menu.Layer.AddSublayer (layer);
+			}
+			
+			return menu;
+		}
+		
 		public virtual void OnSwipe (NSIndexPath path, UITableViewCell cell)
 		{
 			var e = Root [path.Section][path.Row];
@@ -203,11 +266,8 @@ namespace TweetStation
 				var frame = cell.ContentView.Frame;
 				
 				TableView.ScrollEnabled = false;
-				var button = UIButton.FromType (UIButtonType.RoundedRect);
-				button.Frame = new RectangleF (0, 0, frame.Width, frame.Height);
-				
-				//Console.WriteLine ("Swipe detected!");
-				ShowMenu (button, cell);
+				var menu = MakeMenu (frame);
+				ShowMenu (menu, cell);
 			}
 		}
 		
