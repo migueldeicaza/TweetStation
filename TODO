@@ -1,7 +1,5 @@
 *iPhone4
 
-	Missing @2x icons
-
 	Download the large version of the image for the ShortProfile
 	and show at 146x146 instead of the _bigger version which is only
 	73x73
@@ -10,10 +8,30 @@
 	ID, this optimization makes it hard to support all 3 image formats
 	and prevents the code from being reusable
 
+	Option: what if I keep a list of all ID->PicUrl IDs visible, and
+	invalidate any cached images as we load new data.
+
+* Feature Requests:
+	Delete tweets
+	Report Spam
+
+* Style:
+
+	People dont like that RootElement does not "highlight" before switching to the new view
+
+* Bugs:
+	Should profile, slow to startup reports
+	About clips at bottom message
+	Fernando's name has encoding issues
+	View disclosure button never works
+	Solid background for images, messes up icons (twitter.com/mint)
+	
 * Usage Observations
 
-	neds to save draft
-	needs to remembr last position (after phone call, everything is cancelled)
+	Do not show border on detail tweets if we have alpha channel?
+
+	needs to save draft
+	needs to remembrr last position (after phone call, everything is cancelled)
 
 	(http://foo) is not highlighted
 
