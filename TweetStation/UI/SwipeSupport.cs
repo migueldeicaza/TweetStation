@@ -39,12 +39,13 @@ using MonoTouch.UIKit;
 using MonoTouch.Dialog;
 using System.Drawing;
 using MonoTouch.CoreAnimation;
+using MonoTouch.CoreGraphics;
 
 namespace TweetStation
 {
 	public partial class BaseTimelineViewController
 	{
-		class SwipeDetectingTableView : UITableView {
+		internal class SwipeDetectingTableView : UITableView {
 			BaseTimelineViewController container;
 			
 			public SwipeDetectingTableView (RectangleF bounds, UITableViewStyle style, BaseTimelineViewController container)
@@ -200,63 +201,116 @@ namespace TweetStation
 				
 			}
 		}
-		
-		UIImage imageReply, imageRetweet, imageStarOn, imageStarOff, imageProfile;
-		UIImage [] images;
-		
-		UIView MakeMenu (RectangleF frame)
-		{
-			var menu = new UIView (new RectangleF (0, 0, frame.Width, frame.Height)) {
-				BackgroundColor = UIColor.DarkGray
+
+		internal class SwipeMenuView : UIView {
+			static UIImage texture = UIImage.FromBundle ("Images/texture.png");
+			static UIImage [] images = {
+				UIImage.FromBundle ("Images/swipe-reply.png"),
+				UIImage.FromBundle ("Images/swipe-retweet.png"),
+				UIImage.FromBundle ("Images/swipe-star-off.png"),
+				UIImage.FromBundle ("Images/swipe-profile.png")
 			};
-	
-			if (imageReply == null){
-				imageReply   = UIImage.FromBundle ("Images/swipe-reply.png");
-				imageRetweet = UIImage.FromBundle ("Images/swipe-retweet.png");
-				imageStarOn  = UIImage.FromBundle ("Images/swipe-star-onf.png");
-				imageStarOff = UIImage.FromBundle ("Images/swipe-star-off.png");
-				imageProfile = UIImage.FromBundle ("Images/swipe-profile.png");
-				images = new UIImage [] { 
-					imageReply, imageRetweet, imageStarOff, imageProfile,
-				};
-			}
-			var views = new CALayer [images.Length];
+
+			BaseTimelineViewController parent;
 			
-			float slotsize = frame.Width/views.Length;
-			for (int i = 0; i < views.Length; i++){
-				var image = images [i];
-				var layer = views [i] = new CALayer ();
-				layer.Contents = images [i].CGImage;
+			internal SwipeMenuView (BaseTimelineViewController parent, RectangleF frame) : base (frame)
+			{
+				this.parent = parent;
+				BackgroundColor = UIColor.FromPatternImage (texture);
+				var views = new CALayer [images.Length];
 				
-				var alpha = (CABasicAnimation) CABasicAnimation.FromKeyPath ("opacity");
-				alpha.From = new NSNumber (0);
-				alpha.To = new NSNumber (1);
-				alpha.BeginTime = delay/views.Length*i;
-				
-#if DEBUG
-				var pos = (CABasicAnimation) CABasicAnimation.FromKeyPath ("position.y");
-				pos.From = new NSNumber (0);
-				pos.To = new NSNumber (frame.Height);
-#endif
-				
-				var size = (CAKeyFrameAnimation) CAKeyFrameAnimation.FromKeyPath ("transform.scale");
-				size.Values = new NSNumber [] {
-					NSNumber.FromFloat (0.8f),
-					NSNumber.FromFloat (1.2f),
-					NSNumber.FromFloat (1),
-				};
-				
-				var group = CAAnimationGroup.CreateAnimation ();
-				group.Animations = new CAAnimation [] { alpha, /* size, /*pos, */ };
-				group.Duration = delay; 
-				
-				layer.AddAnimation (group, "showup");
-				
-				layer.Frame = new RectangleF (slotsize*i+image.Size.Width/2, (frame.Height-image.Size.Height)/2, image.Size.Width, image.Size.Height);
-				menu.Layer.AddSublayer (layer);
+				float slotsize = frame.Width/views.Length;
+				for (int i = 0; i < views.Length; i++){
+					var image = images [i];
+					var layer = views [i] = new CALayer ();
+
+					
+					UIGraphics.BeginImageContext (new SizeF (image.Size.Width+8, image.Size.Height+8));
+					var ctx = UIGraphics.GetCurrentContext ();
+
+					ctx.SaveState ();
+					ctx.SetShadowWithColor (new SizeF (1, 1), 10, UIColor.Black.CGColor);
+					image.Draw (new PointF (4, 4));
+					ctx.RestoreState ();
+
+					image.Draw (new PointF (4, 4));
+					image = UIGraphics.GetImageFromCurrentImageContext ();
+					layer.Contents = image.CGImage;
+					UIGraphics.EndImageContext ();
+					
+					var alpha = (CABasicAnimation) CABasicAnimation.FromKeyPath ("opacity");
+					alpha.From = new NSNumber (0);
+					alpha.To = new NSNumber (1);
+					alpha.BeginTime = delay/views.Length*i;
+					
+					var size = (CAKeyFrameAnimation) CAKeyFrameAnimation.FromKeyPath ("transform.scale");
+					size.Values = new NSNumber [] {
+						NSNumber.FromFloat (0.8f),
+						NSNumber.FromFloat (1.2f),
+						NSNumber.FromFloat (1),
+					};
+					
+					var group = CAAnimationGroup.CreateAnimation ();
+					group.Animations = new CAAnimation [] { alpha, size };
+					group.Duration = delay; 
+					
+					layer.AddAnimation (group, "showup");					
+					
+					layer.Frame = new RectangleF (
+						(int) (slotsize*i+image.Size.Width/2), 
+						(int) (frame.Height-image.Size.Height)/2, 
+						image.Size.Width, image.Size.Height);
+
+					Layer.AddSublayer (layer);
+				}
 			}
 			
-			return menu;
+			CALayer tracking;
+			
+			void StopTracking ()
+			{
+				if (tracking != null)
+					tracking.BorderWidth = 0;
+				
+				tracking = null;
+			}
+			
+			public override void TouchesBegan (NSSet touches, UIEvent evt)
+			{
+				base.TouchesBegan (touches, evt);
+				
+                var touch = touches.AnyObject as UITouch;
+                var location = touch.LocationInView (this);
+                
+				tracking = Layer.HitTest (location);
+				if (tracking == Layer)
+					tracking = null;
+
+				StopTracking ();
+			}
+			
+			public override void TouchesEnded (NSSet touches, UIEvent evt)
+			{
+				base.TouchesEnded (touches, evt);
+				if (tracking != null){
+					// Cancel menu
+					// Raise event.
+				}
+				
+				StopTracking ();
+			}
+			
+			public override void TouchesMoved (NSSet touches, UIEvent evt)
+			{
+				base.TouchesMoved (touches, evt);
+				
+			}
+			
+			public override void TouchesCancelled (NSSet touches, UIEvent evt)
+			{
+				base.TouchesCancelled (touches, evt);
+				StopTracking ();
+			}
 		}
 		
 		public virtual void OnSwipe (NSIndexPath path, UITableViewCell cell)
@@ -266,7 +320,7 @@ namespace TweetStation
 				var frame = cell.ContentView.Frame;
 				
 				TableView.ScrollEnabled = false;
-				var menu = MakeMenu (frame);
+				var menu = new SwipeMenuView (this, frame);
 				ShowMenu (menu, cell);
 			}
 		}
