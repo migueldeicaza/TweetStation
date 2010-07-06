@@ -24,6 +24,8 @@ using System;
 using System.Drawing;
 using MonoTouch.CoreGraphics;
 using MonoTouch.UIKit;
+using MonoTouch.ObjCRuntime;
+using MonoTouch.CoreAnimation;
 
 namespace TweetStation
 {
@@ -35,6 +37,19 @@ namespace TweetStation
 		// Check for multi-tasking as a way to determine if we can probe for the "Scale" property,
 		// only available on iOS4 
 		public static bool HighRes = UIDevice.CurrentDevice.IsMultitaskingSupported && UIScreen.MainScreen.Scale > 1;
+		
+		static Selector sscale;
+		
+		internal static void ConfigLayerHighRes (CALayer layer)
+		{
+			if (!HighRes)
+				return;
+			
+			if (sscale == null)
+				sscale = new Selector ("setContentsScale:");
+			
+			Messaging.void_objc_msgSend_float (layer.Handle, sscale.Handle, 2.0f);
+		}
 		
         // Child proof the image by rounding the edges of the image
         internal static UIImage RemoveSharpEdges (UIImage image)

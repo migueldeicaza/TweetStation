@@ -186,7 +186,8 @@ namespace TweetStation
 			foreach (var view in menuCell.ContentView.Subviews){
 				if (view == currentMenuView)
 					continue;
-				
+
+				view.SetNeedsDisplay ();
 				AnimateBack (view, animation);
 			}
 			AnimateBack (menuCell.SelectedBackgroundView, animation);
@@ -245,6 +246,7 @@ namespace TweetStation
 				for (int i = 0; i < layers.Length; i++){
 					var image = images [i];
 					var layer = layers [i] = new CALayer ();
+					Graphics.ConfigLayerHighRes (layer);					
 
 					image = RenderImageWithShadow (image, 3, UIColor.Black);
 					layer.Contents = image.CGImage;
@@ -278,7 +280,12 @@ namespace TweetStation
 			
 			UIImage RenderImageWithShadow (UIImage image, float radius, UIColor color)
 			{
-				UIGraphics.BeginImageContext (new SizeF (image.Size.Width+8, image.Size.Height+8));
+				var size = new SizeF (image.Size.Width+8, image.Size.Height+8);
+				
+				if (Graphics.HighRes)
+					UIGraphics.BeginImageContextWithOptions (size, false, 0);
+				else
+					UIGraphics.BeginImageContext (size);
 				var ctx = UIGraphics.GetCurrentContext ();
 
 				ctx.SaveState ();
@@ -287,9 +294,12 @@ namespace TweetStation
 				ctx.RestoreState ();
 
 				image.Draw (new PointF (4, 4));
+				
 				image = UIGraphics.GetImageFromCurrentImageContext ();
+
 				UIGraphics.EndImageContext ();
 				
+				Console.WriteLine ("Image scale={0}", image.CurrentScale);
 				return image;
 			}
 			
@@ -347,12 +357,13 @@ namespace TweetStation
 				base.TouchesEnded (touches, evt);
 
 				bool currentlySelected = cover.SuperLayer != null;
+				int selIdx = selected;
 				StopTracking ();
 				
 				if (currentlySelected){
-					parent.CancelMenu ();
 					if (Selected != null)
-						Selected (selected);
+						Selected (selIdx);
+					parent.CancelMenu ();
 				} 
 			}
 			
@@ -395,7 +406,7 @@ namespace TweetStation
 						UIImage.FromBundle ("Images/swipe-star-off.png"),
 						UIImage.FromBundle ("Images/swipe-star-on.png"),
 					};
-					
+
 					onImages = new UIImage [] {
 						swipeMenuImages [0], swipeMenuImages [1], swipeMenuImages [2], swipeMenuImages [4]
 					};
@@ -405,6 +416,25 @@ namespace TweetStation
 				}
 				
 				var menu = new SwipeMenuView (this, MenuHostElement.Tweet.Favorited ? onImages : offImages, frame);
+				menu.Selected += idx => {
+					switch (idx){
+					case 0:
+						AppDelegate.MainAppDelegate.Reply (this, MenuHostElement.Tweet);
+						break;
+						
+					case 1:
+						AppDelegate.MainAppDelegate.Retweet (this, MenuHostElement.Tweet);
+						break;
+						
+					case 2:
+						ActivateController (new FullProfileView (MenuHostElement.Tweet.UserId));
+						break;
+						
+					case 3:
+						AppDelegate.MainAppDelegate.ToggleFavorite (MenuHostElement.Tweet);
+						break;
+					}
+				};
 				ShowMenu (menu, cell);
 			}
 		}

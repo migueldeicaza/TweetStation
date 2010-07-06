@@ -204,20 +204,7 @@ namespace TweetStation
 		UIActionSheet sheet;
 		void Retweet (object sender, EventArgs args)
 		{
-			sheet = Util.GetSheet (Locale.GetText ("Retweet"));
-			sheet.AddButton (Locale.GetText ("Retweet"));
-			sheet.AddButton (Locale.GetText ("Quote Retweet"));
-			sheet.AddButton (Locale.GetText ("Cancel"));
-			sheet.CancelButtonIndex = 2;
-			
-			sheet.Clicked += delegate(object s, UIButtonEventArgs e) {
-				if (e.ButtonIndex == 0)
-					TwitterAccount.CurrentAccount.Post ("http://api.twitter.com/1/statuses/retweet/" + tweet.Id + ".json", ""); 
-				else if (e.ButtonIndex == 1){
-					Composer.Main.Quote (this, tweet);
-				}
-			};
-			sheet.ShowInView (AppDelegate.MainAppDelegate.MainView);
+			AppDelegate.MainAppDelegate.Retweet (this, tweet);
 		}
 	}
 	
@@ -277,13 +264,8 @@ namespace TweetStation
 				UpdateButtonImage (tweet);
 
 				buttonView.TouchDown += delegate {
-					tweet.Favorited = !tweet.Favorited;
-					AppDelegate.MainAppDelegate.FavoriteChanged (tweet);
-					TwitterAccount.CurrentAccount.Post (String.Format ("http://api.twitter.com/1/favorites/{0}/{1}.json", tweet.Favorited ? "create" : "destroy", tweet.Id),"");
 					UpdateButtonImage (tweet);
-					
-					lock (Database.Main)
-						tweet.Replace (Database.Main);
+					AppDelegate.MainAppDelegate.ToggleFavorite (tweet);
 				};
 			
 				AddSubview (buttonView);

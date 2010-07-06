@@ -53,7 +53,7 @@ namespace TweetStation
 		
 		const int TextHeightPadding = 4;
 		const int TextWidthPadding = 4;
-		const int TextYOffset = userSize + 4;
+		const int TextYOffset = userSize + 8;
 		const int MinHeight = PicSize + 2 * PicYPad;
 		const int TimeWidth = 46;
 		
@@ -194,8 +194,8 @@ namespace TweetStation
 					context.TranslateCTM (xPic, PicYPad);
 					context.SetLineWidth (1);
 					
-					// On device, the shadow is painted in the opposite direction!
-					context.SetShadowWithColor (new SizeF (0, -1), 3, UIColor.DarkGray.CGColor);
+					// On device, on some OS versions, the shadow is painted in the opposite direction!
+					context.SetShadowWithColor (new SizeF (0, 1), 3, UIColor.DarkGray.CGColor);
 					context.AddPath (badgePath);
 					context.FillPath ();
 					

@@ -209,8 +209,36 @@ namespace TweetStation
 			sheet.ShowInView (MainAppDelegate.MainView);
 		}
 		
+		public void Retweet (UIViewController controller, Tweet tweet)
+		{
+			var sheet = Util.GetSheet (Locale.GetText ("Retweet"));
+			sheet.AddButton (Locale.GetText ("Retweet"));
+			sheet.AddButton (Locale.GetText ("Quote Retweet"));
+			sheet.AddButton (Locale.GetText ("Cancel"));
+			sheet.CancelButtonIndex = 2;
+			
+			sheet.Clicked += delegate(object s, UIButtonEventArgs e) {
+				if (e.ButtonIndex == 0)
+					TwitterAccount.CurrentAccount.Post ("http://api.twitter.com/1/statuses/retweet/" + tweet.Id + ".json", ""); 
+				else if (e.ButtonIndex == 1){
+					Composer.Main.Quote (controller, tweet);
+				}
+			};
+			sheet.ShowInView (AppDelegate.MainAppDelegate.MainView);
+		}
+		
+		public void ToggleFavorite (Tweet tweet)
+		{
+			tweet.Favorited = !tweet.Favorited;
+			FavoriteChanged (tweet);
+			TwitterAccount.CurrentAccount.Post (String.Format ("http://api.twitter.com/1/favorites/{0}/{1}.json", tweet.Favorited ? "create" : "destroy", tweet.Id),"");
+			
+			lock (Database.Main)
+				tweet.Replace (Database.Main);
+		}
+		
 		// Broadcast the change, since tweets can be instantiated multiple times.
-		public void FavoriteChanged (Tweet tweet)
+		void FavoriteChanged (Tweet tweet)
 		{
 			favorites.FavoriteChanged (tweet);
 			main.FavoriteChanged (tweet);
