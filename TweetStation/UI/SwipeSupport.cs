@@ -123,7 +123,7 @@ namespace TweetStation
 		TweetElement MenuHostElement;
 		
 		// Animation delay for the swipe
-		const double delay = 0.5;
+		const double delay = 0.3;
 		
 		// The current UIVIew that shows the menu
 		UIView currentMenuView;

@@ -13,6 +13,9 @@
 
 	Add text shadows to "pull to refresh" view
 
+	Delay should be different for show and hide menus.   The show needs
+	to be faster (0.3 or 0.2), the hide, slower (0.5)
+
 * Feature Requests:
 	Delete tweets
 	Report Spam
