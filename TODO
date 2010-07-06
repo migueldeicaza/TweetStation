@@ -11,6 +11,8 @@
 	Option: what if I keep a list of all ID->PicUrl IDs visible, and
 	invalidate any cached images as we load new data.
 
+	Add text shadows to "pull to refresh" view
+
 * Feature Requests:
 	Delete tweets
 	Report Spam

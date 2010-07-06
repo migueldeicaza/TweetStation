@@ -45,8 +45,16 @@ namespace TweetStation
 {
 	public partial class BaseTimelineViewController
 	{
+		
+		public override UITableView MakeTableView (RectangleF bounds, UITableViewStyle style)
+		{
+			return new SwipeDetectingTableView (bounds, style, this);
+		}
+
 		internal class SwipeDetectingTableView : UITableView {
 			BaseTimelineViewController container;
+			bool swipeDetectionDisabled;
+			PointF? touchStart;
 			
 			public SwipeDetectingTableView (RectangleF bounds, UITableViewStyle style, BaseTimelineViewController container)
 				: base (bounds, style)
@@ -54,37 +62,39 @@ namespace TweetStation
 				this.container = container;
 			}
 			
-			bool ignoreTouchEvents;
-			PointF? touchStart;
 			public override void TouchesBegan (NSSet touches, UIEvent evt)
 			{
 				var touch = touches.AnyObject as UITouch;
 				touchStart = touch.LocationInView (this);
-				
-				ignoreTouchEvents = container.CancelMenu ();
-				
+
+				// If the menu is not active
+				if (container.MenuHostElement == null || container.MenuHostElement != container.TweetElementFromPath (IndexPathForRowAtPoint (touchStart.Value)))
+					swipeDetectionDisabled = container.CancelMenu ();
+
 				base.TouchesBegan (touches, evt);
 			}
 			
 			public override void TouchesMoved (NSSet touches, UIEvent evt)
 			{
-				if (ignoreTouchEvents)
+				if (swipeDetectionDisabled)
 					return;
 				
-				if (touchStart != null){
-					var touch = touches.AnyObject as UITouch;
-					var currentPos = touch.LocationInView (this);
-					var deltaX = Math.Abs (touchStart.Value.X - currentPos.X);
-					var deltaY = Math.Abs (touchStart.Value.Y - currentPos.Y);
-					
-					if (deltaY < 5 && deltaX > 16){
-						var menuPath = IndexPathForRowAtPoint (currentPos);
-						var cell = CellAt (menuPath);
+				if (container.MenuHostElement == null){
+					if (touchStart != null){
+						var touch = touches.AnyObject as UITouch;
+						var currentPos = touch.LocationInView (this);
+						var deltaX = Math.Abs (touchStart.Value.X - currentPos.X);
+						var deltaY = Math.Abs (touchStart.Value.Y - currentPos.Y);
 						
-						container.OnSwipe (menuPath, cell);
-						ignoreTouchEvents = true;
-						touchStart = null;
-						return;
+						if (deltaY < 5 && deltaX > 16){
+							var menuPath = IndexPathForRowAtPoint (currentPos);
+							var cell = CellAt (menuPath);
+							
+							container.OnSwipe (menuPath, cell);
+							swipeDetectionDisabled = true;
+							touchStart = null;
+							return;
+						}
 					}
 				}
 				base.TouchesMoved (touches, evt);
@@ -92,7 +102,12 @@ namespace TweetStation
 			
 			public override void TouchesEnded (NSSet touches, UIEvent evt)
 			{
-				if (ignoreTouchEvents)
+				if (container.MenuHostElement != null){
+					container.TouchesEnded (touches, evt);
+					return;
+				}
+				
+				if (swipeDetectionDisabled)
 					return;
 				
 				if (container.DisableSelection)
@@ -102,26 +117,31 @@ namespace TweetStation
 				touchStart = null;
 			}
 		}
+
+		// The element that is hosting the swipe action
+		TweetElement MenuHostElement;
+		
+		// Animation delay for the swipe
+		const double delay = 0.5;
+		
+		// The current UIVIew that shows the menu
+		UIView currentMenuView;
+		
+		// The cell where the menu is shown
+		UITableViewCell menuCell;
 	
 		static void Move (UIView view, float xoffset)
 		{
-			//Console.WriteLine ("    Moving {0} from {1} to {2}", view, view.Frame.X, view.Frame.X + xoffset);
 			var frame = view.Frame;
 			frame.Offset (xoffset, 0);
 			view.Frame = frame;
 		}
 		
-		const double delay = 0.5;
-		UIView currentMenuView;
-		UITableViewCell menuCell;
-	
 		void ShowMenu (UIView menuView, UITableViewCell cell)
 		{
 			HideMenu ();
 			DisableSelection = true;
-			var p = TableView.IndexPathForCell (cell);
 			float offset = cell.ContentView.Frame.Width;
-			//Console.WriteLine ("Activating swipe at {0},{1} OFFSET={2}", p.Section, p.Row, offset);
 
 			currentMenuView = menuView;
 			menuCell = cell;
@@ -131,6 +151,7 @@ namespace TweetStation
 			UIView.SetAnimationDuration (delay);
 			UIView.SetAnimationCurve (UIViewAnimationCurve.EaseIn);
 
+			Move (cell.SelectedBackgroundView, offset);
 			foreach (var view in cell.ContentView.Subviews){
 				if (view == menuView)
 					continue;
@@ -139,14 +160,19 @@ namespace TweetStation
 			UIView.CommitAnimations ();
 		}
 
+		void AnimateBack (UIView view, CAAnimation animation)
+		{
+			var b = view.Bounds;
+			view.Layer.Position = new PointF (b.Width/2, b.Height/2);
+			view.Layer.AddAnimation (animation, "position");
+		}
+		
 		bool HideMenu ()
 		{
 			if (menuCell == null || currentMenuView == null)
 				return false;
 			
 			float offset = menuCell.ContentView.Frame.Width;
-			var p = TableView.IndexPathForCell (menuCell);
-			Console.WriteLine ("REMOVING swite at {0},{1} OFFSET={2}", p.Section, p.Row, offset);
 			
 			UIView.BeginAnimations ("Foo");
 			UIView.SetAnimationDuration (delay);
@@ -156,18 +182,19 @@ namespace TweetStation
 			
 			var animation = MakeBounceAnimation (Math.Abs (offset));
 			
+			menuCell.Selected = false;
 			foreach (var view in menuCell.ContentView.Subviews){
 				if (view == currentMenuView)
 					continue;
 				
-				var b = view.Bounds;
-				view.Layer.Position = new PointF (b.Width/2, b.Height/2);
-				view.Layer.AddAnimation (animation, "position");
+				AnimateBack (view, animation);
 			}
+			AnimateBack (menuCell.SelectedBackgroundView, animation);
 
 			UIView.CommitAnimations ();
 			menuCell = null;
 			DisableSelection = false;
+			MenuHostElement = null;
 			return true;
 		}
 		
@@ -188,7 +215,6 @@ namespace TweetStation
 			};
 			
 			return animation;
-#endif
 		}
 		
 		[Export ("animationDidStop:finished:context:")]
@@ -204,44 +230,29 @@ namespace TweetStation
 
 		internal class SwipeMenuView : UIView {
 			static UIImage texture = UIImage.FromBundle ("Images/texture.png");
-			static UIImage [] images = {
-				UIImage.FromBundle ("Images/swipe-reply.png"),
-				UIImage.FromBundle ("Images/swipe-retweet.png"),
-				UIImage.FromBundle ("Images/swipe-star-off.png"),
-				UIImage.FromBundle ("Images/swipe-profile.png")
-			};
-
 			BaseTimelineViewController parent;
+			CALayer [] layers;
+			UIImage [] images;
 			
-			internal SwipeMenuView (BaseTimelineViewController parent, RectangleF frame) : base (frame)
+			internal SwipeMenuView (BaseTimelineViewController parent, UIImage [] images, RectangleF frame) : base (frame)
 			{
 				this.parent = parent;
+				this.images = images;
 				BackgroundColor = UIColor.FromPatternImage (texture);
-				var views = new CALayer [images.Length];
+				layers = new CALayer [images.Length];
 				
-				float slotsize = frame.Width/views.Length;
-				for (int i = 0; i < views.Length; i++){
+				float slotsize = frame.Width/layers.Length;
+				for (int i = 0; i < layers.Length; i++){
 					var image = images [i];
-					var layer = views [i] = new CALayer ();
+					var layer = layers [i] = new CALayer ();
 
-					
-					UIGraphics.BeginImageContext (new SizeF (image.Size.Width+8, image.Size.Height+8));
-					var ctx = UIGraphics.GetCurrentContext ();
-
-					ctx.SaveState ();
-					ctx.SetShadowWithColor (new SizeF (1, 1), 10, UIColor.Black.CGColor);
-					image.Draw (new PointF (4, 4));
-					ctx.RestoreState ();
-
-					image.Draw (new PointF (4, 4));
-					image = UIGraphics.GetImageFromCurrentImageContext ();
+					image = RenderImageWithShadow (image, 3, UIColor.Black);
 					layer.Contents = image.CGImage;
-					UIGraphics.EndImageContext ();
 					
 					var alpha = (CABasicAnimation) CABasicAnimation.FromKeyPath ("opacity");
 					alpha.From = new NSNumber (0);
 					alpha.To = new NSNumber (1);
-					alpha.BeginTime = delay/views.Length*i;
+					alpha.BeginTime = delay/layers.Length*i;
 					
 					var size = (CAKeyFrameAnimation) CAKeyFrameAnimation.FromKeyPath ("transform.scale");
 					size.Values = new NSNumber [] {
@@ -265,45 +276,93 @@ namespace TweetStation
 				}
 			}
 			
-			CALayer tracking;
+			UIImage RenderImageWithShadow (UIImage image, float radius, UIColor color)
+			{
+				UIGraphics.BeginImageContext (new SizeF (image.Size.Width+8, image.Size.Height+8));
+				var ctx = UIGraphics.GetCurrentContext ();
+
+				ctx.SaveState ();
+				ctx.SetShadowWithColor (new SizeF (1, 1), radius, color.CGColor);
+				image.Draw (new PointF (4, 4));
+				ctx.RestoreState ();
+
+				image.Draw (new PointF (4, 4));
+				image = UIGraphics.GetImageFromCurrentImageContext ();
+				UIGraphics.EndImageContext ();
+				
+				return image;
+			}
+			
+			CALayer cover;
+			int selected;
 			
 			void StopTracking ()
 			{
-				if (tracking != null)
-					tracking.BorderWidth = 0;
+				if (selected == -1)
+					return;
 				
-				tracking = null;
+				layers [selected].BorderWidth = 0;
+				selected = -1;
+				cover.RemoveFromSuperLayer ();
+				cover = null;
+			}
+			
+			void HighlightSelection ()
+			{
+				if (cover == null){
+					cover = new CALayer () {
+						Frame = new RectangleF (new PointF (0, 0), layers [selected].Frame.Size),
+					};
+					cover.Contents = RenderImageWithShadow (images [selected], 4, UIColor.White).CGImage;
+				}
+				layers [selected].AddSublayer (cover);
+			}
+
+			void RemoveHighlight ()
+			{
+				if (cover == null)
+					return;
+				cover.RemoveFromSuperLayer ();
+			}
+			
+			int ItemFromEvent (NSSet touches)
+			{
+				var touch = touches.AnyObject as UITouch;
+				var location = touch.LocationInView (this);
+				return (int) (location.X / (Frame.Width / images.Length));
 			}
 			
 			public override void TouchesBegan (NSSet touches, UIEvent evt)
 			{
 				base.TouchesBegan (touches, evt);
 				
-                var touch = touches.AnyObject as UITouch;
-                var location = touch.LocationInView (this);
-                
-				tracking = Layer.HitTest (location);
-				if (tracking == Layer)
-					tracking = null;
-
-				StopTracking ();
+				selected = ItemFromEvent (touches);
+				HighlightSelection ();
 			}
+			
+			public event Action<int> Selected;
 			
 			public override void TouchesEnded (NSSet touches, UIEvent evt)
 			{
 				base.TouchesEnded (touches, evt);
-				if (tracking != null){
-					// Cancel menu
-					// Raise event.
-				}
-				
+
+				bool currentlySelected = cover.SuperLayer != null;
 				StopTracking ();
+				
+				if (currentlySelected){
+					parent.CancelMenu ();
+					if (Selected != null)
+						Selected (selected);
+				} 
 			}
 			
 			public override void TouchesMoved (NSSet touches, UIEvent evt)
 			{
 				base.TouchesMoved (touches, evt);
-				
+				if (ItemFromEvent (touches) != selected)
+					RemoveHighlight ();
+				else if (cover.SuperLayer == null)
+					HighlightSelection ();
 			}
 			
 			public override void TouchesCancelled (NSSet touches, UIEvent evt)
@@ -313,18 +372,44 @@ namespace TweetStation
 			}
 		}
 		
-		public virtual void OnSwipe (NSIndexPath path, UITableViewCell cell)
+		TweetElement TweetElementFromPath (NSIndexPath path)
 		{
 			var e = Root [path.Section][path.Row];
-			if (e is TweetElement){
-				var frame = cell.ContentView.Frame;
-				
+			return e as TweetElement;
+		}
+		
+		UIImage [] swipeMenuImages, onImages, offImages;
+		
+		internal virtual void OnSwipe (NSIndexPath path, UITableViewCell cell)
+		{
+			MenuHostElement = TweetElementFromPath (path);
+			if (MenuHostElement != null){
+				var frame = cell.ContentView.Frame;				
 				TableView.ScrollEnabled = false;
-				var menu = new SwipeMenuView (this, frame);
+				
+				if (swipeMenuImages == null){
+					swipeMenuImages = new UIImage [] {
+						UIImage.FromBundle ("Images/swipe-reply.png"),
+						UIImage.FromBundle ("Images/swipe-retweet.png"),
+						UIImage.FromBundle ("Images/swipe-profile.png"),
+						UIImage.FromBundle ("Images/swipe-star-off.png"),
+						UIImage.FromBundle ("Images/swipe-star-on.png"),
+					};
+					
+					onImages = new UIImage [] {
+						swipeMenuImages [0], swipeMenuImages [1], swipeMenuImages [2], swipeMenuImages [4]
+					};
+					offImages = new UIImage [] {
+						swipeMenuImages [0], swipeMenuImages [1], swipeMenuImages [2], swipeMenuImages [3]
+					};
+				}
+				
+				var menu = new SwipeMenuView (this, MenuHostElement.Tweet.Favorited ? onImages : offImages, frame);
 				ShowMenu (menu, cell);
 			}
 		}
 		
+		// Returns true if the menu was cancelled, false if there was no menu to cancel
 		public virtual bool CancelMenu ()
 		{
 			if (HideMenu ()){
@@ -333,10 +418,6 @@ namespace TweetStation
 			}
 			return false;
 		}
-		
-		public override UITableView MakeTableView (RectangleF bounds, UITableViewStyle style)
-		{
-			return new SwipeDetectingTableView (bounds, style, this);
-		}
 	}
 }
+#endif
