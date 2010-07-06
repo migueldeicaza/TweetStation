@@ -40,6 +40,7 @@ using MonoTouch.Dialog;
 using System.Drawing;
 using MonoTouch.CoreAnimation;
 using MonoTouch.CoreGraphics;
+using System.Runtime.InteropServices;
 
 namespace TweetStation
 {
@@ -278,12 +279,17 @@ namespace TweetStation
 				}
 			}
 			
+			// 
+			// Temporary prototype, published MonoTouch has a bug.
+			[DllImport (MonoTouch.Constants.UIKitLibrary, EntryPoint="UIGraphicsBeginImageContextWithOptions")]
+			public extern static void BeginImageContextWithOptions (SizeF size, bool opaque, float scale);
+			
 			UIImage RenderImageWithShadow (UIImage image, float radius, UIColor color)
 			{
 				var size = new SizeF (image.Size.Width+8, image.Size.Height+8);
 				
 				if (Graphics.HighRes)
-					UIGraphics.BeginImageContextWithOptions (size, false, 0);
+					BeginImageContextWithOptions (size, false, 0);
 				else
 					UIGraphics.BeginImageContext (size);
 				var ctx = UIGraphics.GetCurrentContext ();
@@ -299,7 +305,6 @@ namespace TweetStation
 
 				UIGraphics.EndImageContext ();
 				
-				Console.WriteLine ("Image scale={0}", image.CurrentScale);
 				return image;
 			}
 			
