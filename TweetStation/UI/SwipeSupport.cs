@@ -67,6 +67,7 @@ namespace TweetStation
 			{
 				var touch = touches.AnyObject as UITouch;
 				touchStart = touch.LocationInView (this);
+				Console.WriteLine ("Begin: {0}", touchStart);
 
 				// If the menu is not active
 				if (container.MenuHostElement == null || container.MenuHostElement != container.TweetElementFromPath (IndexPathForRowAtPoint (touchStart.Value)))
@@ -77,6 +78,7 @@ namespace TweetStation
 			
 			public override void TouchesMoved (NSSet touches, UIEvent evt)
 			{
+				Console.WriteLine ("Move: disabled={0}", swipeDetectionDisabled);
 				if (swipeDetectionDisabled)
 					return;
 				
@@ -103,6 +105,8 @@ namespace TweetStation
 			
 			public override void TouchesEnded (NSSet touches, UIEvent evt)
 			{
+				Console.WriteLine ("Ended: disabled={0}", swipeDetectionDisabled);
+
 				if (container.MenuHostElement != null){
 					container.TouchesEnded (touches, evt);
 					return;
