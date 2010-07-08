@@ -261,10 +261,10 @@ namespace TweetStation
 				// Now that we now our size, center the button
 				buttonView = UIButton.FromType (UIButtonType.Custom);
 				buttonView.Frame = new RectangleF (tweetRect.X + tweetRect.Width, (f.Height-38)/2-4, 38, 38);
-				UpdateButtonImage (tweet);
+				UpdateButtonImage (tweet.Favorited);
 
 				buttonView.TouchDown += delegate {
-					UpdateButtonImage (tweet);
+					UpdateButtonImage (!tweet.Favorited);
 					AppDelegate.MainAppDelegate.ToggleFavorite (tweet);
 				};
 			
@@ -312,9 +312,9 @@ namespace TweetStation
 			context.RestoreState ();
 		}
 
-		void UpdateButtonImage (Tweet tweet)
+		void UpdateButtonImage (bool favorited)
 		{
-			var image = tweet.Favorited ? on : off;
+			var image = favorited ? on : off;
 			
 			buttonView.SetImage (image, UIControlState.Normal);
 			buttonView.SetImage (image, UIControlState.Selected);
