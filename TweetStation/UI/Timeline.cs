@@ -393,7 +393,7 @@ namespace TweetStation {
 			});
 		}
 		
-		protected virtual void PopulateRootFrom (byte [] data) {}
+		protected virtual void PopulateRootFrom (Stream stream) {}
 		
 		public override void FavoriteChanged (Tweet tweet)
 		{
@@ -450,51 +450,54 @@ namespace TweetStation {
 			Load (1, last_id);
 		}
 		
-		protected virtual IEnumerable<Tweet> GetTweetStream (byte [] result)
+		protected virtual IEnumerable<Tweet> GetTweetStream (Stream result)
 		{
-			return Tweet.TweetsFromStream (new MemoryStream (result), ReferenceUser);
+			return Tweet.TweetsFromStream (result, ReferenceUser);
 		}
 			
 		void Load (int page, long since_id)
 		{
 			var fullUrl = BuildUrl (page, since_id);
-			TwitterAccount.CurrentAccount.Download (fullUrl, res => {
+			TwitterAccount.CurrentAccount.Download (fullUrl, false, res => {
 				if (res == null){
-					Root = Util.MakeError (TimelineTitle);
+					BeginInvokeOnMainThread (delegate { Root = Util.MakeError (TimelineTitle); });
 					return;
 				}
-				var tweetStream = GetTweetStream (res);
+				Element [] tweetArray = (from tweet in GetTweetStream (res) select (Element) new TweetElement (tweet)).ToArray ();
 				
-				Section section;
-				if (since_id == 0){
-					if (page == 1){
-						// If we are the first batch of data being loaded, not load more, or refresh
-						var root = new RootElement (StreamedTitle) { UnevenRows = true };
-						section = new Section ();
-						root.Add (section);
-						Root = root;
-					} else { 
+				// Now on the main thread, do the UI work
+				BeginInvokeOnMainThread (delegate {
+					Section section;
+					if (since_id == 0){
+						if (page == 1){
+							// If we are the first batch of data being loaded, not load more, or refresh
+							var root = new RootElement (StreamedTitle) { UnevenRows = true };
+							section = new Section ();
+							root.Add (section);
+							Root = root;
+						} else { 
+							section = Root [0];
+							section.Remove (loadMore);
+						}
+						
+						int n = section.Add (tweetArray);
+						
+						if (n == expectedCount){
+							loadMore = new LoadMoreElement (Locale.GetText ("Load more"), Locale.GetText ("Loading"), delegate {
+								Load (page+1, 0);
+							}, UIFont.BoldSystemFontOfSize (14), UIColor.Black);
+						
+							section.Add (loadMore);
+						}
+					} else {
 						section = Root [0];
-						section.Remove (loadMore);
+						section.Insert (0, UITableViewRowAnimation.None, tweetArray);
 					}
-					
-					int n = section.Add (from tweet in tweetStream select (Element) new TweetElement (tweet));
-					
-					if (n == expectedCount){
-						loadMore = new LoadMoreElement (Locale.GetText ("Load more"), Locale.GetText ("Loading"), delegate {
-							Load (page+1, 0);
-						}, UIFont.BoldSystemFontOfSize (14), UIColor.Black);
-					
-						section.Add (loadMore);
-					}
-				} else {
-					section = Root [0];
-					section.Insert (0, UITableViewRowAnimation.None, from tweet in tweetStream select (Element) new TweetElement (tweet));
-				}
-				if (sinceStr != null && section.Count > 0)
-					last_id = (section [0] as TweetElement).Tweet.Id;
-
-				ReloadComplete ();
+					if (sinceStr != null && section.Count > 0)
+						last_id = (section [0] as TweetElement).Tweet.Id;
+		
+					ReloadComplete ();
+				});
 			});
 		}
 		

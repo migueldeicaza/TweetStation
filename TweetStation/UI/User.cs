@@ -93,11 +93,11 @@ namespace TweetStation
 		{
 		}
 
-		protected override void PopulateRootFrom (byte [] result)
+		protected override void PopulateRootFrom (Stream result)
 		{
 			lock (Database.Main){
 				Database.Main.Execute ("BEGIN");
-				var userStream = User.UnlockedLoadUsers (new MemoryStream (result));
+				var userStream = User.UnlockedLoadUsers (result);
 				
 				Root = new RootElement (StreamedTitle){
 					new Section () {

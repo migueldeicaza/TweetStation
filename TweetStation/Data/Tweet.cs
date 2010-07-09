@@ -322,7 +322,7 @@ namespace TweetStation
 				if (result == null)
 					callback (null);
 				
-				var tweet = Tweet.ParseTweet (new MemoryStream (result));
+				var tweet = Tweet.ParseTweet (result);
 				
 				if (tweet == null)
 					callback (null);
@@ -430,6 +430,16 @@ namespace TweetStation
 		public string Description {
 			get {
 				return (string) Json ["description"];
+			}
+		}
+		
+		public DateTime? CreatedAt {
+			get {
+				try {
+					return DateTime.ParseExact (Json ["created_at"], "ddd MMM dd HH:mm:ss zzz yyyy", CultureInfo.InvariantCulture);
+				} catch {
+					return null;
+				}
 			}
 		}
 		

@@ -25,6 +25,7 @@ using System.Threading;
 using SQLite;
 using MonoTouch.Foundation;
 using System.IO;
+using System.Net;
 
 namespace TweetStation
 {
@@ -125,7 +126,7 @@ namespace TweetStation
 				Util.PushNetworkActive ();
 				foreach (var task in tasks){
 					Uri taskUri = new Uri (task.Url);
-					OAuthAuthorizer.AuthorizeRequest (OAuthConfig, client, OAuthToken, OAuthTokenSecret, "POST", taskUri, task.PostData);
+					client.Headers [HttpRequestHeader.Authorization] = OAuthAuthorizer.AuthorizeRequest (OAuthConfig, OAuthToken, OAuthTokenSecret, "POST", taskUri, task.PostData);
 					try {
 						client.UploadData (taskUri, "POST", Encoding.UTF8.GetBytes (task.PostData));
 					} catch (Exception){
@@ -184,7 +185,7 @@ namespace TweetStation
 				
 				if (result != null){
 					try {
-						count = Tweet.LoadJson (new MemoryStream (result), LocalAccountId, kind);
+						count = Tweet.LoadJson (result, LocalAccountId, kind);
 					} catch (Exception e) { 
 						Console.WriteLine (e);
 					}

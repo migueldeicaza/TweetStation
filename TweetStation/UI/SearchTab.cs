@@ -118,10 +118,10 @@ namespace TweetStation
 			FetchTrends ();
 		}
 		
-		void LoadSearchResults (byte [] result)
+		void LoadSearchResults (Stream result)
 		{
 			try {
-				var json = JsonValue.Load (new MemoryStream (result));
+				var json = JsonValue.Load (result);
 				int i;
 				
 				var key = "x-" + TwitterAccount.CurrentAccount.AccountId;
@@ -186,14 +186,21 @@ namespace TweetStation
 		{
 			account.Download ("http://search.twitter.com/trends/current.json", result => {
 				try {
-					var json = JsonValue.Load (new MemoryStream (result));
+					if (result == null){
+						Root.Add (new Section ("Trends"){
+							new StringElement ("Error fetching trends")
+						});
+						return;
+					}
+					
+					var json = JsonValue.Load (result);
 					var jroot = (JsonObject) json ["trends"];
 					var jtrends = jroot.Values.FirstOrDefault (); 
 					
 					trends = new Section ("Trends");
 					
 					for (int i = 0; i < jtrends.Count; i++)
-						trends.Add (	new SearchElement (jtrends [i]["name"], jtrends [i]["query"]));
+						trends.Add (new SearchElement (jtrends [i]["name"], jtrends [i]["query"]));
 					Root.Add (trends);
 				} catch (Exception e){
 					Console.WriteLine (e);
@@ -211,7 +218,7 @@ namespace TweetStation
 				if (res == null)
 					return;
 				
-				var json = JsonValue.Load (new MemoryStream (res));
+				var json = JsonValue.Load (res);
 				var jlists = json ["lists"];
 				try {
 					int pos = 0;

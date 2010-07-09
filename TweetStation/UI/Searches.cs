@@ -42,9 +42,9 @@ namespace TweetStation
 			//View.AddSubview (bottomBar);
 		}
 		
-		protected override IEnumerable<Tweet> GetTweetStream (byte[] result)
+		protected override IEnumerable<Tweet> GetTweetStream (Stream result)
 		{
-			return Tweet.TweetsFromSearchResults (new MemoryStream (result), ReferenceUser);
+			return Tweet.TweetsFromSearchResults (result, ReferenceUser);
 		}
 	}
 	
@@ -58,9 +58,9 @@ namespace TweetStation
 		{
 		}
 
-		protected override IEnumerable<Tweet> GetTweetStream (byte[] result)
+		protected override IEnumerable<Tweet> GetTweetStream (Stream result)
 		{
-			return Tweet.TweetsFromSearchResults (new MemoryStream (result), ReferenceUser);
+			return Tweet.TweetsFromSearchResults (result, ReferenceUser);
 		}
 	}
 	
