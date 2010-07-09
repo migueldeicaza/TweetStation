@@ -74,10 +74,10 @@ namespace TweetStation
 				
 		internal struct Request {
 			public string Url;
-			public Action<byte []> Callback;
+			public Action<Stream> Callback;
 			public bool CallbackOnMainThread;
 			
-			public Request (string url, bool callbackOnMainThread, Action<byte []> callback)
+			public Request (string url, bool callbackOnMainThread, Action<Stream> callback)
 			{
 				Url = url;
 				Callback = callback;
@@ -95,12 +95,18 @@ namespace TweetStation
 		/// </summary>
 		/// 
 		/// 
-		public void Download (string url, Action<byte []> callback)		
+		public void Download (string url, Action<Stream> callback)		
 		{
 			Download (url, true, callback);
 		}
-		
-		public void Download (string url, bool callbackOnMainThread, Action<byte []> callback)
+
+		//
+		// Downloads the given url, if the callbackOnMainThread is true, this will
+		// buffer the result from the server before calling the callback on the main
+		// thread.   Otherwise the callback is invoked with a stream that will pull
+		// data as it is received from the network and might hang.
+		//
+		public void Download (string url, bool callbackOnMainThread, Action<Stream> callback)
 		{
 			lock (queue){				
 				pending++;
@@ -108,10 +114,12 @@ namespace TweetStation
 					Launch (url, callbackOnMainThread, callback);
 				else {
 					queue.Enqueue (new Request (url, callbackOnMainThread, callback));
-					//Console.WriteLine ("Queued: {0}", url);
 				}
 			}
 		}
+
+#if PRE_OAUTH_CODE
+		// In the future, for connecting to non-OAuth twitter sites
 
 		// This is required because by default WebClient wont authenticate
 		// until challenged to.   Twitter does not do that, so we need to force
@@ -125,70 +133,77 @@ namespace TweetStation
 				return req;
 			}
 		}
+#endif
 		
 		WebClient GetClient ()
 		{
-			if (OAuthTokenSecret != null)
-				return new WebClient (); 
-			return null;
-#if false
-			// In the future, for connecting to non-OAuth twitter sites
-			else 
-				return new AuthenticatedWebClient () {
-					Credentials = new NetworkCredentials (login, pass);
-			}
-#endif
+			return new WebClient (); 
 		}
 		
-		public void AddOAuthHeader (string operation, string url, string data)
-		{
-		}
-
-		static void InvokeCallback (Action<byte []> callback, DownloadDataCompletedEventArgs e)
+		static void InvokeCallback (Action<Stream> callback, Stream stream)
 		{
 			try {
-				if (e == null)
-					callback (null);
-				callback (e.Result);
+				callback (stream);
 			} catch  (Exception ex){
 				Console.WriteLine (ex);
 			}
+			stream.Close ();
 		}
 		
-		void Launch (string url, bool callbackOnMainThread, Action<byte []> callback)
+		void Launch (string url, bool callbackOnMainThread, Action<Stream> callback)
 		{
-			var client = GetClient ();
-	
-			client.DownloadDataCompleted += delegate(object sender, DownloadDataCompletedEventArgs e) {
-				lock (queue)
-					pending--;
-				
-				Util.PopNetworkActive ();
-				
-				if (callbackOnMainThread)
-					invoker.BeginInvokeOnMainThread (delegate { InvokeCallback (callback, e);});
-				else
-					InvokeCallback (callback, e);
-				
-				lock (queue){
-					if (queue.Count > 0){
-						var request = queue.Dequeue ();
-						Launch (request.Url, request.CallbackOnMainThread, request.Callback);
-					}
-				}
-			};
 			Util.PushNetworkActive ();
 			Uri uri = new Uri (url);
-			OAuthAuthorizer.AuthorizeRequest (OAuthConfig, client, OAuthToken, OAuthTokenSecret, "GET", uri, null);
-			client.DownloadDataAsync (uri);
+			var request = (HttpWebRequest) WebRequest.Create (uri);
+			request.AutomaticDecompression = DecompressionMethods.GZip;
+			request.Headers [HttpRequestHeader.Authorization] = OAuthAuthorizer.AuthorizeRequest (OAuthConfig, OAuthToken, OAuthTokenSecret, "GET", uri, null);
+			
+			request.BeginGetResponse (ar => {
+				try {
+					lock (queue)
+						pending--;
+					Util.PopNetworkActive ();
+					Stream stream = null;
+					
+					try {
+						var response = (HttpWebResponse) request.EndGetResponse (ar);
+						stream = response.GetResponseStream ();
+
+						// Since the stream will deliver in chunks, make a copy before passing to the main UI
+						if (callbackOnMainThread){
+							var ms = new MemoryStream ();
+							CopyToEnd (stream, ms);
+							ms.Position = 0;
+							stream.Close ();
+							stream = ms;
+						}
+					} catch (Exception e) {
+						Console.WriteLine (e);
+						stream = null;
+					}
+					
+					if (callbackOnMainThread)
+						invoker.BeginInvokeOnMainThread (delegate { InvokeCallback (callback, stream); });
+					else 
+						InvokeCallback (callback, stream);
+					
+				} catch (Exception e){
+					Console.WriteLine (e);
+				}
+				lock (queue){
+					if (queue.Count > 0){
+						var nextRequest = queue.Dequeue ();
+						Launch (nextRequest.Url, nextRequest.CallbackOnMainThread, nextRequest.Callback);
+					}
+				}
+			}, null);
 		}
 		
-		static void Copy (Stream source, Stream dest)
+		static void CopyToEnd (Stream source, Stream dest)
 		{
 			var buffer = new byte [4096];
 			int n = 0;
 
-			source.Position = 0;
 			while ((n = source.Read (buffer, 0, buffer.Length)) != 0){
 				dest.Write (buffer, 0, n);
 			}
@@ -214,7 +229,8 @@ namespace TweetStation
 		{
 			var dest = new MemoryStream ();
 			AddPart (dest, boundary, false, "Content-Disposition: form-data; name=\"media\"; filename=\"none.png\"\r\nContent-Type: application/octet-stream", null);
-			Copy (source, dest);
+			source.Position = 0;
+			CopyToEnd (source, dest);
 			AddPart (dest, boundary, true, "Content-Disposition: form-data; name=\"username\"", username);
 			var bbytes = Encoding.ASCII.GetBytes (String.Format ("\r\n--{0}--", boundary));
 			dest.Write (bbytes, 0, bbytes.Length);
@@ -236,7 +252,8 @@ namespace TweetStation
 			Stream upload = GenerateYFrogFrom (boundary, source, Username);
 			req.ContentLength = upload.Length;
 			using (var rs = req.GetRequestStream ()){
-				Copy (upload, rs);
+				upload.Position = 0;
+				CopyToEnd (upload, rs);
 				rs.Close ();
 			}
 			string urlToPic = null;

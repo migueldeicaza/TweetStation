@@ -267,7 +267,7 @@ namespace TweetStation
 				}
 				User user;
 				lock (Database.Main){
-					user = User.UnlockedLoadUsers (new MemoryStream (res)).FirstOrDefault ();
+					user = User.UnlockedLoadUsers (res).FirstOrDefault ();
 				}
 				cback (user);
 			});

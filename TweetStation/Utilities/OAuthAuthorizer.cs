@@ -225,7 +225,11 @@ namespace TweetStation
 			return false;
 		}
 		
-		public static void AuthorizeRequest (OAuthConfig config, WebClient wc, string oauthToken, string oauthTokenSecret, string method, Uri uri, string data)
+		// 
+		// Assign the result to the Authorization header, like this:
+		// request.Headers [HttpRequestHeader.Authorization] = AuthorizeRequest (...)
+		//
+		public static string AuthorizeRequest (OAuthConfig config, string oauthToken, string oauthTokenSecret, string method, Uri uri, string data)
 		{
 			var headers = new Dictionary<string, string>() {
 				{ "oauth_consumer_key", config.ConsumerKey },
@@ -256,7 +260,7 @@ namespace TweetStation
 
 			headers.Add ("oauth_signature", OAuth.PercentEncode (oauth_signature));
 			
-			wc.Headers [HttpRequestHeader.Authorization] = HeadersToOAuth (headers);
+			return HeadersToOAuth (headers);
 		}
 
 		//

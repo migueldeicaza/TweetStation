@@ -11,8 +11,6 @@
 	Option: what if I keep a list of all ID->PicUrl IDs visible, and
 	invalidate any cached images as we load new data.
 
-	Add text shadows to "pull to refresh" view
-
 	Delay should be different for show and hide menus.   The show needs
 	to be faster (0.3 or 0.2), the hide, slower (0.5)
 
@@ -47,6 +45,13 @@
 		Open (for links)
 		Quote
 
+* Optimizations
+
+	TwitterAccount.Download by default will make a copy into a MemoryStream of 
+	the results.   This is fine for small downloads, but for larger downloads it
+	is best to stream directly (for example timeliens), btu then we need to be
+	careful to decouple the stream reading from UI code.
+
 * Would be nice
 
 	Upload images in background, like "POSTs" do.
@@ -71,7 +76,6 @@
 		Special List timeline controller that lets edit	
 	User profile:	
 		Red Color for Blocking users
-		Showing first joined twitter
 		Merge friends + followers in a single cell to save space?
 		Showing a map for the user profile
 		Show if the tweet is protected/user protected

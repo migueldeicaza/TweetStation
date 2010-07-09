@@ -189,13 +189,13 @@ namespace TweetStation
 
 				if ((CellStyle & 2) == 0){
 					// Cute touch
-					UIColor.Gray.SetColor ();
+					UIColor.White.SetColor ();
 					context.SaveState ();
 					context.TranslateCTM (xPic, PicYPad);
 					context.SetLineWidth (1);
 					
-					// On device, on some OS versions, the shadow is painted in the opposite direction!
-					context.SetShadowWithColor (new SizeF (0, 1), 3, UIColor.DarkGray.CGColor);
+					// On device, the shadow is painted in the opposite direction!
+					context.SetShadowWithColor (new SizeF (1, 1), 3, UIColor.DarkGray.CGColor);
 					context.AddPath (badgePath);
 					context.FillPath ();
 					

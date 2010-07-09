@@ -70,12 +70,13 @@ namespace TweetStation
 			shortProfileView.PictureTapped += delegate { PictureViewer.Load (this, user.Id); };
 			shortProfileView.UrlTapped += delegate { WebViewController.OpenUrl (this, user.Url); };
 
-			var main = new Section (shortProfileView){
-				new StyledStringElement (user.Description) {
+			var main = new Section (shortProfileView);
+			if (!String.IsNullOrEmpty (user.Description)){
+				main.Add (new StyledStringElement (user.Description) {
 					Lines = 0,
 					LineBreakMode = UILineBreakMode.WordWrap,
 					Font = UIFont.SystemFontOfSize (14)
-				}
+				});
 			};
 			
 			var tweetsUrl = String.Format ("http://api.twitter.com/1/statuses/user_timeline.json?skip_user=true&id={0}", user.Id);
@@ -103,6 +104,10 @@ namespace TweetStation
 				},
 				sfollow,
 			};
+			var created = user.CreatedAt;
+			if (created.HasValue){
+				Root.Add (new Section (null, Locale.Format ("Joined on {0}", created.Value.ToLongDateString ())));
+			}
 			
 			string url = String.Format ("http://api.twitter.com/1/friendships/show.json?target_id={0}&source_screen_name={1}",
 			                            user.Id, 
@@ -138,10 +143,10 @@ namespace TweetStation
 		// we extract from here the follow status and the blocking status
 		// and insert the sections directly into our root
 		//
-		void  ParseFollow (byte [] res)
+		void  ParseFollow (Stream res)
 		{
 			try {
-				var root = JsonValue.Load (new MemoryStream (res));
+				var root = JsonValue.Load (res);
 				
 				//
 				// Follow/unfollow
