@@ -11,9 +11,6 @@
 	Option: what if I keep a list of all ID->PicUrl IDs visible, and
 	invalidate any cached images as we load new data.
 
-	Delay should be different for show and hide menus.   The show needs
-	to be faster (0.3 or 0.2), the hide, slower (0.5)
-
 * Feature Requests:
 	Delete tweets
 	Report Spam
@@ -27,7 +24,8 @@
 	About clips at bottom message
 	Fernando's name has encoding issues
 	View disclosure button never works
-	Solid background for images, messes up icons (twitter.com/mint)
+	When selection is on, the swipe background is visible as the cell moves out,
+	we need to figure out why the selection is not being disabled
 	
 * Usage Observations
 
