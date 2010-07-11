@@ -44,6 +44,8 @@ namespace TweetStation
 			MainAppDelegate = this;
 			window.MakeKeyAndVisible ();
 
+			//SpyTouch.SpyTouch.Run ();
+			
 			// Required by some HTTP calls to Twitter
 			System.Net.ServicePointManager.Expect100Continue = false;
 

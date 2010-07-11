@@ -186,15 +186,10 @@
     <Content Include="Images\mini-star-on.png" />
     <Content Include="Images\arrows.png" />
     <Content Include="about.html" />
-    <Content Include="Icon.png" />
-    <Content Include="IconSpotlight.png" />
     <Content Include="Audio\chicken1.caf" />
     <Content Include="Audio\chicken2.caf" />
     <Content Include="Images\back.png" />
     <Content Include="Images\forward.png" />
-    <Content Include="Default.png" />
-    <Content Include="Default%402x.png" />
-    <Content Include="Icon%402x.png" />
     <Content Include="Images\replies%402x.png" />
     <Content Include="Images\home%402x.png" />
     <Content Include="Images\messages%402x.png" />
@@ -209,16 +204,6 @@
     <Content Include="Images\forward%402x.png" />
     <Content Include="Images\gps%402x.png" />
     <Content Include="Images\arrows%402x.png" />
-    <Content Include="Images\swipe-reply.png" />
-    <Content Include="Images\swipe-reply%402x.png" />
-    <Content Include="Images\swipe-retweet.png" />
-    <Content Include="Images\swipe-retweet%402x.png" />
-    <Content Include="Images\swipe-star-off.png" />
-    <Content Include="Images\swipe-star-off%402x.png" />
-    <Content Include="Images\swipe-star-on.png" />
-    <Content Include="Images\swipe-star-on%402x.png" />
-    <Content Include="Images\swipe-profile.png" />
-    <Content Include="Images\swipe-profile%402x.png" />
     <Content Include="Images\texture.png" />
   </ItemGroup>
   <ItemGroup>

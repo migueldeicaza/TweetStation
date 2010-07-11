@@ -67,18 +67,19 @@ namespace TweetStation
 			{
 				var touch = touches.AnyObject as UITouch;
 				touchStart = touch.LocationInView (this);
-				Console.WriteLine ("Begin: {0}", touchStart);
 
 				// If the menu is not active
-				if (container.MenuHostElement == null || container.MenuHostElement != container.TweetElementFromPath (IndexPathForRowAtPoint (touchStart.Value)))
-					swipeDetectionDisabled = container.CancelMenu ();
+				if (container.MenuHostElement == null || container.MenuHostElement != container.TweetElementFromPath (IndexPathForRowAtPoint (touchStart.Value))){
+					container.CancelMenu ();
+					swipeDetectionDisabled = false;
+				}
+				
 
 				base.TouchesBegan (touches, evt);
 			}
 			
 			public override void TouchesMoved (NSSet touches, UIEvent evt)
 			{
-				Console.WriteLine ("Move: disabled={0}", swipeDetectionDisabled);
 				if (swipeDetectionDisabled)
 					return;
 				
@@ -89,7 +90,7 @@ namespace TweetStation
 						var deltaX = Math.Abs (touchStart.Value.X - currentPos.X);
 						var deltaY = Math.Abs (touchStart.Value.Y - currentPos.Y);
 						
-						if (deltaY < 5 && deltaX > 16){
+						if (deltaY < 10 && deltaX > 16){
 							var menuPath = IndexPathForRowAtPoint (currentPos);
 							var cell = CellAt (menuPath);
 							
@@ -105,8 +106,6 @@ namespace TweetStation
 			
 			public override void TouchesEnded (NSSet touches, UIEvent evt)
 			{
-				Console.WriteLine ("Ended: disabled={0}", swipeDetectionDisabled);
-
 				if (container.MenuHostElement != null){
 					container.TouchesEnded (touches, evt);
 					return;
@@ -174,12 +173,16 @@ namespace TweetStation
 		
 		bool HideMenu ()
 		{
-			if (menuCell == null || currentMenuView == null)
+			if (menuCell == null)
 				return false;
 			
 			float offset = menuCell.ContentView.Frame.Width;
 			
-			UIView.BeginAnimations ("Foo");
+			// Pass the currentMenuView as the view to remove, as it is a global that can be overwritten by
+			// another menu showing up.
+			var copy = currentMenuView;
+			var gch = GCHandle.Alloc (copy);
+			UIView.BeginAnimations ("Foo", GCHandle.ToIntPtr (gch));
 			UIView.SetAnimationDuration (delay);
 			UIView.SetAnimationDidStopSelector (new Selector ("animationDidStop:finished:context:"));
 			UIView.SetAnimationDelegate (this);
@@ -201,6 +204,7 @@ namespace TweetStation
 			menuCell = null;
 			DisableSelection = false;
 			MenuHostElement = null;
+			currentMenuView = null;
 			return true;
 		}
 		
@@ -227,11 +231,10 @@ namespace TweetStation
 		[Preserve]
 		public void HideFinished (string name, NSNumber numFinished, IntPtr context)
 		{
-			if (currentMenuView != null){
-				currentMenuView.RemoveFromSuperview ();
-				currentMenuView = null;
-				
-			}
+			GCHandle h = GCHandle.FromIntPtr (context);
+			var view = (UIView) h.Target;
+			view.RemoveFromSuperview ();
+			h.Free ();
 		}
 
 		internal class SwipeMenuView : UIView {
@@ -451,11 +454,8 @@ namespace TweetStation
 		// Returns true if the menu was cancelled, false if there was no menu to cancel
 		public virtual bool CancelMenu ()
 		{
-			if (HideMenu ()){
-				TableView.ScrollEnabled = true;
-				return true;
-			}
-			return false;
+			TableView.ScrollEnabled = true;
+			return HideMenu ();
 		}
 	}
 }
