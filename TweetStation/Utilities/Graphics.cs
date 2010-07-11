@@ -51,29 +51,29 @@ namespace TweetStation
 			Messaging.void_objc_msgSend_float (layer.Handle, sscale.Handle, 2.0f);
 		}
 		
-        // Child proof the image by rounding the edges of the image
-        internal static UIImage RemoveSharpEdges (UIImage image)
-        {
+		// Child proof the image by rounding the edges of the image
+		internal static UIImage RemoveSharpEdges (UIImage image)
+		{
 			if (image == null)
 				throw new ArgumentNullException ("image");
 			
 			float size = HighRes ? 73 : 48;
 			
-            UIGraphics.BeginImageContext (new SizeF (size, size));
-	        var c = UIGraphics.GetCurrentContext ();
-
+			UIGraphics.BeginImageContext (new SizeF (size, size));
+			var c = UIGraphics.GetCurrentContext ();
+			
 			if (HighRes)
 				c.AddPath (largePath);
 			else 
 				c.AddPath (smallPath);
 			
-        	c.Clip ();
-
-        	image.Draw (new RectangleF (0, 0, size, size));
-            var converted = UIGraphics.GetImageFromCurrentImageContext ();
-            UIGraphics.EndImageContext ();
-            return converted;
-        }
+			c.Clip ();
+			
+			image.Draw (new RectangleF (0, 0, size, size));
+			var converted = UIGraphics.GetImageFromCurrentImageContext ();
+			UIGraphics.EndImageContext ();
+			return converted;
+		}
 		
 		//
 		// Centers image, scales and removes borders
@@ -84,11 +84,11 @@ namespace TweetStation
 			if (image == null)
 				throw new ArgumentNullException ("image");
 			
-            UIGraphics.BeginImageContext (new SizeF (73, 73));
-            var c = UIGraphics.GetCurrentContext ();
-
+			UIGraphics.BeginImageContext (new SizeF (73, 73));
+			var c = UIGraphics.GetCurrentContext ();
+			
 			c.AddPath (largePath);
-            c.Clip ();
+			c.Clip ();
 
 			// Twitter not always returns squared images, adjust for that.
 			var cg = image.CGImage;
@@ -108,11 +108,11 @@ namespace TweetStation
 					c.DrawImage (new RectangleF (0, 0, size, -size), copy);
 				}
 			} else 
-	            image.Draw (new RectangleF (0, 0, size, size));
+				image.Draw (new RectangleF (0, 0, size, size));
 			
-            var converted = UIGraphics.GetImageFromCurrentImageContext ();
-            UIGraphics.EndImageContext ();
-            return converted;
+			var converted = UIGraphics.GetImageFromCurrentImageContext ();
+			UIGraphics.EndImageContext ();
+			return converted;
 		}
 		
 		internal static CGPath MakeRoundedPath (float size)

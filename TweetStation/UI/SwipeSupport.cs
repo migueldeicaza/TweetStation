@@ -139,21 +139,18 @@ namespace TweetStation
 		void ShowMenu (UIView menuView, UITableViewCell cell)
 		{
 			HideMenu ();
+			
+			var ip = TableView.IndexPathForCell (cell);
+			if (ip != null)
+				TableView.DeselectRow (ip, false);
+			
 			DisableSelection = true;
 			float offset = cell.ContentView.Frame.Width;
 
 			currentMenuView = menuView;
 			menuCell = cell;
 			
-			//
-			// This is necessay because the cell.ContentView
-			// changes our background color if the cell happens
-			// to be selected to allow the blue view they put in the
-			// back to show.   We do not want that.
-			//
-			var savedColor = menuView.BackgroundColor;
 			cell.ContentView.InsertSubview (menuView, 0);
-			menuView.BackgroundColor = savedColor;
 
 			UIView.BeginAnimations ("Foo");
 			UIView.SetAnimationDuration (globalDelay);
@@ -247,23 +244,39 @@ namespace TweetStation
 			CALayer [] layers;
 			UIImage [] images;
 			
-			internal SwipeMenuView (BaseTimelineViewController parent, UIImage [] images, RectangleF frame) : base (frame)
+			CALayer MakeBackgroundLayer (RectangleF frame)
 			{
-				this.parent = parent;
-				this.images = images;
 				if (textureColor == null){
  					texture = UIImage.FromBundle ("Images/texture.png");
 					textureColor = UIColor.FromPatternImage (texture);
 				}
-#if false
-				// Go down this path to add the shadow on the image
+
+				BeginImageContext (frame.Size);
+				var c = UIGraphics.GetCurrentContext ();
+				
+				texture.DrawAsPatternInRect (frame);
+
+				var shadow = UIImage.FromBundle ("Images/menu-shadow.png");
+				shadow.Draw (frame);
+				var result = UIGraphics.GetImageFromCurrentImageContext ();
+				
+				UIGraphics.EndImageContext ();
+
 				var back = new CALayer (){
 					Frame = frame
 				};
-				back.Contents = texture.CGImage;
-				Layer.AddSublayer (back);
-#endif		
-				BackgroundColor = textureColor;
+				Graphics.ConfigLayerHighRes (back);
+				back.Contents = result.CGImage;
+				return back;
+			}
+			
+			internal SwipeMenuView (BaseTimelineViewController parent, UIImage [] images, RectangleF frame) : base (frame)
+			{
+				this.parent = parent;
+				this.images = images;
+
+				Layer.AddSublayer (MakeBackgroundLayer (frame));
+
 				layers = new CALayer [images.Length];
 				
 				float slotsize = frame.Width/layers.Length;
@@ -308,14 +321,19 @@ namespace TweetStation
 			[DllImport (MonoTouch.Constants.UIKitLibrary, EntryPoint="UIGraphicsBeginImageContextWithOptions")]
 			public extern static void BeginImageContextWithOptions (SizeF size, bool opaque, float scale);
 			
-			UIImage RenderImageWithShadow (UIImage image, float radius, UIColor color)
+			void BeginImageContext (SizeF size)
 			{
-				var size = new SizeF (image.Size.Width+8, image.Size.Height+8);
-				
 				if (Graphics.HighRes)
 					BeginImageContextWithOptions (size, false, 0);
 				else
 					UIGraphics.BeginImageContext (size);
+			}
+			
+			UIImage RenderImageWithShadow (UIImage image, float radius, UIColor color)
+			{
+				var size = new SizeF (image.Size.Width+8, image.Size.Height+8);
+				
+				BeginImageContext (size);
 				var ctx = UIGraphics.GetCurrentContext ();
 
 				ctx.SaveState ();
