@@ -120,7 +120,8 @@ namespace TweetStation
 		TweetElement MenuHostElement;
 		
 		// Animation delay for the swipe
-		const double delay = 0.3;
+		const double globalDelay = 0.3;
+		const double hideDelay = 0.5;
 		
 		// The current UIVIew that shows the menu
 		UIView currentMenuView;
@@ -155,7 +156,7 @@ namespace TweetStation
 			menuView.BackgroundColor = savedColor;
 
 			UIView.BeginAnimations ("Foo");
-			UIView.SetAnimationDuration (delay);
+			UIView.SetAnimationDuration (globalDelay);
 			UIView.SetAnimationCurve (UIViewAnimationCurve.EaseIn);
 			Move (cell.SelectedBackgroundView, offset);
 			foreach (var view in cell.ContentView.Subviews){
@@ -185,7 +186,7 @@ namespace TweetStation
 			var copy = currentMenuView;
 			var gch = GCHandle.Alloc (copy);
 			UIView.BeginAnimations ("Foo", GCHandle.ToIntPtr (gch));
-			UIView.SetAnimationDuration (delay);
+			UIView.SetAnimationDuration (hideDelay);
 			UIView.SetAnimationDidStopSelector (new Selector ("animationDidStop:finished:context:"));
 			UIView.SetAnimationDelegate (this);
 			UIView.SetAnimationCurve (UIViewAnimationCurve.EaseInOut);			
@@ -214,12 +215,12 @@ namespace TweetStation
 		{
 			var animation = (CAKeyFrameAnimation) CAKeyFrameAnimation.FromKeyPath ("position.x");
 			
-			animation.Duration = delay;
+			animation.Duration = hideDelay;
 			float left = offset/2;
 			animation.Values = new NSNumber [] {
 				NSNumber.FromFloat (offset),
-				NSNumber.FromFloat (left-60),
-				NSNumber.FromFloat (left+40),
+				//NSNumber.FromFloat (left-60),
+				//NSNumber.FromFloat (left+40),
 				NSNumber.FromFloat (left-30),
 				NSNumber.FromFloat (left+10),
 				NSNumber.FromFloat (left-10),
@@ -254,11 +255,19 @@ namespace TweetStation
  					texture = UIImage.FromBundle ("Images/texture.png");
 					textureColor = UIColor.FromPatternImage (texture);
 				}
-				
+#if false
+				// Go down this path to add the shadow on the image
+				var back = new CALayer (){
+					Frame = frame
+				};
+				back.Contents = texture.CGImage;
+				Layer.AddSublayer (back);
+#endif		
 				BackgroundColor = textureColor;
 				layers = new CALayer [images.Length];
 				
 				float slotsize = frame.Width/layers.Length;
+				double delay = globalDelay; 
 				for (int i = 0; i < layers.Length; i++){
 					var image = images [i];
 					var layer = layers [i] = new CALayer ();
