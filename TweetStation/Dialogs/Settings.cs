@@ -118,10 +118,7 @@ namespace TweetStation
 				SetupLeftItemEdit ();
 		}
 		
-		BooleanElement playMusic;
-		BooleanElement chicken;
-		BooleanElement selfOnRight;
-		BooleanElement shadows;
+		BooleanElement playMusic, chicken, selfOnRight, shadows, autoFav;
 		RootElement compress;
 		
 		public override void ViewWillDisappear (bool animated)
@@ -130,6 +127,7 @@ namespace TweetStation
 			
 			Util.Defaults.SetInt (playMusic.Value ? 0 : 1, "disableMusic");
 			Util.Defaults.SetInt (chicken.Value ? 0 : 1, "disableChickens");
+			Util.Defaults.SetInt (autoFav.Value ? 0 : 1, "disableFavoriteRetweets");
 			
 			int style = (selfOnRight.Value ? 0 : 1) | (shadows.Value ? 0 : 2);
 			
@@ -156,6 +154,7 @@ namespace TweetStation
 						new Section (Locale.GetText ("Style")){
 							(selfOnRight = new BooleanElement (Locale.GetText ("My tweets on right"), (cellStyle & 1) == 0)),
 							(shadows = new BooleanElement (Locale.GetText ("Avatar shadows"), (cellStyle & 2) == 0)),
+							(autoFav = new BooleanElement (Locale.GetText ("Favorite on Retweet"), Util.Defaults.IntForKey ("disableFavoriteRetweets") == 0)),
 							(compress = new RootElement ("Image Compression", new RadioGroup ("group", Util.Defaults.IntForKey ("sizeCompression"))) {
 								new Section () {
 									new RadioElement ("Maximum"),

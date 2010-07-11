@@ -220,6 +220,9 @@ namespace TweetStation
 			sheet.CancelButtonIndex = 2;
 			
 			sheet.Clicked += delegate(object s, UIButtonEventArgs e) {
+				if (!tweet.Favorited && Util.Defaults.IntForKey ("disableFavoriteRetweets") == 0)
+					ToggleFavorite (tweet);
+				
 				if (e.ButtonIndex == 0)
 					TwitterAccount.CurrentAccount.Post ("http://api.twitter.com/1/statuses/retweet/" + tweet.Id + ".json", ""); 
 				else if (e.ButtonIndex == 1){
