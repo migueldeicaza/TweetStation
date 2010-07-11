@@ -232,6 +232,7 @@ namespace TweetStation {
 		void DownloadTweets (int insertPoint, long? since, long? max_id, Element removeOnInsert)
 		{
 			Account.ReloadTimeline (kind, since, max_id, count => {
+				CancelMenu ();
 				mainSection.Remove (removeOnInsert);
 				if (count == -1){
 					var msg = Locale.Format ("Net failure on {0}", DateTime.Now);
@@ -412,6 +413,7 @@ namespace TweetStation {
 			 if (!loaded)
 				return;
 			
+			CancelMenu ();
 			try {
 				Section main = Root [0];
 	
@@ -471,6 +473,7 @@ namespace TweetStation {
 		{
 			var fullUrl = BuildUrl (page, since_id);
 			TwitterAccount.CurrentAccount.Download (fullUrl, false, res => {
+				CancelMenu ();
 				if (res == null){
 					BeginInvokeOnMainThread (delegate { Root = Util.MakeError (TimelineTitle); });
 					return;

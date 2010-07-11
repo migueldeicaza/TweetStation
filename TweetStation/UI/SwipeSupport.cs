@@ -20,12 +20,6 @@
 
 //
 // TODO:
-//   * Sometimes it keeps a cell selected, this creates some sort of view that
-//     shows up as blue and prevents the grey background from being shown.
-//
-//   * Needs texture for the background image
-//
-//   * Needs actions hooked up
 //
 //   * Menu needs to be cancelled when items are added
 //
@@ -149,7 +143,16 @@ namespace TweetStation
 
 			currentMenuView = menuView;
 			menuCell = cell;
-			cell.ContentView.InsertSubview (menuView, 0);
+			
+			//
+			// This is necessay because the cell.ContentView
+			// changes our background color if the cell happens
+			// to be selected to allow the blue view they put in the
+			// back to show.   We do not want that.
+			//
+			var savedColor = menuView.BackgroundColor;
+			cell.ContentView.AddSubview (menuView);
+			menuView.BackgroundColor = savedColor;
 
 			UIView.BeginAnimations ("Foo");
 			UIView.SetAnimationDuration (delay);
@@ -238,7 +241,8 @@ namespace TweetStation
 		}
 
 		internal class SwipeMenuView : UIView {
-			static UIImage texture = UIImage.FromBundle ("Images/texture.png");
+			static UIImage texture;
+			static UIColor textureColor;
 			BaseTimelineViewController parent;
 			CALayer [] layers;
 			UIImage [] images;
@@ -247,7 +251,12 @@ namespace TweetStation
 			{
 				this.parent = parent;
 				this.images = images;
-				BackgroundColor = UIColor.FromPatternImage (texture);
+				if (textureColor == null){
+ 					texture = UIImage.FromBundle ("Images/texture.png");
+					textureColor = UIColor.FromPatternImage (texture);
+				}
+				
+				BackgroundColor = textureColor;
 				layers = new CALayer [images.Length];
 				
 				float slotsize = frame.Width/layers.Length;
