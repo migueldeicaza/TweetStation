@@ -151,13 +151,12 @@ namespace TweetStation
 			// back to show.   We do not want that.
 			//
 			var savedColor = menuView.BackgroundColor;
-			cell.ContentView.AddSubview (menuView);
+			cell.ContentView.InsertSubview (menuView, 0);
 			menuView.BackgroundColor = savedColor;
 
 			UIView.BeginAnimations ("Foo");
 			UIView.SetAnimationDuration (delay);
 			UIView.SetAnimationCurve (UIViewAnimationCurve.EaseIn);
-
 			Move (cell.SelectedBackgroundView, offset);
 			foreach (var view in cell.ContentView.Subviews){
 				if (view == menuView)
