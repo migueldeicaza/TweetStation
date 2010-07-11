@@ -129,7 +129,7 @@ namespace TweetStation
 			base.ViewWillDisappear (animated);
 			
 			Util.Defaults.SetInt (playMusic.Value ? 0 : 1, "disableMusic");
-			Util.Defaults.SetInt (chicken.Value ? 1 : 0, "enableChickens");
+			Util.Defaults.SetInt (chicken.Value ? 0 : 1, "disableChickens");
 			
 			int style = (selfOnRight.Value ? 0 : 1) | (shadows.Value ? 0 : 2);
 			

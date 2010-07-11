@@ -215,7 +215,7 @@
     <Content Include="Images\swipe-profile.png" />
     <Content Include="Images\swipe-profile%402x.png" />
     <Content Include="Images\texture.png" />
-    <Content Include="Images\swipe-retweet-handcoded.png" />
+    <Content Include="Images\texture%402x.png" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\MonoTouch.Dialog\MonoTouch.Dialog\MonoTouch.Dialog.csproj">
