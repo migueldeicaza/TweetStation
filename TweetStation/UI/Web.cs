@@ -154,11 +154,38 @@ namespace TweetStation
 			LayoutViews ();
 		}
 		
+		public static string EncodeIdna (string host)
+		{
+			foreach (char c in host){
+				if (c > (char) 0x7f){
+					var segments = host.Split ('.');
+					var encoded = new string [segments.Length];
+					int i = 0;
+					
+					foreach (var s in segments)
+						encoded [i++] = Mono.Util.Punycode.Encode (s.ToLower ());
+					
+					return "xn--" + string.Join (".", encoded);
+				}
+			}
+			return host;
+		}
+		
 		public static void OpenUrl (DialogViewController parent, string url)
 		{
 			UIView.BeginAnimations ("foo");
 			Main.HidesBottomBarWhenPushed = true;
 			Main.SetupWeb (url);
+			
+			if (url.StartsWith ("http://")){
+				string host;
+				int last = url.IndexOf ('/', 7);
+				if (last == -1)
+					host = url.Substring (7);
+				else 
+					host = url.Substring (7, last-7);
+				url = "http://" + EncodeIdna (host) + (last == -1 ? "" : url.Substring (last));
+			}
 			Main.WebView.LoadRequest (new NSUrlRequest (new NSUrl (url)));
 			
 			parent.PresentModalViewController (Main, true);

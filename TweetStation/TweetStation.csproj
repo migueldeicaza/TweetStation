@@ -150,6 +150,7 @@
     <Compile Include="UI\Chickens.cs" />
     <Compile Include="Data\TwitterAccountDatabase.cs" />
     <Compile Include="Data\TweetDatabase.cs" />
+    <Compile Include="Utilities\Punycode.cs" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="MainWindow.xib" />
