@@ -33,7 +33,7 @@ using MonoTouch.Foundation;
 namespace TweetStation
 {
 	public partial class BaseTimelineViewController {
-		public static bool ChickenNoisesEnabled = Util.Defaults.IntForKey ("disableChickens") == 1;
+		public static bool ChickenNoisesEnabled = Util.Defaults.IntForKey ("disableChickens") != 1;
 		
 		// A subclass of the header, we hook up to SetStatus to put our own effects
 		// We do this lazily to avoid startup costs

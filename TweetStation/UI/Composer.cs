@@ -215,9 +215,9 @@ namespace TweetStation
 			// Navigation Bar
 			navigationBar = new UINavigationBar (new RectangleF (0, 0, 320, 44));
 			navItem = new UINavigationItem ("");
-			var close = new UIBarButtonItem ("Close", UIBarButtonItemStyle.Plain, CloseComposer);
+			var close = new UIBarButtonItem (Locale.GetText ("Close"), UIBarButtonItemStyle.Plain, CloseComposer);
 			navItem.LeftBarButtonItem = close;
-			sendItem = new UIBarButtonItem ("Send", UIBarButtonItemStyle.Plain, PostCallback);
+			sendItem = new UIBarButtonItem (Locale.GetText ("Send"), UIBarButtonItemStyle.Plain, PostCallback);
 			navItem.RightBarButtonItem = sendItem;
 
 			navigationBar.PushNavigationItem (navItem, false);
@@ -329,7 +329,7 @@ namespace TweetStation
 					break;
 				}
 
-				var hud = new LoadingHUDView (Locale.GetText ("Image"), "Compressing");
+				var hud = new LoadingHUDView (Locale.GetText ("Image"), Locale.GetText ("Compressing"));
 				View.AddSubview (hud);
 				hud.StartAnimating ();
 				
@@ -399,7 +399,7 @@ namespace TweetStation
 				return;
 			}
 
-			hud = new LoadingHUDView (Locale.GetText ("Image"), "Uploading");
+			hud = new LoadingHUDView (Locale.GetText ("Image"), Locale.GetText ("Uploading"));
 			View.AddSubview (hud);
 			hud.StartAnimating ();
 			

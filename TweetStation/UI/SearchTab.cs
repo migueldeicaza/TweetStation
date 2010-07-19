@@ -140,7 +140,7 @@ namespace TweetStation
 		void LoadSearches ()
 		{
 			var cachedSearches = GetCachedResults ();
-			savedSearches = new Section ("Saved searches");
+			savedSearches = new Section (Locale.GetText ("Saved searches"));
 			PopulateSearchFromArray (cachedSearches);
 			Root.Add (savedSearches);
 			if (SearchResultsAreRecent)
@@ -187,8 +187,8 @@ namespace TweetStation
 			account.Download ("http://search.twitter.com/trends/current.json", result => {
 				try {
 					if (result == null){
-						Root.Add (new Section ("Trends"){
-							new StringElement ("Error fetching trends")
+						Root.Add (new Section (Locale.GetText ("Trends")){
+							new StringElement (Locale.GetText ("Error fetching trends"))
 						});
 						return;
 					}
@@ -197,7 +197,7 @@ namespace TweetStation
 					var jroot = (JsonObject) json ["trends"];
 					var jtrends = jroot.Values.FirstOrDefault (); 
 					
-					trends = new Section ("Trends");
+					trends = new Section (Locale.GetText ("Trends"));
 					
 					for (int i = 0; i < jtrends.Count; i++)
 						trends.Add (new SearchElement (jtrends [i]["name"], jtrends [i]["query"]));
@@ -245,15 +245,15 @@ namespace TweetStation
 		public void EditList (string originalName, ListDefinition list)
 		{
 			var editor = new DialogViewController (null, true);
-			var name = new EntryElement ("Name", null, list.Name);
+			var name = new EntryElement (Locale.GetText ("Name"), null, list.Name);
 			name.Changed += delegate {
 				editor.NavigationItem.RightBarButtonItem.Enabled = !String.IsNullOrEmpty (name.Value);
 			};
-			var description = new EntryElement ("Description", "optional", list.Description);
-			var privacy = new RootElement ("Privacy", new RadioGroup ("key", (int) list.Privacy)){
+			var description = new EntryElement (Locale.GetText ("Description"), Locale.GetText ("optional"), list.Description);
+			var privacy = new RootElement (Locale.GetText ("Privacy"), new RadioGroup ("key", (int) list.Privacy)){
 				new Section () {
-					new RadioElement ("Public"),
-					new RadioElement ("Private")
+					new RadioElement (Locale.GetText ("Public")),
+					new RadioElement (Locale.GetText ("Private"))
 				}
 			};
 			editor.NavigationItem.SetLeftBarButtonItem (new UIBarButtonItem (UIBarButtonSystemItem.Cancel, delegate {
@@ -272,7 +272,7 @@ namespace TweetStation
 			}), false);
 
 			editor.NavigationItem.RightBarButtonItem.Enabled = !String.IsNullOrEmpty (name.Value);
-			editor.Root = new RootElement ("New List") {
+			editor.Root = new RootElement (Locale.GetText ("New List")) {
 				new Section () { name, description, privacy }
 			};
 			ActivateController (editor);

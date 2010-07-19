@@ -383,7 +383,7 @@ namespace TweetStation {
 			base.ViewWillAppear (animated);
 			if (loaded)
 				return;
-			SearchPlaceholder = "Search";
+			SearchPlaceholder = Locale.GetText ("Search");
 			loaded = true;
 			Root = Util.MakeProgressRoot (StreamedTitle);
 			TriggerRefresh ();
@@ -396,7 +396,7 @@ namespace TweetStation {
 				if (result == null){
 					Root = new RootElement (StreamedTitle) {
 						new Section () {
-							new StringElement ("Unable to download the timeline")
+							new StringElement (Locale.GetText ("Unable to download the timeline")),
 						}
 					};
 					return;

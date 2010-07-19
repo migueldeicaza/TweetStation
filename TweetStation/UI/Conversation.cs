@@ -45,7 +45,7 @@ namespace TweetStation
 		{
 			convSection = new Section ();
 			ProcessConversation (source);
-			Root = new RootElement ("Conversation") {
+			Root = new RootElement (Locale.GetText ("Conversation")) {
 				convSection
 			};
 		}
@@ -85,7 +85,7 @@ namespace TweetStation
 		
 		void EndConversation ()
 		{
-			convSection.Add (new StringElement ("End of conversation"));
+			convSection.Add (new StringElement (Locale.GetText ("End of conversation")));
 		}			
 	}
 	

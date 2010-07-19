@@ -201,9 +201,9 @@ namespace TweetStation
 		
 		public static RootElement MakeError (string diagMsg)
 		{
-			return new RootElement ("Error"){
-				new Section ("Error"){
-					new MultilineElement ("Unable to retrieve the information")
+			return new RootElement (Locale.GetText ("Error")){
+				new Section (Locale.GetText ("Error")){
+					new MultilineElement (Locale.GetText ("Unable to retrieve the information"))
 				}
 			};
 		}

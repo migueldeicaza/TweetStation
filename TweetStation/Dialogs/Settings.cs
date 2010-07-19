@@ -155,11 +155,11 @@ namespace TweetStation
 							(selfOnRight = new BooleanElement (Locale.GetText ("My tweets on right"), (cellStyle & 1) == 0)),
 							(shadows = new BooleanElement (Locale.GetText ("Avatar shadows"), (cellStyle & 2) == 0)),
 							(autoFav = new BooleanElement (Locale.GetText ("Favorite on Retweet"), Util.Defaults.IntForKey ("disableFavoriteRetweets") == 0)),
-							(compress = new RootElement ("Image Compression", new RadioGroup ("group", Util.Defaults.IntForKey ("sizeCompression"))) {
+							(compress = new RootElement (Locale.GetText ("Image Compression"), new RadioGroup ("group", Util.Defaults.IntForKey ("sizeCompression"))) {
 								new Section () {
-									new RadioElement ("Maximum"),
-									new RadioElement ("Medium"),
-									new RadioElement ("None")
+									new RadioElement (Locale.GetText ("Maximum")),
+									new RadioElement (Locale.GetText ("Medium")),
+									new RadioElement (Locale.GetText ("None"))
 								}
 							})
 						},
@@ -184,20 +184,20 @@ namespace TweetStation
 							Twitterista ("migueldeicaza"),
 							Twitterista ("itweetstation"),
 						},
-						new Section ("Music"){
+						new Section (Locale.GetText ("Music")){
 							Twitterista ("kmacleod"),
 						},
-						new Section ("Conspirators") {
+						new Section (Locale.GetText ("Conspirators")) {
 							Twitterista ("JosephHill"),
 							Twitterista ("kangamono"),
 							Twitterista ("lauradeicaza"),
 							Twitterista ("mancha"),
 							Twitterista ("mjhutchinson"),
 						},
-						new Section ("Contributors"){
+						new Section (Locale.GetText ("Contributors")){
 							Twitterista ("martinbowling"),
 						},
-						new Section ("Includes X11 code from") {
+						new Section (Locale.GetText ("Includes X11 code from")) {
 							Twitterista ("escoz"),
 							Twitterista ("praeclarum"),
 						}

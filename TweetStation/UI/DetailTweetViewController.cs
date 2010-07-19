@@ -246,7 +246,7 @@ namespace TweetStation
 			rect.Y = y;
 			rect.Height = smallSize;
 			AddSubview (new UILabel (rect) {
-				Text = Util.FormatTime (new TimeSpan (DateTime.UtcNow.Ticks - tweet.CreatedAt)) + " ago from " + tweet.Source,
+				Text = Locale.Format ("{0} ago from {1}", Util.FormatTime (new TimeSpan (DateTime.UtcNow.Ticks - tweet.CreatedAt)), tweet.Source),
 				TextColor = UIColor.Gray,
 				Font = UIFont.SystemFontOfSize (smallSize)
 			});

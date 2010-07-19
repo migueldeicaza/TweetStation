@@ -245,7 +245,7 @@ namespace TweetStation
 		
 		public string Text { 
 			get { return text; }
-			set { text = value; Caption = Locale.Format (format, text); }
+			set { text = value; Caption = String.Format (format, text); }
 		}
 		
 		public SearchMirrorElement (string format) : base ("")

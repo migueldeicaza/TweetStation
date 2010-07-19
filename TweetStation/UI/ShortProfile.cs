@@ -142,7 +142,7 @@ namespace TweetStation
 			DrawString (user.Location, new RectangleF (TextX, 50, w, locationSize), locationFont, UILineBreakMode.TailTruncation);
 			
 			UIColor.DarkGray.SetColor ();
-			DrawString (user.FollowersCount + " followers", new RectangleF (TextX, 34, w, followerSize), followerFont);
+			DrawString (Locale.Format ("{0:#,#} followers", user.FollowersCount), new RectangleF (TextX, 34, w, followerSize), followerFont);
 
 			//url.Draw (rect);
 			
