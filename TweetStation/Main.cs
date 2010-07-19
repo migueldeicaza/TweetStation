@@ -92,27 +92,27 @@ namespace TweetStation
 			MainView = tabbarController.View;
 			window.AddSubview (MainView);
 
-			main = new TimelineViewController ("Friends", TweetKind.Home, false);
-			mentions = new TimelineViewController ("Mentions", TweetKind.Replies, false); 
-			messages = new TimelineViewController ("Messages", TweetKind.Direct, false);
+			main = new TimelineViewController (Locale.GetText ("Friends"), TweetKind.Home, false);
+			mentions = new TimelineViewController (Locale.GetText ("Mentions"), TweetKind.Replies, false); 
+			messages = new TimelineViewController (Locale.GetText ("Messages"), TweetKind.Direct, false);
 			searches = new SearchesViewController ();
 			favorites = StreamedTimelineViewController.MakeFavorites ("http://api.twitter.com/1/favorites.json");
 			
 			navigationRoots = new UINavigationController [5] {
 				new UINavigationController (main) {
-					TabBarItem = new UITabBarItem ("Friends", UIImage.FromBundle ("Images/home.png"), 0),
+					TabBarItem = new UITabBarItem (Locale.GetText ("Friends"), UIImage.FromBundle ("Images/home.png"), 0),
 				},
 				new UINavigationController (mentions) {
-					TabBarItem = new UITabBarItem ("Mentions", UIImage.FromBundle ("Images/replies.png"), 1)
+					TabBarItem = new UITabBarItem (Locale.GetText ("Mentions"), UIImage.FromBundle ("Images/replies.png"), 1)
 				},
 				new UINavigationController (messages) {
-					TabBarItem = new UITabBarItem ("Messages", UIImage.FromBundle ("Images/messages.png"), 2)
+					TabBarItem = new UITabBarItem (Locale.GetText ("Messages"), UIImage.FromBundle ("Images/messages.png"), 2)
 				},
 				new UINavigationController (favorites) {
-					TabBarItem = new UITabBarItem ("Favorites", UIImage.FromBundle ("Images/fav.png"), 3)
+					TabBarItem = new UITabBarItem (Locale.GetText ("Favorites"), UIImage.FromBundle ("Images/fav.png"), 3)
 				},
 				new UINavigationController (searches) {
-					TabBarItem = new UITabBarItem ("Search", UIImage.FromBundle ("Images/lupa.png"), 4)
+					TabBarItem = new UITabBarItem (Locale.GetText ("Search"), UIImage.FromBundle ("Images/lupa.png"), 4)
 				}
 			};
 	
@@ -283,15 +283,15 @@ namespace TweetStation
 		// app
 		void NewAccountXAuth (DialogViewController parent, NSAction callback)
 		{
-			var login = new EntryElement ("Username", "Your twitter username", "");
-			var password = new EntryElement ("Password", "Your password", "", true);
+			var login = new EntryElement (Locale.GetText ("Username"), Locale.GetText ("Your twitter username"), "");
+			var password = new EntryElement (Locale.GetText ("Password"), Locale.GetText ("Your password"), "", true);
 			var root = new RootElement (Locale.GetText ("Login")){
 				new Section (){
 					login,
 					password
 				},
 				new Section (){
-					new LoadMoreElement ("Login to Twitter", "Contacting twitter", delegate {
+					new LoadMoreElement (Locale.GetText ("Login to Twitter"), Locale.GetText ("Contacting twitter"), delegate {
 						StartXauthLogin (login.Value.Trim (), password.Value.Trim (), callback); 
 					}, UIFont.BoldSystemFontOfSize (16), UIColor.Black)
 				}

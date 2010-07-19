@@ -57,6 +57,19 @@ namespace TweetStation
 				this.container = container;
 			}
 			
+			class TouchEvent {
+				public NSSet Touches;
+				public UIEvent Event;
+				
+				public TouchEvent (NSSet touches, UIEvent evt)
+				{
+					Touches = touches;
+					Event = evt;
+				}
+			}
+			
+			TouchEvent capturedEnded;
+			
 			public override void TouchesBegan (NSSet touches, UIEvent evt)
 			{
 				var touch = touches.AnyObject as UITouch;
@@ -64,34 +77,37 @@ namespace TweetStation
 
 				// If the menu is not active
 				if (container.MenuHostElement == null || container.MenuHostElement != container.TweetElementFromPath (IndexPathForRowAtPoint (touchStart.Value))){
-					container.CancelMenu ();
+					if (container.CancelMenu ()){
+						if (capturedEnded != null){
+							TouchesCancelled (capturedEnded.Touches, capturedEnded.Event);
+							capturedEnded = null;
+						}
+					}
 					swipeDetectionDisabled = false;
 				}
-				
 
 				base.TouchesBegan (touches, evt);
 			}
 			
 			public override void TouchesMoved (NSSet touches, UIEvent evt)
 			{
-				if (swipeDetectionDisabled)
-					return;
-				
-				if (container.MenuHostElement == null){
-					if (touchStart != null){
-						var touch = touches.AnyObject as UITouch;
-						var currentPos = touch.LocationInView (this);
-						var deltaX = Math.Abs (touchStart.Value.X - currentPos.X);
-						var deltaY = Math.Abs (touchStart.Value.Y - currentPos.Y);
-						
-						if (deltaY < 10 && deltaX > 16){
-							var menuPath = IndexPathForRowAtPoint (currentPos);
-							var cell = CellAt (menuPath);
+				if (!swipeDetectionDisabled){
+					if (container.MenuHostElement == null){
+						if (touchStart != null){
+							var touch = touches.AnyObject as UITouch;
+							var currentPos = touch.LocationInView (this);
+							var deltaX = Math.Abs (touchStart.Value.X - currentPos.X);
+							var deltaY = Math.Abs (touchStart.Value.Y - currentPos.Y);
 							
-							container.OnSwipe (menuPath, cell);
-							swipeDetectionDisabled = true;
-							touchStart = null;
-							return;
+							if (deltaY < 10 && deltaX > 16){
+								var menuPath = IndexPathForRowAtPoint (currentPos);
+								var cell = CellAt (menuPath);
+								
+								container.OnSwipe (menuPath, cell);
+								swipeDetectionDisabled = true;
+								touchStart = null;
+								return;
+							}
 						}
 					}
 				}
@@ -101,6 +117,8 @@ namespace TweetStation
 			public override void TouchesEnded (NSSet touches, UIEvent evt)
 			{
 				if (container.MenuHostElement != null){
+					if (capturedEnded == null)
+						capturedEnded = new TouchEvent (touches, evt);
 					container.TouchesEnded (touches, evt);
 					return;
 				}
@@ -113,6 +131,11 @@ namespace TweetStation
 				
 				base.TouchesEnded (touches, evt);
 				touchStart = null;
+			}
+			
+			public override void TouchesCancelled (NSSet touches, UIEvent evt)
+			{
+				base.TouchesCancelled (touches, evt);
 			}
 		}
 
@@ -160,6 +183,20 @@ namespace TweetStation
 				if (view == menuView)
 					continue;
 				Move (view, offset);
+				
+				// Ok this is a gross hack that deals with the fact that the
+				// selection is *partially* there, but if we insert our
+				// animated layer *below* the selection, the animation looks
+				// *horrible*, it seems like something in the selection background
+				// layer interferes with the animation of our layer 
+				// if our animation layer sits *below* the background layer
+				//
+				// This changes the transparent background that the UITableView
+				// sets on the cell during selection to a solid background.
+				
+				// Possible alternative: "grow" the menu Frame as the menu
+				// gets swiped out
+				view.BackgroundColor = UIColor.White;
 			}
 			UIView.CommitAnimations ();
 		}
@@ -386,6 +423,10 @@ namespace TweetStation
 			{
 				var touch = touches.AnyObject as UITouch;
 				var location = touch.LocationInView (this);
+				
+				if (location.Y < 0 || location.Y > Frame.Height)
+					return -1;
+				
 				return (int) (location.X / (Frame.Width / images.Length));
 			}
 			

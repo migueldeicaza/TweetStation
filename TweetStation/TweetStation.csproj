@@ -169,6 +169,8 @@
     <Folder Include="UI\" />
     <Folder Include="Images\" />
     <Folder Include="Audio\" />
+    <Folder Include="en.lproj\" />
+    <Folder Include="es.lproj\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Images\friends.png" />
@@ -218,6 +220,7 @@
     <Content Include="Images\texture.png" />
     <Content Include="Images\texture%402x.png" />
     <Content Include="Images\menu-shadow.png" />
+    <Content Include="es.lproj\Localizable.strings" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\MonoTouch.Dialog\MonoTouch.Dialog\MonoTouch.Dialog.csproj">
