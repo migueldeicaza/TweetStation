@@ -20,6 +20,13 @@ TweetStation
 
 	The official description for the app is on TweetStation.txt
 
+Building
+========
+
+	To build TweetStation, you will need a side-by-side
+	MonoTouch.Dialog release, since they are co-developed,
+	you will likely need the latest version.
+
 Design Goals
 ============
 
