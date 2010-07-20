@@ -119,6 +119,7 @@ namespace TweetStation
 				if (container.MenuHostElement != null){
 					if (capturedEnded == null)
 						capturedEnded = new TouchEvent (touches, evt);
+
 					container.TouchesEnded (touches, evt);
 					return;
 				}
@@ -168,6 +169,7 @@ namespace TweetStation
 				TableView.DeselectRow (ip, false);
 			
 			DisableSelection = true;
+
 			float offset = cell.ContentView.Frame.Width;
 
 			currentMenuView = menuView;
@@ -175,28 +177,20 @@ namespace TweetStation
 			
 			cell.ContentView.InsertSubview (menuView, 0);
 
+			// We animate the underlying menu by growing its frame
+			var old = menuView.Frame;
+			menuView.Frame = new RectangleF (old.Location, new SizeF (0, old.Height));
+
 			UIView.BeginAnimations ("Foo");
 			UIView.SetAnimationDuration (globalDelay);
 			UIView.SetAnimationCurve (UIViewAnimationCurve.EaseIn);
 			Move (cell.SelectedBackgroundView, offset);
+			menuView.Frame = old;
 			foreach (var view in cell.ContentView.Subviews){
 				if (view == menuView)
 					continue;
 				Move (view, offset);
 				
-				// Ok this is a gross hack that deals with the fact that the
-				// selection is *partially* there, but if we insert our
-				// animated layer *below* the selection, the animation looks
-				// *horrible*, it seems like something in the selection background
-				// layer interferes with the animation of our layer 
-				// if our animation layer sits *below* the background layer
-				//
-				// This changes the transparent background that the UITableView
-				// sets on the cell during selection to a solid background.
-				
-				// Possible alternative: "grow" the menu Frame as the menu
-				// gets swiped out
-				view.BackgroundColor = UIColor.White;
 			}
 			UIView.CommitAnimations ();
 		}
@@ -215,19 +209,12 @@ namespace TweetStation
 			
 			float offset = menuCell.ContentView.Frame.Width;
 			
-			// Pass the currentMenuView as the view to remove, as it is a global that can be overwritten by
-			// another menu showing up.
-			var copy = currentMenuView;
-			var gch = GCHandle.Alloc (copy);
-			UIView.BeginAnimations ("Foo", GCHandle.ToIntPtr (gch));
+			UIView.BeginAnimations ("Foo");
 			UIView.SetAnimationDuration (hideDelay);
-			UIView.SetAnimationDidStopSelector (new Selector ("animationDidStop:finished:context:"));
-			UIView.SetAnimationDelegate (this);
 			UIView.SetAnimationCurve (UIViewAnimationCurve.EaseInOut);			
 			
 			var animation = MakeBounceAnimation (Math.Abs (offset));
 			
-			menuCell.Selected = false;
 			foreach (var view in menuCell.ContentView.Subviews){
 				if (view == currentMenuView)
 					continue;
@@ -238,6 +225,14 @@ namespace TweetStation
 			AnimateBack (menuCell.SelectedBackgroundView, animation);
 
 			UIView.CommitAnimations ();
+			
+			// Pass the currentMenuView as the view to remove, as it is a global that can be overwritten by
+			// another menu showing up.
+			var copy = currentMenuView;
+			NSTimer.CreateScheduledTimer (hideDelay + 0.5, delegate {
+				copy.RemoveFromSuperview ();
+			});
+			
 			menuCell = null;
 			DisableSelection = false;
 			MenuHostElement = null;
@@ -264,16 +259,6 @@ namespace TweetStation
 			return animation;
 		}
 		
-		[Export ("animationDidStop:finished:context:")]
-		[Preserve]
-		public void HideFinished (string name, NSNumber numFinished, IntPtr context)
-		{
-			GCHandle h = GCHandle.FromIntPtr (context);
-			var view = (UIView) h.Target;
-			view.RemoveFromSuperview ();
-			h.Free ();
-		}
-
 		internal class SwipeMenuView : UIView {
 			static UIImage texture;
 			static UIColor textureColor;
@@ -312,6 +297,7 @@ namespace TweetStation
 				this.parent = parent;
 				this.images = images;
 
+				Layer.MasksToBounds = true;
 				Layer.AddSublayer (MakeBackgroundLayer (frame));
 
 				layers = new CALayer [images.Length];

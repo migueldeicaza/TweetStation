@@ -11,6 +11,11 @@
 	Option: what if I keep a list of all ID->PicUrl IDs visible, and
 	invalidate any cached images as we load new data.
 
+* Probelms:
+
+	We still keep the menus around after they have been hidden and the
+	animation is gone, need to track that down
+
 * Feature Requests:
 	Delete tweets
 	Report Spam
