@@ -29,7 +29,7 @@ namespace TweetStation
 		{
 			Util.ReportTime ("Database init");
 			CreateTable<TwitterAccount> ();
-			CreateTable<TwitterAccount.QueuedTask> ();
+			CreateTable<TwitterAccount.QueuedTask2> ();
 			CreateTable<Tweet> ();
 			CreateTable<User> ();
 			Util.ReportTime ("Database finish");

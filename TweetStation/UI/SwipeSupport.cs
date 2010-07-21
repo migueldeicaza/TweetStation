@@ -79,6 +79,7 @@ namespace TweetStation
 				if (container.MenuHostElement == null || container.MenuHostElement != container.TweetElementFromPath (IndexPathForRowAtPoint (touchStart.Value))){
 					if (container.CancelMenu ()){
 						if (capturedEnded != null){
+							Console.WriteLine ("Touches canceled");
 							TouchesCancelled (capturedEnded.Touches, capturedEnded.Event);
 							capturedEnded = null;
 						}
@@ -104,6 +105,7 @@ namespace TweetStation
 								var cell = CellAt (menuPath);
 								
 								container.OnSwipe (menuPath, cell);
+								ignoreUntilLift = true;
 								swipeDetectionDisabled = true;
 								touchStart = null;
 								return;
@@ -111,8 +113,13 @@ namespace TweetStation
 						}
 					}
 				}
+				if (ignoreUntilLift)
+					return;
+				
 				base.TouchesMoved (touches, evt);
 			}
+			
+			bool ignoreUntilLift;
 			
 			public override void TouchesEnded (NSSet touches, UIEvent evt)
 			{
@@ -124,8 +131,10 @@ namespace TweetStation
 					return;
 				}
 				
-				if (swipeDetectionDisabled)
+				if (swipeDetectionDisabled){
+					ignoreUntilLift = false;
 					return;
+				}
 				
 				if (container.DisableSelection)
 					return;
@@ -229,8 +238,9 @@ namespace TweetStation
 			// Pass the currentMenuView as the view to remove, as it is a global that can be overwritten by
 			// another menu showing up.
 			var copy = currentMenuView;
-			NSTimer.CreateScheduledTimer (hideDelay + 0.5, delegate {
+			NSTimer.CreateScheduledTimer (hideDelay + 0.1, delegate {
 				copy.RemoveFromSuperview ();
+				copy.Dispose ();
 			});
 			
 			menuCell = null;

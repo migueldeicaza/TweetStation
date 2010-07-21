@@ -16,8 +16,9 @@
 	We still keep the menus around after they have been hidden and the
 	animation is gone, need to track that down
 
+	Add support for using the OAuth + XAauth keys
+
 * Feature Requests:
-	Delete tweets
 	Report Spam
 
 * Style:

@@ -178,7 +178,7 @@ namespace TweetStation
 		
 		public override SearchMirrorElement MakeMirror ()
 		{
-			 return new SearchMirrorElement (Locale.GetText ("@{0}"));
+			 return new SearchMirrorElement ("@{0}");
 		}
 		
 		public override void Selected (NSIndexPath indexPath)

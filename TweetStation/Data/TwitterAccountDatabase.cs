@@ -91,10 +91,16 @@ namespace TweetStation
 		//
 		public void Post (string url, string content)
 		{
-			var qtask = new QueuedTask () {
+			Post (url, "POST", content);
+		}
+		
+		public void Post (string url, string verb, string content)
+		{
+			var qtask = new QueuedTask2 () {
 				AccountId = LocalAccountId, 
 				Url = url, 
 				PostData = content,
+				Verb = verb
 			};
 			lock (Database.Main)
 				Database.Main.Insert (qtask);
@@ -105,7 +111,7 @@ namespace TweetStation
 		void FlushTasks ()
 		{
 			lock (Database.Main){
-				var tasks = Database.Main.Query<QueuedTask> ("SELECT * FROM QueuedTask where AccountId = ? ORDER BY TaskId DESC", LocalAccountId).ToArray ();
+				var tasks = Database.Main.Query<QueuedTask2> ("SELECT * FROM QueuedTask2 where AccountId = ? ORDER BY TaskId DESC", LocalAccountId).ToArray ();
 				ThreadPool.QueueUserWorkItem (delegate { PostTask (tasks); });
 			}
 		}
@@ -119,7 +125,7 @@ namespace TweetStation
 		//     (posts show dialog, btu starring does not?
 		//
 		// Runs on a thread from the threadpool.
-		void PostTask (QueuedTask [] tasks)
+		void PostTask (QueuedTask2 [] tasks)
 		{
 			var client = GetClient ();
 			try {
@@ -128,13 +134,16 @@ namespace TweetStation
 					Uri taskUri = new Uri (task.Url);
 					client.Headers [HttpRequestHeader.Authorization] = OAuthAuthorizer.AuthorizeRequest (OAuthConfig, OAuthToken, OAuthTokenSecret, "POST", taskUri, task.PostData);
 					try {
-						client.UploadData (taskUri, "POST", Encoding.UTF8.GetBytes (task.PostData));
-					} catch (Exception){
+						var res = client.UploadData (taskUri, task.Verb, Encoding.UTF8.GetBytes (task.PostData));
+						//var r = new StreamReader (new MemoryStream (res));
+						//Console.WriteLine (r.ReadToEnd ());
+					} catch (Exception e){
 						// Can happen if we had already favorited this status
+						Console.WriteLine ("Can happen if we already favorited: {0}", e);
 					}
 					
 					lock (Database.Main)
-						Database.Main.Execute ("DELETE FROM QueuedTask WHERE TaskId = ?", task.TaskId);
+						Database.Main.Execute ("DELETE FROM QueuedTask2 WHERE TaskId = ?", task.TaskId);
 				}
 			} catch (Exception e) {
 				Console.WriteLine (e);
@@ -195,13 +204,14 @@ namespace TweetStation
 			});
 		}
 		
-		public class QueuedTask {
+		public class QueuedTask2 {
 			[PrimaryKey, AutoIncrement]
 			public int TaskId { get; set; }
 			public long AccountId { get; set; }
 			public string Url { get; set; }
 
 			public string PostData { get; set; }
+			public string Verb { get; set; }
 		}
 	}
 }

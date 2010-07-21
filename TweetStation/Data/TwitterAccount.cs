@@ -147,7 +147,8 @@ namespace TweetStation
 			} catch  (Exception ex){
 				Console.WriteLine (ex);
 			}
-			stream.Close ();
+			if (stream != null)
+				stream.Close ();
 		}
 		
 		void Launch (string url, bool callbackOnMainThread, Action<Stream> callback)

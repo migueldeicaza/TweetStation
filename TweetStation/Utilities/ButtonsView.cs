@@ -33,16 +33,16 @@ namespace TweetStation
 		UIButton [] buttons;
 		const int buttonHeight = 44;
 		
-		public ButtonsView (string [] captions, EventHandler [] actions) : base (new Rectangle (0, 0, 320, buttonHeight))
+		public ButtonsView (int len, string [] captions, EventHandler [] actions) : base (new Rectangle (0, 0, 320, buttonHeight))
 		{
 			if (captions == null || actions == null)
 				throw new ArgumentNullException ();
 			
-			if (captions.Length != actions.Length)
+			if (len > captions.Length || len > actions.Length)
 				throw new ArgumentException ("Mismatched array sizes between actions and captions");
 	
-			buttons = new UIButton [captions.Length];
-			for (int i = captions.Length; --i >= 0; ){
+			buttons = new UIButton [len];
+			for (int i = len; --i >= 0; ){
 				var button = UIButton.FromType (UIButtonType.RoundedRect);
 				
 				button.Font = UIFont.BoldSystemFontOfSize (14);

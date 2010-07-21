@@ -43,14 +43,20 @@ namespace TweetStation
 		static string [] buttons = new string [] { 
 			Locale.GetText ("Reply"), 
 			Locale.GetText ("Retweet"),
-			Locale.GetText ("Direct") };
+			Locale.GetText ("Direct"),
+			Locale.GetText ("Delete"),
+		};
 		
 		public DetailTweetViewController (Tweet partialTweet) : base (UITableViewStyle.Grouped, null, true)
 		{
+			bool isMine = false;
+			
 			if (partialTweet.IsSearchResult)
 				Tweet.LoadFullTweet (partialTweet.Id, fullTweet => SetTweet (fullTweet));
+			else
+				isMine = partialTweet.UserId == TwitterAccount.CurrentAccount.AccountId;
 			
-			var handlers = new EventHandler [] { Reply, Retweet, Direct };
+			var handlers = new EventHandler [] { Reply, Retweet, Direct, Delete };
 			var profileRect = new RectangleF (PadX, 0, View.Bounds.Width-30-PadX*2, 100);
 			var detailRect = new RectangleF (PadX, 0, View.Bounds.Width-30-PadX*2, 0);
 			
@@ -75,7 +81,7 @@ namespace TweetStation
 			if (partialTweet.Kind == TweetKind.Direct)
 				replySection.Add (new StringElement (Locale.GetText ("Direct Reply"), delegate { Direct (this, EventArgs.Empty); }));
 			else 
-				replySection.Add (new UIViewElement (null, new ButtonsView (buttons, handlers), true) {
+				replySection.Add (new UIViewElement (null, new ButtonsView (isMine ? 4 : 3, buttons, handlers), true) {
 					Flags = UIViewElement.CellFlags.DisableSelection | UIViewElement.CellFlags.Transparent
 				});
 			
@@ -199,6 +205,22 @@ namespace TweetStation
 		void Direct (object sender, EventArgs args)
 		{
 			Composer.Main.Direct (this, tweet.Screename);
+		}
+		
+		void Delete (object sender, EventArgs args)
+		{
+			UIView v = null;
+			var sheet = Util.GetSheet (Locale.GetText ("Delete"));
+			sheet.AddButton ("Delete");
+			sheet.AddButton ("Cancel");
+			sheet.CancelButtonIndex = 1;
+			sheet.Clicked += delegate(object s, UIButtonEventArgs e) {
+				if (e.ButtonIndex == 0){
+					TwitterAccount.CurrentAccount.Post ("http://api.twitter.com/1/statuses/destroy/" + tweet.Id + ".json", "DELETE", "");
+					DeactivateController (true);
+				}
+			};
+			sheet.ShowInView (AppDelegate.MainAppDelegate.MainView);
 		}
 		
 		UIActionSheet sheet;
