@@ -53,8 +53,13 @@ namespace TweetStation
 			
 			if (partialTweet.IsSearchResult)
 				Tweet.LoadFullTweet (partialTweet.Id, fullTweet => SetTweet (fullTweet));
-			else
+			else {
 				isMine = partialTweet.UserId == TwitterAccount.CurrentAccount.AccountId;
+				
+				// Hack until we figure out why DELETE is not working with OAuth
+				// and making the server return 401 Unauthorized
+				isMine = false;
+			}
 			
 			var handlers = new EventHandler [] { Reply, Retweet, Direct, Delete };
 			var profileRect = new RectangleF (PadX, 0, View.Bounds.Width-30-PadX*2, 100);

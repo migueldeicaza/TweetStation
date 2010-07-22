@@ -21,10 +21,6 @@
 * Feature Requests:
 	Report Spam
 
-* Style:
-
-	People dont like that RootElement does not "highlight" before switching to the new view
-
 * Bugs:
 	Should profile, slow to startup reports
 	About clips at bottom message

@@ -260,7 +260,7 @@ namespace TweetStation
 				}
 				return true;
 			} catch (Exception e) {
-				Console.WriteLine (e);
+				Console.WriteLine ("Problem with {0} {1}", url, e);
 				return false;
 			}
 		}

@@ -498,13 +498,16 @@ namespace TweetStation
 			if (Util.Defaults.IntForKey ("disableMusic") != 0)
 				return;
 			
-			try {
-				if (player == null)
-					player = new AudioPlay ("Audio/composeaudio.mp3");
-				player.Play ();
-			} catch (Exception e){
-				Console.WriteLine (e);
-			}
+			// Give some room to breathe on old systems
+			NSTimer.CreateScheduledTimer (1, delegate {
+				try {
+					if (player == null)
+						player = new AudioPlay ("Audio/composeaudio.mp3");
+					player.Play ();
+				} catch (Exception e){
+					Console.WriteLine (e);
+				}
+			});
 		}
 		
 		public void NewTweet (UIViewController parent)
