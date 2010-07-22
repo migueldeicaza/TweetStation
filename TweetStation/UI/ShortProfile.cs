@@ -123,8 +123,9 @@ namespace TweetStation
 				if (Tapped != null)
 					Tapped ();
 			}
+			base.TouchesBegan (touches, evt);
 		}
-		
+
 		public override void Draw (RectangleF rect)
 		{
 			// If we have a partialTweet, we do not have this information yet.

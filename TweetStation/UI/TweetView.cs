@@ -197,7 +197,11 @@ namespace TweetStation
 					context.SetRGBFillColor (1, 1, 1, 1);
 					last = null;
 				}
-				DrawString (block.Value, block.Bounds, block.Font);
+
+				// We need to use the full overload because the short overload does not
+				// render Unicode character beyond a simple range.   Amazing, but true
+				DrawString (block.Value, block.Bounds, block.Font, UILineBreakMode.Clip, UITextAlignment.Left);
+				
 				//context.SetRGBStrokeColor (1, 0, 1, 1);
 				//context.StrokeRect (block.Bounds);
 			}

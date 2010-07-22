@@ -62,7 +62,7 @@ namespace TweetStation
 			}
 			
 			var handlers = new EventHandler [] { Reply, Retweet, Direct, Delete };
-			var profileRect = new RectangleF (PadX, 0, View.Bounds.Width-30-PadX*2, 100);
+			var profileRect = new RectangleF (PadX, 0, View.Bounds.Width-PadX, 100);
 			var detailRect = new RectangleF (PadX, 0, View.Bounds.Width-30-PadX*2, 0);
 			
 			shortProfileView = new ShortProfileView (profileRect, partialTweet, true);

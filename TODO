@@ -18,17 +18,13 @@
 
 	Add support for using the OAuth + XAauth keys
 
-* Feature Requests:
+Missing Features:
 	Report Spam
+	Show posting lcoation if available
+		Location is available in the tweet as <places>
+		But requires an upgrade to the tweets.db
+ 
 
-* Bugs:
-	Should profile, slow to startup reports
-	About clips at bottom message
-	Fernando's name has encoding issues
-	View disclosure button never works
-	When selection is on, the swipe background is visible as the cell moves out,
-	we need to figure out why the selection is not being disabled
-	
 * Usage Observations
 
 	Do not show border on detail tweets if we have alpha channel?
@@ -37,13 +33,6 @@
 	needs to remembrr last position (after phone call, everything is cancelled)
 
 	(http://foo) is not highlighted
-
-	Swipe menu
-		Retweet
-		Reply
-		Star
-		Open (for links)
-		Quote
 
 * Optimizations
 
@@ -58,6 +47,7 @@
 
 	Compress image in background, without blocking with the HUD display
 
+	Add an option to cancel the upload.
 	
 *  Missing Stuff
 

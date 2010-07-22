@@ -65,7 +65,7 @@ namespace TweetStation
 		
 		void CreateUI ()
 		{
-			var profileRect = new RectangleF (PadX, 0, View.Bounds.Width-30-PadX*2, 100);
+			var profileRect = new RectangleF (PadX, 0, View.Bounds.Width-PadX, 100);
 			var shortProfileView = new ShortProfileView (profileRect, user.Id, false);
 			shortProfileView.PictureTapped += delegate { PictureViewer.Load (this, user.Id); };
 			shortProfileView.UrlTapped += delegate { WebViewController.OpenUrl (this, user.Url); };
