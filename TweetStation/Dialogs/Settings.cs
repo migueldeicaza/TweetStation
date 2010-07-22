@@ -197,6 +197,7 @@ namespace TweetStation
 						},
 						new Section (Locale.GetText ("Contributors")){
 							Twitterista ("martinbowling"),
+							Twitterista ("conceptdev"),
 						},
 						new Section (Locale.GetText ("Includes X11 code from")) {
 							Twitterista ("escoz"),

@@ -9,14 +9,14 @@ namespace TweetStation
 		
 		public static string GetText (string str)
 		{
-			return main.LocalizedString (str, str, "");
+			return main.LocalizedString (str, "", "");
 		}
 		
 		public static string Format (string fmt, params object [] args)
 		{
-			var msg = main.LocalizedString (fmt, fmt, "");
+			var msg = main.LocalizedString (fmt, "", "");
 			
-			return String.Format (fmt, args);
+			return String.Format (msg, args);
 		}
 	}
 }

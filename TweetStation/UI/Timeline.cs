@@ -51,7 +51,7 @@ namespace TweetStation {
 			Style = UITableViewStyle.Plain;
 			NavigationItem.RightBarButtonItem = new UIBarButtonItem (UIBarButtonSystemItem.Compose, delegate {
 				if (kind == TweetKind.Direct){
-					var sheet = new UIActionSheet ("");
+					var sheet = Util.GetSheet ("");
 					sheet.AddButton (Locale.GetText ("New Tweet"));
 					sheet.AddButton (Locale.GetText ("Direct Message"));
 					sheet.AddButton (Locale.GetText ("Cancel"));

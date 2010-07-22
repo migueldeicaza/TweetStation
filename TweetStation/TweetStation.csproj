@@ -221,6 +221,8 @@
     <Content Include="Images\texture%402x.png" />
     <Content Include="Images\menu-shadow.png" />
     <Content Include="es.lproj\Localizable.strings" />
+    <Content Include="es.lproj\InfoPlist.strings" />
+    <Content Include="en.lproj\Localizable.strings" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\MonoTouch.Dialog\MonoTouch.Dialog\MonoTouch.Dialog.csproj">
