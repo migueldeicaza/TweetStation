@@ -88,7 +88,7 @@
 
 /* TweetStation.Settings..ctor() */
 /* Flag: untranslated */
-"Conspirators" = "Conspiradores"
+"Conspirators" = "Conspiradores";
 
 /* TweetStation.AppDelegate.StartLogin() */
 "Contacting twitter" = "Contactando a Twitter";
@@ -344,7 +344,7 @@
 
 /* TweetStation.Settings..ctor() */
 /* Flag: untranslated */
-"Twitter is best used when you are\ninspired.  I picked music and audio\nthat should inspire you to create\nclever tweets" = "Twitter se disfruta mejor si estás\ninspirado. Seleccioné música y efectos especiales\n que te inspiran a crear\ntweets únicos" */;
+"Twitter is best used when you are\ninspired.  I picked music and audio\nthat should inspire you to create\nclever tweets" = "Twitter se disfruta mejor si estás\ninspirado. Seleccioné música y efectos especiales\n que te inspiran a crear\ntweets únicos" ;
 
 /* TweetStation.StreamedViewController.<ReloadTimeline>m__5E() */
 "Unable to download the timeline" = "No pude obtener los tweets";
