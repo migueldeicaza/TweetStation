@@ -17,7 +17,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE  SOFTWARE.
-
+#define animate
 //
 // TODO:
 //
@@ -35,6 +35,7 @@ using System.Drawing;
 using MonoTouch.CoreAnimation;
 using MonoTouch.CoreGraphics;
 using System.Runtime.InteropServices;
+using System.Collections.Generic;
 
 namespace TweetStation
 {
@@ -186,22 +187,21 @@ namespace TweetStation
 			
 			cell.ContentView.InsertSubview (menuView, 0);
 
-			// We animate the underlying menu by growing its frame
-			var old = menuView.Frame;
-			menuView.Frame = new RectangleF (old.Location, new SizeF (0, old.Height));
-
+#if animate
 			UIView.BeginAnimations ("Foo");
 			UIView.SetAnimationDuration (globalDelay);
 			UIView.SetAnimationCurve (UIViewAnimationCurve.EaseIn);
+#endif
 			Move (cell.SelectedBackgroundView, offset);
-			menuView.Frame = old;
 			foreach (var view in cell.ContentView.Subviews){
 				if (view == menuView)
 					continue;
 				Move (view, offset);
 				
 			}
+#if animate
 			UIView.CommitAnimations ();
+#endif
 		}
 
 		void AnimateBack (UIView view, CAAnimation animation)
@@ -218,11 +218,12 @@ namespace TweetStation
 			
 			float offset = menuCell.ContentView.Frame.Width;
 			
+
 			UIView.BeginAnimations ("Foo");
 			UIView.SetAnimationDuration (hideDelay);
 			UIView.SetAnimationCurve (UIViewAnimationCurve.EaseInOut);			
-			
-			var animation = MakeBounceAnimation (Math.Abs (offset));
+
+			var animation = MakeBounceAnimation (Math.Abs (offset), "position.x");
 			
 			foreach (var view in menuCell.ContentView.Subviews){
 				if (view == currentMenuView)
@@ -242,7 +243,7 @@ namespace TweetStation
 				copy.RemoveFromSuperview ();
 				copy.Dispose ();
 			});
-			
+	
 			menuCell = null;
 			DisableSelection = false;
 			MenuHostElement = null;
@@ -250,14 +251,14 @@ namespace TweetStation
 			return true;
 		}
 		
-		CAAnimation MakeBounceAnimation (float offset)
+		CAAnimation MakeBounceAnimation (float offset, string key)
 		{
-			var animation = (CAKeyFrameAnimation) CAKeyFrameAnimation.FromKeyPath ("position.x");
+			var animation = (CAKeyFrameAnimation) CAKeyFrameAnimation.FromKeyPath (key);
 			
 			animation.Duration = hideDelay;
 			float left = offset/2;
 			animation.Values = new NSNumber [] {
-				NSNumber.FromFloat (offset),
+				NSNumber.FromFloat (offset+left),
 				//NSNumber.FromFloat (left-60),
 				//NSNumber.FromFloat (left+40),
 				NSNumber.FromFloat (left-30),
@@ -288,8 +289,7 @@ namespace TweetStation
 				
 				texture.DrawAsPatternInRect (frame);
 
-				var shadow = UIImage.FromBundle ("Images/menu-shadow.png");
-				shadow.Draw (frame);
+				Images.MenuShadow.Draw (frame);
 				var result = UIGraphics.GetImageFromCurrentImageContext ();
 				
 				UIGraphics.EndImageContext ();
@@ -322,20 +322,41 @@ namespace TweetStation
 					image = RenderImageWithShadow (image, 3, UIColor.Black);
 					layer.Contents = image.CGImage;
 					
-					var alpha = (CABasicAnimation) CABasicAnimation.FromKeyPath ("opacity");
-					alpha.From = new NSNumber (0);
-					alpha.To = new NSNumber (1);
-					alpha.BeginTime = delay/layers.Length*i;
-					
-					var size = (CAKeyFrameAnimation) CAKeyFrameAnimation.FromKeyPath ("transform.scale");
-					size.Values = new NSNumber [] {
-						NSNumber.FromFloat (0.8f),
-						NSNumber.FromFloat (1.2f),
+					var alpha = (CAKeyFrameAnimation) CAKeyFrameAnimation.FromKeyPath ("opacity");
+#if false
+					var vals = new List<NSNumber> ();
+					for (int j = 0; j <= i; j++)
+						vals.Add (new NSNumber (0));
+					vals.Add (new NSNumber (1));
+					alpha.Values = vals.ToArray ();
+#endif
+					alpha.Values = new NSNumber [] {
+						NSNumber.FromFloat (0),
+						NSNumber.FromFloat (0.1f),
+						NSNumber.FromFloat (1),
+					};
+					alpha.KeyTimes = new NSNumber [] {
+						NSNumber.FromFloat (0),
+						NSNumber.FromFloat (1f/(layers.Length-i)),
 						NSNumber.FromFloat (1),
 					};
 					
+					var size = (CAKeyFrameAnimation) CAKeyFrameAnimation.FromKeyPath ("transform.scale");
+					size.Values = new NSNumber [] {
+						NSNumber.FromFloat (0.7f),
+						NSNumber.FromFloat (1.3f),
+						NSNumber.FromFloat (1),
+					};
+
+#if debug
+					var pos = (CAKeyFrameAnimation) CAKeyFrameAnimation.FromKeyPath ("position.y");
+					pos.Values = new NSNumber [] {
+						NSNumber.FromFloat (0f),
+						NSNumber.FromFloat (60f),
+					};
+#endif					
 					var group = CAAnimationGroup.CreateAnimation ();
-					group.Animations = new CAAnimation [] { alpha, size };
+					group.Animations = new CAAnimation [] { alpha, size /*, pos */ };
 					group.Duration = delay; 
 					
 					layer.AddAnimation (group, "showup");					

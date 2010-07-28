@@ -146,6 +146,10 @@ namespace TweetStation
 				var bounds = Bounds;
 				var midx = bounds.Width/2;
 				if (highlighted){
+					UIColor.FromRGB (4, 0x79, 0xef).SetColor ();
+					context.FillRect (bounds);
+					Images.MenuShadow.Draw (bounds, CGBlendMode.Normal, 0.5f);
+					
 					textColor = UIColor.White;
 				} else {
 					UIColor.White.SetColor ();

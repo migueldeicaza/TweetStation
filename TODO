@@ -1,3 +1,6 @@
+* Perf
+	Measure time between will-update and did-update on our main view
+
 *iPhone4
 
 	Download the large version of the image for the ShortProfile

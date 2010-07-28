@@ -151,6 +151,7 @@
     <Compile Include="Data\TwitterAccountDatabase.cs" />
     <Compile Include="Data\TweetDatabase.cs" />
     <Compile Include="Utilities\Punycode.cs" />
+    <Compile Include="Images\Images.cs" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="MainWindow.xib" />
