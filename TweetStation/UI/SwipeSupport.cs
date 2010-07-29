@@ -78,13 +78,11 @@ namespace TweetStation
 
 				// If the menu is not active
 				if (container.MenuHostElement == null || container.MenuHostElement != container.TweetElementFromPath (IndexPathForRowAtPoint (touchStart.Value))){
-					if (container.CancelMenu ()){
-						if (capturedEnded != null){
-							Console.WriteLine ("Touches canceled");
-							TouchesCancelled (capturedEnded.Touches, capturedEnded.Event);
-							capturedEnded = null;
-						}
+					if (capturedEnded != null){
+						TouchesCancelled (capturedEnded.Touches, capturedEnded.Event);
+						capturedEnded = null;
 					}
+					container.CancelMenu ();
 					swipeDetectionDisabled = false;
 				}
 
@@ -131,15 +129,8 @@ namespace TweetStation
 					container.TouchesEnded (touches, evt);
 					return;
 				}
-				
-				if (swipeDetectionDisabled){
-					ignoreUntilLift = false;
-					return;
-				}
-				
-				if (container.DisableSelection)
-					return;
-				
+				ignoreUntilLift = false;
+
 				base.TouchesEnded (touches, evt);
 				touchStart = null;
 			}
@@ -178,8 +169,6 @@ namespace TweetStation
 			if (ip != null)
 				TableView.DeselectRow (ip, false);
 			
-			DisableSelection = true;
-
 			float offset = cell.ContentView.Frame.Width;
 
 			currentMenuView = menuView;
@@ -245,7 +234,6 @@ namespace TweetStation
 			});
 	
 			menuCell = null;
-			DisableSelection = false;
 			MenuHostElement = null;
 			currentMenuView = null;
 			return true;
