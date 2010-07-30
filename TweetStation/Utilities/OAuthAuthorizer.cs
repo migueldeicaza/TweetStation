@@ -355,11 +355,11 @@ namespace TweetStation
 		{
 			var sb = new StringBuilder ();
 			
-			foreach (char c in s){
+			foreach (byte c in Encoding.UTF8.GetBytes (s)){
 				if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '-' || c == '_' || c == '.' || c == '~')
-					sb.Append (c);
+					sb.Append ((char) c);
 				else {
-					sb.AppendFormat ("%{0:X2}", (int) c);
+					sb.AppendFormat ("%{0:X2}", c);
 				}
 			}
 			return sb.ToString ();
