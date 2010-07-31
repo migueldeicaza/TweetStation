@@ -48,7 +48,7 @@ namespace TweetStation
 	public static class ImageStore
 	{
 		public const long TempStartId = 100000000000000;
-		const int MaxRequests = 4;
+		const int MaxRequests = 6;
 		static string PicDir, RoundedPicDir, LargeRoundedPicDir, TmpDir; 
 		public readonly static UIImage DefaultImage;
 		static LRUCache<long,UIImage> cache;
