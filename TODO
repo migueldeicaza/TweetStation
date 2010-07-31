@@ -16,12 +16,13 @@
 
 * Probelms:
 
-	We still keep the menus around after they have been hidden and the
-	animation is gone, need to track that down
-
-	Add support for using the OAuth + XAauth keys
+	Add support for using the OAuth + XAauth keys.   Currently
+	installign the product vs installing the final build breaks the
+	authentication
 
 Missing Features:
+	Show "Verified" accounts
+	Show "User has tweets protected"
 	Report Spam
 	Show posting lcoation if available
 		Location is available in the tweet as <places>
@@ -88,7 +89,6 @@ Missing Features:
 		commercial use, not worth the hassle
 
 	Video service
-	URL shorter
 	Read Later
 	
 	User svcs:
@@ -112,10 +112,6 @@ Missing Features:
 	Add editing capability to searches to trim down the search list
 
 	Nearby tweets on a map
-
-	When favoriting/unfavoriting, we need to add those
-	tweets to Favorites tab, or recompute that tab
-	on demand.
 
 	Themed cell renderers
 
@@ -158,12 +154,6 @@ Missing Features:
 	Since all calls to the twitter API are to the same server,
 	we should have an API that serializes all calls, maybe even
 	reuses the WebClient instance.
-
-	WebClient does not use the ThreadPool, instead it uses a 
-	new thread, perhaps move to HttpWebRequest?
-
-	Need HttpWebRequest for POST anyways (needed for inserting
-	the result of a post).
 
 	Should support high-priority vs low-priority requests.  Some
 	operations like trend fetching do not have to be a top 
