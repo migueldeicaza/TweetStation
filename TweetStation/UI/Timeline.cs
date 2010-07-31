@@ -203,8 +203,9 @@ namespace TweetStation {
 		{
 			var mainSection = Root [0];
 			if (mainSection.Elements.Count > pos && pos >= 0){
-				foreach (var element in mainSection.Elements){
-					var te = element as TweetElement;
+				for (int idx = pos; pos < mainSection.Elements.Count; idx++){
+					var te = mainSection.Elements [idx] as TweetElement;
+					
 					if (te == null)
 						continue;
 					return te.Tweet.Id;
