@@ -2,6 +2,15 @@
 	Tapping on a user in a @foo does not load anything on the first
 	tap, only on the second tap
 
+* Must do
+
+	Upgrade Sqlite-net, so we can:
+		Add new column for "retweet-count"
+		Add column for geo location
+
+	Add mechanism to re-authenticate on Net Failure, due to my
+	two sets of keys.
+
 * Perf
 	Measure time between will-update and did-update on our main view
 
@@ -12,6 +21,8 @@
 	is too big
 
 * Features
+
+	On network failures, add fail whale artwork
 
 	Group conversations in private messages
 
