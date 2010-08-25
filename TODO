@@ -1,5 +1,28 @@
+* Bugs
+	Tapping on a user in a @foo does not load anything on the first
+	tap, only on the second tap
+
 * Perf
 	Measure time between will-update and did-update on our main view
+
+	Chicken noises should be started on a background thread?  
+	Maybe use shorter noises to make the UI more responsive.
+
+	Shrink the audio file, too large, takes too long to load, and
+	is too big
+
+* Features
+
+	Group conversations in private messages
+
+	Offer to "Load Stored Tweets"
+
+	Kill the database, and just keep a circular buffer of the last
+	n-thousand tweets?
+
+	Show Number of times the tweet has been retweeted
+
+	Show Geo icon
 
 *iPhone4
 

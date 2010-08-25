@@ -30,7 +30,7 @@
     <WarningLevel>4</WarningLevel>
     <MtouchLink>None</MtouchLink>
     <MtouchDebug>True</MtouchDebug>
-    <MtouchExtraArgs>-i18n=west</MtouchExtraArgs>
+    <MtouchExtraArgs>-i18n=west -mapinject</MtouchExtraArgs>
     <MtouchI18n />
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <MtouchSdkVersion>4.0</MtouchSdkVersion>
@@ -59,8 +59,9 @@
     <MtouchDebug>True</MtouchDebug>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <MtouchI18n />
-    <CodesignProvision>CD7CE718-F7A1-4858-A956-9B9A161C239C</CodesignProvision>
+    <CodesignProvision>B162ABCA-2DC5-4E31-B96B-1B7F8A245297</CodesignProvision>
     <MtouchSdkVersion>4.0</MtouchSdkVersion>
+    <MtouchExtraArgs>-mapinject</MtouchExtraArgs>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhone' ">
     <DebugType>none</DebugType>
@@ -100,6 +101,7 @@
     <CodesignProvision>AACDC083-6F7D-4DCC-A50B-1E246C8E90E1</CodesignProvision>
     <CodesignKey>iPhone Distribution</CodesignKey>
     <MtouchSdkVersion>4.0</MtouchSdkVersion>
+    <MtouchExtraArgs>-mapinject</MtouchExtraArgs>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />

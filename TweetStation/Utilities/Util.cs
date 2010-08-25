@@ -28,6 +28,7 @@ using MonoTouch.Foundation;
 using MonoTouch.Dialog;
 using MonoTouch.CoreLocation;
 using System.Globalization;
+using System.Drawing;
 
 namespace TweetStation
 {
@@ -64,6 +65,44 @@ namespace TweetStation
 				if (active == 0)
 					MainApp.NetworkActivityIndicatorVisible = false;
 			}
+		}
+		
+				
+		public static void ReportError (UIViewController current, Exception e, string msg)
+		{
+			var root = new RootElement (Locale.GetText ("Error")) {
+				new Section (Locale.GetText ("Error")) {
+					new StyledStringElement (msg){
+						Font = UIFont.BoldSystemFontOfSize (14)
+					}
+				}
+			};
+			
+			if (e != null){
+				root.Add (new Section (e.GetType ().ToString ()){
+					new StyledStringElement (e.Message){
+						Font = UIFont.SystemFontOfSize (14)
+					}
+				});
+				root.Add (new Section ("Stacktrace"){
+					new StyledStringElement (e.ToString ()){
+						Font = UIFont.SystemFontOfSize (14)
+					}
+				});
+			};
+			
+			// Delay one second, as UIKit does not like to present
+			// views in the middle of an animation.
+			NSTimer.CreateScheduledTimer (TimeSpan.FromSeconds (1), delegate {
+				UINavigationController nav = null;
+				DialogViewController dvc = new DialogViewController (root);
+				dvc.NavigationItem.LeftBarButtonItem = new UIBarButtonItem (Locale.GetText ("Close"), UIBarButtonItemStyle.Plain, delegate {
+					nav.DismissModalViewControllerAnimated (false);
+				});
+				
+				nav = new UINavigationController (dvc);
+				current.PresentModalViewController (nav, false);	
+			});
 		}
 		
 		public static DateTime LastUpdate (string key)

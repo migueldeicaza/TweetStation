@@ -175,20 +175,8 @@ namespace TweetStation
 		}
 
 		public void ReloadTimeline (TweetKind kind, long? since, long? max_id, Action<int> done)
-		{
-			string uri = null;
-			switch (kind){
-			case TweetKind.Home:
-				uri = timelineUri; break;
-			case TweetKind.Replies:
-				uri = mentionsUri; break;
-			case TweetKind.Direct:
-				uri = directUri; break;
-			}
-			var req = uri + "?count=200" + 
-				(since.HasValue ? "&since_id=" + since.Value : "") +
-				(max_id.HasValue ? "&max_id=" + max_id.Value : "");
-				
+		{				
+			var req = MakeTimelineRequest (kind, since, max_id);
 			Download (req, false, result => {
 				int count = -1;
 				

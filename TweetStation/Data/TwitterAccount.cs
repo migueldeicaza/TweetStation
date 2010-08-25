@@ -151,6 +151,22 @@ namespace TweetStation
 				stream.Close ();
 		}
 		
+		static string MakeTimelineRequest (TweetKind kind, long? since, long? max_id)
+		{
+			string uri = null;
+			switch (kind){
+			case TweetKind.Home:
+				uri = timelineUri; break;
+			case TweetKind.Replies:
+				uri = mentionsUri; break;
+			case TweetKind.Direct:
+				uri = directUri; break;
+			}
+			return uri + "?count=200" + 
+				(since.HasValue ? "&since_id=" + since.Value : "") +
+				(max_id.HasValue ? "&max_id=" + max_id.Value : "");
+		}
+		
 		void Launch (string url, bool callbackOnMainThread, Action<Stream> callback)
 		{
 			Util.PushNetworkActive ();

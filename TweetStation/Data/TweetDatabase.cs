@@ -70,6 +70,7 @@ namespace TweetStation
 		/// </summary>
 		static public int LoadJson (Stream stream, int localAccount, TweetKind kind)
 		{
+			//stream = File.OpenRead ("/Users/miguel/Projects/TweetStation/foo");
 			Database db = Database.Main;
 			int count = 0;
 			JsonValue root;
@@ -96,24 +97,35 @@ namespace TweetStation
 			
 			lock (db){
 				db.Execute ("BEGIN");
-				foreach (JsonObject jentry in root){
+				
+				foreach (object djentry in root){
+					// Sometimes twitter just inserts junk in the middle of the JsonStream (a null literal, 
+					// instead of an actual tweet.   Go Twitter!
+					var jentry = djentry as JsonObject;
+					if (jentry == null)
+						continue;
+					
 					var juser = jentry [userKey];
 					bool result;
 					
 					if (!ParseUser ((JsonObject) juser, user, usersSeen))
 						continue;
 					
-					if (kind == TweetKind.Direct)
-						result = tweet.TryPopulateDirect (jentry);
-					else
-						result = tweet.TryPopulate (jentry);
-					
-					if (result){
-						PopulateUser (tweet, user);
-						tweet.Insert (db);
-						count++;
-					}	
-					
+					try {
+						if (kind == TweetKind.Direct)
+							result = tweet.TryPopulateDirect (jentry);
+						else
+							result = tweet.TryPopulate (jentry);
+						
+						if (result){
+							PopulateUser (tweet, user);
+							tweet.Insert (db);
+							count++;
+						}	
+					} catch (Exception e){
+						Console.WriteLine (e);
+					}
+						
 					// Repeat user loading for the retweet info
 					if (tweet.Retweeter != null)
 						ParseUser ((JsonObject)(jentry ["retweeted_status"]["user"]), user, usersSeen);
