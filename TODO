@@ -6,6 +6,9 @@
 	logic on the settings page to be straightforward instead of being
 	made of double negatives everywhere
 
+	Add account a second time does not work with the cheap-o authentication
+	system.    Perhaps we are still logged in with WebKit?
+
 * Must do
 
 	Upgrade Sqlite-net, so we can:
