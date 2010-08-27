@@ -1,7 +1,4 @@
-* Bugs
-	Tapping on a user in a @foo does not load anything on the first
-	tap, only on the second tap
-
+*s Bugs
 	Settings are not loaded on startup, change all the convoluted
 	logic on the settings page to be straightforward instead of being
 	made of double negatives everywhere

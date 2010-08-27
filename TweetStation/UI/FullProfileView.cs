@@ -31,6 +31,7 @@ namespace TweetStation
 {
 	public class FullProfileView : DialogViewController 
 	{
+		UIActivityIndicatorView spinner;
 		const int PadX = 4;
 		StyledStringElement followButton, blockUnblockButton;
 		User user;
@@ -54,17 +55,38 @@ namespace TweetStation
 				CreateUI ();
 		}
 		
+		public override void ViewWillAppear (bool animated)
+		{
+			base.ViewWillAppear (animated);
+			
+			// If the user is null, add a spinner to show that the data is loading
+			if (user == null){
+				spinner = new UIActivityIndicatorView (UIActivityIndicatorViewStyle.White){
+					Frame = new RectangleF (20, 20, 30, 30)
+				};
+				spinner.StartAnimating ();
+				View.AddSubview (spinner);
+			}
+		}
+		
 		void ProcessUserReturn (User user)
 		{
 			if (user == null){
 				Root = Util.MakeError (Locale.GetText ("Could not get information on user"));
 				return;
 			}
+			this.user = user;
 			CreateUI ();
 		}
 		
 		void CreateUI ()
 		{
+			System.Threading.Thread.Sleep (2000);
+			if (spinner != null){
+				spinner.RemoveFromSuperview ();
+				spinner = null;
+			}
+			
 			var profileRect = new RectangleF (PadX, 0, View.Bounds.Width-PadX, 100);
 			var shortProfileView = new ShortProfileView (profileRect, user.Id, false);
 			shortProfileView.PictureTapped += delegate { PictureViewer.Load (this, user.Id); };
@@ -75,7 +97,7 @@ namespace TweetStation
 				main.Add (new StyledStringElement (user.Description) {
 					Lines = 0,
 					LineBreakMode = UILineBreakMode.WordWrap,
-					Font = UIFont.SystemFontOfSize (14)
+					Font = UIFont.SystemFontOfSize (14), 
 				});
 			};
 			
@@ -157,7 +179,7 @@ namespace TweetStation
 				followButton = new StyledStringElement (GetFollowText (following), ToggleFollow){
 					Alignment = UITextAlignment.Center,
 					TextColor = UIColor.FromRGB (0x32, 0x4f, 0x85),
-					Font = UIFont.BoldSystemFontOfSize (16)
+					Font = UIFont.BoldSystemFontOfSize (16),
 				};
 
 				var following_me = (bool) target ["following"];

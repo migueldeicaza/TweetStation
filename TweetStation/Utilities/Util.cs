@@ -73,7 +73,7 @@ namespace TweetStation
 			var root = new RootElement (Locale.GetText ("Error")) {
 				new Section (Locale.GetText ("Error")) {
 					new StyledStringElement (msg){
-						Font = UIFont.BoldSystemFontOfSize (14)
+						Font = UIFont.BoldSystemFontOfSize (14),
 					}
 				}
 			};
@@ -81,12 +81,12 @@ namespace TweetStation
 			if (e != null){
 				root.Add (new Section (e.GetType ().ToString ()){
 					new StyledStringElement (e.Message){
-						Font = UIFont.SystemFontOfSize (14)
+						Font = UIFont.SystemFontOfSize (14),
 					}
 				});
 				root.Add (new Section ("Stacktrace"){
 					new StyledStringElement (e.ToString ()){
-						Font = UIFont.SystemFontOfSize (14)
+						Font = UIFont.SystemFontOfSize (14),
 					}
 				});
 			};
