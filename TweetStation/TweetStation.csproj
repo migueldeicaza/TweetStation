@@ -12,13 +12,14 @@
     <MainNibFile>MainWindow.xib</MainNibFile>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <AssemblyName>TweetStation</AssemblyName>
-    <MtouchMinimumOS>3.0</MtouchMinimumOS>
     <BundleIdentifier>org.tirania.tweetstation</BundleIdentifier>
     <BundleVersion>1.6</BundleVersion>
     <BundleDisplayName>TweetStation</BundleDisplayName>
     <BundleIcon>Icon.png</BundleIcon>
     <BundleIconSpotlight>IconSpotlight.png</BundleIconSpotlight>
     <BundleIconHigh>Icon@2x.png</BundleIconHigh>
+    <MtouchMinimumOS>3.0</MtouchMinimumOS>
+    <MtouchSdkVersion>4.1</MtouchSdkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|iPhoneSimulator' ">
     <DebugSymbols>true</DebugSymbols>
@@ -33,7 +34,6 @@
     <MtouchExtraArgs>-i18n=west -mapinject</MtouchExtraArgs>
     <MtouchI18n />
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <MtouchSdkVersion>4.0</MtouchSdkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhoneSimulator' ">
     <DebugType>none</DebugType>
@@ -45,7 +45,6 @@
     <MtouchDebug>False</MtouchDebug>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <MtouchI18n />
-    <MtouchSdkVersion>4.1</MtouchSdkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|iPhone' ">
     <DebugSymbols>true</DebugSymbols>
@@ -59,8 +58,6 @@
     <MtouchDebug>True</MtouchDebug>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <MtouchI18n />
-    <CodesignProvision>B162ABCA-2DC5-4E31-B96B-1B7F8A245297</CodesignProvision>
-    <MtouchSdkVersion>3.2</MtouchSdkVersion>
     <MtouchExtraArgs>-mapinject</MtouchExtraArgs>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhone' ">
@@ -73,7 +70,6 @@
     <MtouchDebug>False</MtouchDebug>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <MtouchI18n />
-    <MtouchSdkVersion>4.1</MtouchSdkVersion>
     <DefineConstants>TRACE</DefineConstants>
     <CodesignProvision>B162ABCA-2DC5-4E31-B96B-1B7F8A245297</CodesignProvision>
     <MtouchExtraArgs>-mapinject</MtouchExtraArgs>
@@ -88,7 +84,6 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <CodesignProvision>81CC6220-6404-46B6-BAC0-6F4C5E8C7C34</CodesignProvision>
     <CodesignKey>iPhone Distribution</CodesignKey>
-    <MtouchSdkVersion>4.0</MtouchSdkVersion>
     <DefineConstants>TRACE</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'AppStore|iPhone' ">
@@ -101,7 +96,6 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <CodesignProvision>AACDC083-6F7D-4DCC-A50B-1E246C8E90E1</CodesignProvision>
     <CodesignKey>iPhone Distribution</CodesignKey>
-    <MtouchSdkVersion>4.1</MtouchSdkVersion>
     <MtouchExtraArgs>-mapinject</MtouchExtraArgs>
   </PropertyGroup>
   <ItemGroup>
