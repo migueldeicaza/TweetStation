@@ -63,6 +63,7 @@ namespace TweetStation
 #else
 			var cfg = TwitterAccount.OAuthConfig;
 			useXauth = true;
+
 #endif
 			
 			Util.ReportTime ("Before GetDefaultAccount");
@@ -291,6 +292,8 @@ namespace TweetStation
 				},
 				new Section (){
 					new LoadMoreElement (Locale.GetText ("Login to Twitter"), Locale.GetText ("Contacting twitter"), delegate {
+						login.FetchValue ();
+						password.FetchValue ();
 						StartXauthLogin (login.Value.Trim (), password.Value.Trim (), callback); 
 					}, UIFont.BoldSystemFontOfSize (16), UIColor.Black)
 				}
