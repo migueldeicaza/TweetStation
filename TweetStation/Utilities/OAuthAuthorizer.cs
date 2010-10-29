@@ -175,6 +175,9 @@ namespace TweetStation
 		}
 		
 		// Invoked after the user has authorized us
+		//
+		// TODO: this should return the stream error for invalid passwords instead of
+		// just true/false.
 		public bool AcquireAccessToken ()
 		{
 			var headers = new Dictionary<string,string> () {
@@ -218,7 +221,10 @@ namespace TweetStation
 					
 					return true;
 				}
-			} catch (Exception e) {
+			} catch (WebException e) {
+				var x = e.Response.GetResponseStream ();
+				var j = new System.IO.StreamReader (x);
+				Console.WriteLine (j.ReadToEnd ());
 				Console.WriteLine (e);
 				// fallthrough for errors
 			}
