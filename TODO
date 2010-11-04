@@ -1,3 +1,17 @@
+* Feedback:
+
+	Instapaper support, deal breaker for @dssstrkl
+	
+	Web browser buttons are too close (problem with big fingers)
+
+	Probably use icons for "Retweet" instead of a label?
+
+	Photo picker only selects from camera roll, not whole library
+
+	Drop shadow on text in the detail view seems off, there is a
+	white outline surrounding it instead of just the bottom.
+
+	
 * Bugs
 	Rendering of individual cells sometimes cuts the text, this
 	is because we are using one of UIKit's broken draw/measure

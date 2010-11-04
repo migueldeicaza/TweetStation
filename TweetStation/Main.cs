@@ -40,6 +40,7 @@ namespace TweetStation
 		public override bool FinishedLaunching (UIApplication app, NSDictionary options)
 		{
 			Util.ReportTime ("Entering Finished");
+			
 			MainAppDelegate = this;
 			window.MakeKeyAndVisible ();
 
