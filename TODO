@@ -2,11 +2,7 @@
 
 	Instapaper support, deal breaker for @dssstrkl
 	
-	Web browser buttons are too close (problem with big fingers)
-
 	Probably use icons for "Retweet" instead of a label?
-
-	Photo picker only selects from camera roll, not whole library
 
 	Drop shadow on text in the detail view seems off, there is a
 	white outline surrounding it instead of just the bottom.
@@ -16,9 +12,6 @@
 	Rendering of individual cells sometimes cuts the text, this
 	is because we are using one of UIKit's broken draw/measure
 	APIs, we need to use the other one.
-
-	On switch-to-foreground, do not scroll to the last tweet
-	unless we are at the top of the tweet list
 
 	Reduce the audio quality, currently it is too slow to load
 

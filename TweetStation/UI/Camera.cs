@@ -69,7 +69,7 @@ namespace TweetStation
 		public static void SelectPicture (UIViewController parent, Action<NSDictionary> callback)
 		{
 			Init ();
-			picker.SourceType = UIImagePickerControllerSourceType.SavedPhotosAlbum;
+			picker.SourceType = UIImagePickerControllerSourceType.PhotoLibrary;
 			_callback = callback;
 			parent.PresentModalViewController (picker, true);
 		}
