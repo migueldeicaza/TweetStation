@@ -155,9 +155,9 @@ namespace TweetStation
 		
 		public override void WillEnterForeground (UIApplication application)
 		{
-			main.ReloadTimeline ();
-			mentions.ReloadTimeline ();
-			messages.ReloadTimeline ();
+			main.ReloadIfAtTop ();
+			mentions.ReloadIfAtTop ();
+			messages.ReloadIfAtTop ();
 		}
 		
 		//

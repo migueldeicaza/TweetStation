@@ -263,6 +263,15 @@ namespace TweetStation
 			Console.WriteLine (String.Format (format, args));
 		}
 		
+		public static void LogException (string text, Exception e)
+		{
+			using (var s = System.IO.File.AppendText (Util.BaseDir + "/Documents/crash.log")){
+				var msg = String.Format ("On {0}, message: {1}\nException:\n{2}", DateTime.Now, text, e.ToString());
+				s.WriteLine (msg);
+				Console.WriteLine (msg);
+			}
+		}
+			
 		static UIActionSheet sheet;
 		public static UIActionSheet GetSheet (string title)
 		{

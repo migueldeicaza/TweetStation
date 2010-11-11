@@ -43,6 +43,7 @@ namespace TweetStation {
 		{			
 			Autorotate = true;
 			EnableSearch = true;
+			AutoHideSearch = true;
 			RefreshRequested += delegate {
 				ReloadTimeline ();
 			};
@@ -219,16 +220,22 @@ namespace TweetStation {
 		// Gets the ID for the tweet in the tableview at @pos
 		long? GetTableTweetId (int pos)
 		{
+			int idx = -1;
 			var mainSection = Root [0];
-			if (mainSection.Elements.Count > pos && pos >= 0){
-				for (int idx = pos; pos < mainSection.Elements.Count; idx++){
-					var te = mainSection.Elements [idx] as TweetElement;
-					
-					if (te == null)
-						continue;
-					return te.Tweet.Id;
-				}
-			} 
+			
+			try {
+				if (mainSection.Elements.Count > pos && pos >= 0){
+					for (idx = pos; pos < mainSection.Elements.Count; idx++){
+						var te = mainSection.Elements [idx] as TweetElement;
+						
+						if (te == null)
+							continue;
+						return te.Tweet.Id;
+					}
+				} 
+			} catch (Exception e){
+				Util.LogException (String.Format ("idx={0} mainSection.Elements.Count={1} pos={2}", idx, mainSection.Elements.Count, pos), e);
+			}
 			return null;
 		}
 		
@@ -304,6 +311,15 @@ namespace TweetStation {
 					TableView.ScrollToRow (NSIndexPath.FromRowSection (count-1, 0), UITableViewScrollPosition.Middle, false);
 			});
 		}
+		
+		// Only reloads the timeline if we are looking at the top tweet, to avoid 
+		// scrolling on resume.
+		public void ReloadIfAtTop ()
+		{
+			if (TableView.ContentOffset.Y > 45)
+				return;
+			ReloadTimeline ();
+		}		
 		
 		protected override void ResetState ()
 		{
