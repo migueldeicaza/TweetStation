@@ -118,9 +118,11 @@ namespace TweetStation
 			
 			if (File.Exists (picfile)){
 				ret = UIImage.FromFileUncached (picfile);
-				lock (cache)
-					cache [id] = ret;
-				return ret;
+				if (ret != null){
+					lock (cache)
+						cache [id] = ret;
+					return ret;
+				}
 			} 
 			
 			picfile = PicDir + id + ".png";
@@ -206,7 +208,7 @@ namespace TweetStation
 
 			lock (requestQueue){
 				if (pendingRequests.ContainsKey (id)){
-					Util.Log ("pendingRequest: added new listener for {0}", id);
+					//Util.Log ("pendingRequest: added new listener for {0}", id);
 					pendingRequests [id].Add (notify);
 					return;
 				}
