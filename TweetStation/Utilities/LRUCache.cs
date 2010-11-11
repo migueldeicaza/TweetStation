@@ -85,14 +85,13 @@ public class LRUCache<TKey, TValue> where TValue : class, IDisposable  {
 				list.AddFirst (node);
 	
 				// Remove the old value
-				node.Value.Dispose ();
+				if (node.Value != null)
+					node.Value.Dispose ();
 				node.Value = value;
 				return;
 			}
-			
 			if (dict.Count >= limit)
 				Evict ();
-	
 			// Adding new node
 			node = new LinkedListNode<TValue> (value);
 			list.AddFirst (node);
