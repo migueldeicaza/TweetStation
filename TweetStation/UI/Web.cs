@@ -39,7 +39,9 @@ namespace TweetStation
 
 		protected WebViewController ()
 		{
-			var fixedSpace = new UIBarButtonItem (UIBarButtonSystemItem.FixedSpace, null);
+			var fixedSpace = new UIBarButtonItem (UIBarButtonSystemItem.FixedSpace, null) {
+				Width = 26
+			};
 			var flexibleSpace = new UIBarButtonItem (UIBarButtonSystemItem.FlexibleSpace, null);
 
 			toolbar = new UIToolbar ();
@@ -65,8 +67,8 @@ namespace TweetStation
 			forwardButton = new UIBarButtonItem (UIImage.FromBundle ("Images/forward.png"), UIBarButtonItemStyle.Plain, (o, e) => { WebView.GoForward (); });
 			refreshButton = new UIBarButtonItem (UIBarButtonSystemItem.Refresh, (o, e) => { WebView.Reload (); });
 			stopButton = new UIBarButtonItem (UIBarButtonSystemItem.Stop, (o, e) => { WebView.StopLoading (); });
-
-			toolbar.Items = new UIBarButtonItem [] { backButton,	fixedSpace, forwardButton, flexibleSpace, stopButton, refreshButton };
+			
+			toolbar.Items = new UIBarButtonItem [] { backButton, fixedSpace, forwardButton, flexibleSpace, stopButton, fixedSpace, refreshButton };
 
 			View.AddSubview (topBar);
 			View.AddSubview (toolbar);
