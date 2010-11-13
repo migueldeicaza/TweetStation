@@ -94,7 +94,7 @@ namespace TweetStation
 
 			var main = new Section (shortProfileView);
 			if (!String.IsNullOrEmpty (user.Description)){
-				main.Add (new StyledStringElement (user.Description) {
+				main.Add (new StyledMultilineElement (user.Description) {
 					Lines = 0,
 					LineBreakMode = UILineBreakMode.WordWrap,
 					Font = UIFont.SystemFontOfSize (14), 
