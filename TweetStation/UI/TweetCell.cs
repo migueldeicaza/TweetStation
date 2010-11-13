@@ -135,32 +135,46 @@ namespace TweetStation
 				SetNeedsDisplay ();
 			}
 			
+			int state;
 			public override void Draw (RectangleF rect)
+			{
+				try {
+					state = 0;
+					RealDraw (rect);
+				} catch (Exception e) {
+					Util.LogException ("State: " + state, e);
+				}
+			}
+			
+			void RealDraw (RectangleF rect)
 			{
 				var context = UIGraphics.GetCurrentContext ();
 
 				// Superview is the container, its superview the uitableviewcell
 				bool highlighted = (Superview.Superview as UITableViewCell).Highlighted;
 				UIColor textColor;
-				
+	
+				state = 1;
 				var bounds = Bounds;
 				var midx = bounds.Width/2;
 				if (highlighted){
+					state = 2;
 					UIColor.FromRGB (4, 0x79, 0xef).SetColor ();
 					context.FillRect (bounds);
 					Images.MenuShadow.Draw (bounds, CGBlendMode.Normal, 0.5f);
-					
+					state = 4;
 					textColor = UIColor.White;
 				} else {
 					UIColor.White.SetColor ();
 					context.FillRect (bounds);
-
+					state = 5;
 					context.DrawLinearGradient (bottomGradient, new PointF (midx, bounds.Height-17), new PointF (midx, bounds.Height), 0);
 					context.DrawLinearGradient (topGradient, new PointF (midx, 1), new PointF (midx, 3), 0);
-					                                   
+					               state = 6;                    
 					textColor = UIColor.Black;
 				}
 				
+				state = 10;
 				float xPic, xText;
 				
 				if ((CellStyle & 1) == 0 && tweet.UserId == TwitterAccount.CurrentAccount.AccountId){
@@ -170,17 +184,18 @@ namespace TweetStation
 					xText = PicAreaWidth;
 					xPic = PicXPad;
 				}
-				
+				state = 11;
 				if (userText == null){
 					userText = "Unknown";
 				}
-				
+				state = 12;
 				textColor.SetColor ();
 				DrawString (userText, new RectangleF (xText, TextHeightPadding, bounds.Width-PicAreaWidth-TextWidthPadding-TimeWidth, userSize), userFont);
 				DrawString (tweet.Text, new RectangleF (xText, bounds.Y + TextYOffset, bounds.Width-PicAreaWidth-TextWidthPadding, bounds.Height-TextYOffset), textFont, UILineBreakMode.WordWrap);
-				
+				state = 13;
 				timeColor.SetColor ();
 				string time = Util.FormatTime (new TimeSpan (DateTime.UtcNow.Ticks - tweet.CreatedAt));
+				state = 14;
 				if (tweet.Favorited){
 					using (var nss = new NSString (time)){
 						var size = nss.StringSize (timeFont);
@@ -188,9 +203,11 @@ namespace TweetStation
 						star.Draw (new RectangleF (bounds.Width-24-size.Width-(xPic == PicXPad ? 0 : PicAreaWidth), TextHeightPadding, size.Height, size.Height));
 					}
 				}
+				state = 15;
 				DrawString (time, new RectangleF (xText, TextHeightPadding, bounds.Width-PicAreaWidth-TextWidthPadding, timeSize),
 				            timeFont, UILineBreakMode.Clip, UITextAlignment.Right);
-
+				
+				state = 17;
 				if ((CellStyle & 2) == 0){
 					// Cute touch
 					UIColor.White.SetColor ();
@@ -198,22 +215,24 @@ namespace TweetStation
 					context.TranslateCTM (xPic, PicYPad);
 					context.SetLineWidth (1);
 					
+					state = 16;
 					// On device, the shadow is painted in the opposite direction!
 					context.SetShadowWithColor (new SizeF (1, 1), 3, UIColor.DarkGray.CGColor);
 					context.AddPath (badgePath);
 					context.FillPath ();
-					
+					state = 18;
 					if (retweetImage != null){
 						context.TranslateCTM (30, 30);
 						context.AddPath (smallBadgePath);
 						context.StrokePath ();
 					}
-					
+					state = 19;
 					context.RestoreState ();
 				}
-				
+				state = 20;
 				tweetImage.Draw (new RectangleF (xPic, PicYPad, PicSize, PicSize));
 				
+				state = 21;
 				if (retweetImage != null)
 					retweetImage.Draw (new RectangleF (xPic+30, PicYPad+30, 23, 23));
 			}
