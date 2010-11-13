@@ -169,7 +169,7 @@ namespace TweetStation
 						                             "that should inspire you to create\n" +
 						                             "clever tweets")){
 							(playMusic = new BooleanElement (Locale.GetText ("Music on Composer"), Util.Defaults.IntForKey ("disableMusic") == 0)),
-							(chicken = new BooleanElement (Locale.GetText ("Chicken noises"), Util.Defaults.IntForKey ("enableChickens") != 0)),
+							(chicken = new BooleanElement (Locale.GetText ("Chicken noises"), Util.Defaults.IntForKey ("disableChickens") == 0)),
 						}
 					},
 					//new RootElement (Locale.GetText ("Services"))
