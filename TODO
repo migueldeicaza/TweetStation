@@ -9,9 +9,8 @@
 
 	
 * Bugs
-	Rendering of individual cells sometimes cuts the text, this
-	is because we are using one of UIKit's broken draw/measure
-	APIs, we need to use the other one.
+	On user searches, the icon for the user, for the same user
+	takes a while to load
 
 	Reduce the audio quality, currently it is too slow to load
 
