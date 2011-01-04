@@ -91,6 +91,11 @@ namespace TweetStation
 			requestQueue = new Stack<long> ();
 		}
 		
+		public static void Purge ()
+		{
+			cache.Purge ();
+		}
+		
 		public static UIImage GetLocalProfilePicture (long id)
 		{
 			UIImage ret;
