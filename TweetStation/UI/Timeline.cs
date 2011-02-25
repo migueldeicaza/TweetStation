@@ -294,10 +294,13 @@ namespace TweetStation {
 					
 					if (!continuous && nParsed > 0){
 						LoadMoreElement more = null;
+						
 						more = new LoadMoreElement (Locale.GetText ("Load more tweets"), Locale.GetText ("Loading"), delegate {
 							more.Animating = true;
 							DownloadTweets (insertPoint + nParsed, null, GetTableTweetId (insertPoint + count-1)-1, more);
 						});
+						more.Height = 60;
+						
 						try {
 							mainSection.Insert (insertPoint+nParsed, UITableViewRowAnimation.None, more);
 						} catch {
@@ -538,7 +541,7 @@ namespace TweetStation {
 							loadMore = new LoadMoreElement (Locale.GetText ("Load more"), Locale.GetText ("Loading"), delegate {
 								Load (page+1, 0);
 							}, UIFont.BoldSystemFontOfSize (14), UIColor.Black);
-						
+							loadMore.Height = 60;						
 							section.Add (loadMore);
 						}
 					} else {

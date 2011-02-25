@@ -45,7 +45,7 @@
     <MtouchDebug>False</MtouchDebug>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <MtouchI18n />
-    <MtouchSdkVersion>4.1</MtouchSdkVersion>
+    <MtouchSdkVersion>4.2</MtouchSdkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|iPhone' ">
     <DebugSymbols>true</DebugSymbols>
@@ -73,9 +73,9 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <MtouchI18n />
     <DefineConstants>TRACE</DefineConstants>
-    <CodesignProvision>A422FB4F-E893-4909-BA4A-81D7B4C15909</CodesignProvision>
+    <CodesignProvision>EEB2110C-C864-4631-8FF7-5477F3B921F9</CodesignProvision>
     <MtouchExtraArgs>-mapinject</MtouchExtraArgs>
-    <MtouchSdkVersion>4.1</MtouchSdkVersion>
+    <MtouchSdkVersion>4.2</MtouchSdkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'AdHoc|iPhone' ">
     <DebugType>none</DebugType>
