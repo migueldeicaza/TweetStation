@@ -38,7 +38,7 @@ namespace TweetStation
 		static UIFont followerFont = UIFont.SystemFontOfSize (followerSize);
 		static UIFont locationFont = UIFont.SystemFontOfSize (locationSize);
 		static UIFont urlFont = UIFont.BoldSystemFontOfSize (urlSize);
-		static CGPath borderPath = Graphics.MakeRoundedPath (75);
+		static CGPath borderPath = GraphicsUtil.MakeRoundedPath (75, 4);
 		
 		UIImageView profilePic;
 		UIButton url;

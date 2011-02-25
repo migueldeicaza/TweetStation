@@ -236,7 +236,7 @@ namespace TweetStation
 	}
 	
 	public class DetailTweetView : UIView, IImageUpdated {
-		static CGPath borderPath = Graphics.MakeRoundedPath (78);
+		static CGPath borderPath = GraphicsUtil.MakeRoundedPath (78, 4);
 		static UIImage off = UIImage.FromBundle ("Images/star-off.png");
 		public static UIImage on = UIImage.FromBundle ("Images/star-on.png");
 		const int PadY = 4;

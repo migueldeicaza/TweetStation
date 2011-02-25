@@ -71,7 +71,7 @@ namespace TweetStation
 				new Section () {
 					new RootElement (Locale.GetText ("Search"), x => new TwitterTextSearch ()),
 #if true
-					new LoadMoreElement (Locale.GetText ("Nearby"), Locale.GetText ("Finding your position"), x => StartGeoSearch (x)) {
+					new LoadMoreElement (Locale.GetText ("Nearby"), Locale.GetText ("Finding your position"), (x) => StartGeoSearch (x)) {
 						Accessory = UITableViewCellAccessory.DisclosureIndicator,
 						Alignment = UITextAlignment.Left
 					},

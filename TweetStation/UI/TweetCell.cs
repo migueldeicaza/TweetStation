@@ -65,8 +65,8 @@ namespace TweetStation
 		TweetCellView tweetView;
 		
 		static CGGradient bottomGradient, topGradient;
-		static CGPath badgePath = Graphics.MakeRoundedPath (48);
-		static CGPath smallBadgePath = Graphics.MakeRoundedPath (23);
+		static CGPath badgePath = GraphicsUtil.MakeRoundedPath (48, 4);
+		static CGPath smallBadgePath = GraphicsUtil.MakeRoundedPath (23, 4);
 		
 		public static int CellStyle;
 		

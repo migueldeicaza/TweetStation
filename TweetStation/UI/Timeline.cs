@@ -33,6 +33,8 @@ using System.Text;
 using MonoTouch.ObjCRuntime;
 
 namespace TweetStation {
+	
+	// Base class for timeline views
 	public abstract partial class BaseTimelineViewController : DialogViewController
 	{
 		UserSelector selector;
@@ -289,7 +291,7 @@ namespace TweetStation {
 					NSTimer.CreateScheduledTimer (TimeSpan.FromSeconds (0.3), delegate {
 						NavigationController.TabBarItem.BadgeValue = (nParsed > 0) ? nParsed.ToString () : null;
 					});
-
+					
 					if (!continuous && nParsed > 0){
 						LoadMoreElement more = null;
 						more = new LoadMoreElement (Locale.GetText ("Load more tweets"), Locale.GetText ("Loading"), delegate {

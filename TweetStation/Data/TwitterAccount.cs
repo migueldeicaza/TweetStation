@@ -154,15 +154,16 @@ namespace TweetStation
 		static string MakeTimelineRequest (TweetKind kind, long? since, long? max_id)
 		{
 			string uri = null;
+			int count = 200;
 			switch (kind){
 			case TweetKind.Home:
 				uri = timelineUri; break;
 			case TweetKind.Replies:
-				uri = mentionsUri; break;
+				uri = mentionsUri; count = 40; break;
 			case TweetKind.Direct:
 				uri = directUri; break;
 			}
-			return uri + "?count=200" + 
+			return uri + "?count=" + count + 
 				(since.HasValue ? "&since_id=" + since.Value : "") +
 				(max_id.HasValue ? "&max_id=" + max_id.Value : "");
 		}

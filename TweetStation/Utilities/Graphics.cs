@@ -26,13 +26,14 @@ using MonoTouch.CoreGraphics;
 using MonoTouch.UIKit;
 using MonoTouch.ObjCRuntime;
 using MonoTouch.CoreAnimation;
+using MonoTouch.Dialog;
 
 namespace TweetStation
 {
 	public static class Graphics
 	{
-		static CGPath smallPath = MakeRoundedPath (48);
-		static CGPath largePath = MakeRoundedPath (73);
+		static CGPath smallPath = GraphicsUtil.MakeRoundedPath (48, 4);
+		static CGPath largePath = GraphicsUtil.MakeRoundedPath (73, 4);
 		
 		// Check for multi-tasking as a way to determine if we can probe for the "Scale" property,
 		// only available on iOS4 
@@ -113,21 +114,6 @@ namespace TweetStation
 			var converted = UIGraphics.GetImageFromCurrentImageContext ();
 			UIGraphics.EndImageContext ();
 			return converted;
-		}
-		
-		internal static CGPath MakeRoundedPath (float size)
-		{
-			float hsize = size/2;
-			
-			var path = new CGPath ();
-			path.MoveToPoint (size, hsize);
-			path.AddArcToPoint (size, size, hsize, size, 4);
-			path.AddArcToPoint (0, size, 0, hsize, 4);
-			path.AddArcToPoint (0, 0, hsize, 0, 4);
-			path.AddArcToPoint (size, 0, size, hsize, 4);
-			path.CloseSubpath ();
-			
-			return path;
 		}
 	}
 	
