@@ -49,7 +49,6 @@ namespace TweetStation {
 			RefreshRequested += delegate {
 				ReloadTimeline ();
 			};
-			
 			Style = UITableViewStyle.Plain;
 			NavigationItem.RightBarButtonItem = new UIBarButtonItem (UIBarButtonSystemItem.Compose, delegate {
 				if (kind == TweetKind.Direct){

@@ -25,7 +25,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\iPhoneSimulator\Debug</OutputPath>
-    <DefineConstants>DEBUG; TRACE</DefineConstants>
+    <DefineConstants>DEBUG; TRACE; DEBUGIMAGE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <MtouchLink>None</MtouchLink>
@@ -60,7 +60,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <MtouchI18n />
     <MtouchExtraArgs>-mapinject</MtouchExtraArgs>
-    <CodesignProvision>A422FB4F-E893-4909-BA4A-81D7B4C15909</CodesignProvision>
+    <CodesignProvision>EEB2110C-C864-4631-8FF7-5477F3B921F9</CodesignProvision>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhone' ">
     <DebugType>none</DebugType>
@@ -72,7 +72,7 @@
     <MtouchDebug>False</MtouchDebug>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <MtouchI18n />
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>TRACE; DEBUGIMAGE</DefineConstants>
     <CodesignProvision>EEB2110C-C864-4631-8FF7-5477F3B921F9</CodesignProvision>
     <MtouchExtraArgs>-mapinject</MtouchExtraArgs>
     <MtouchSdkVersion>4.2</MtouchSdkVersion>
@@ -154,6 +154,7 @@
     <Compile Include="Data\TweetDatabase.cs" />
     <Compile Include="Utilities\Punycode.cs" />
     <Compile Include="Images\Images.cs" />
+    <Compile Include="Debug.cs" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="MainWindow.xib" />

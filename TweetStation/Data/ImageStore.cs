@@ -56,6 +56,10 @@ namespace TweetStation
 		// A list of requests that have been issues, with a list of objects to notify.
 		static Dictionary<long, List<IImageUpdated>> pendingRequests;
 		
+#if DEBUGIMAGE
+		static Dictionary<long,long> pendingTimes;
+#endif
+		
 		// A list of updates that have completed, we must notify the main thread about them.
 		static HashSet<long> queuedUpdates;
 		
@@ -86,6 +90,9 @@ namespace TweetStation
 			DefaultImage = UIImage.FromFile ("Images/default_profile_4_normal.png");
 			cache = new LRUCache<long,UIImage> (200);
 			pendingRequests = new Dictionary<long,List<IImageUpdated>> ();
+#if DEBUGIMAGE
+			pendingTimes = new Dictionary<long, long> ();
+#endif
 			idToUrl = new Dictionary<long,string> ();
 			queuedUpdates = new HashSet<long>();
 			requestQueue = new Stack<long> ();
@@ -195,6 +202,22 @@ namespace TweetStation
 			return user.Screenname;
 		}
 		
+#if DEBUGIMAGE
+		static public void GetStatus (out List<string> pendingList, out List<string> requestList, out int downloaders, out int reqCount)
+		{
+			pendingList = new List<string> ();
+			requestList = new List<string> ();
+			lock (requestQueue){
+				foreach (var key in pendingRequests.Keys)
+					pendingList.Add (string.Format ("[{0} - {1}]", key.ToString (), TimeSpan.FromTicks (DateTime.UtcNow.Ticks-pendingTimes [key]).ToString ()));
+				
+				foreach (var key in requestQueue)
+					requestList.Add ("Key=" + key.ToString ());
+			}
+			downloaders = picDownloaders;
+			reqCount = requestQueue.Count;
+		}
+#endif
 		//
 		// Requests that the picture for "id" be downloaded, the optional url prevents
 		// one lookup, it can be null if not known
@@ -220,12 +243,15 @@ namespace TweetStation
 				var slot = new List<IImageUpdated> (4);
 				slot.Add (notify);
 				pendingRequests [id] = slot;
-				
-				if (requestQueue.Count >= MaxRequests){
+#if DEBUGIMAGE
+				pendingTimes [id] = DateTime.UtcNow.Ticks;
+#endif	
+				if (picDownloaders > MaxRequests){
 					Util.Log ("Queuing Image request because {0} >= {1} {2}", requestQueue.Count, MaxRequests, picDownloaders);
 					requestQueue.Push (id);
 				} else {
 					ThreadPool.QueueUserWorkItem (delegate { 
+						
 							try {
 								StartPicDownload (id, url); 
 							} catch (Exception e){
@@ -272,7 +298,7 @@ namespace TweetStation
 			}
 		}
 		
-		static long picDownloaders;
+		static int picDownloaders;
 		
 		static void StartPicDownload (long id, Uri url)
 		{
@@ -306,9 +332,12 @@ namespace TweetStation
 						// If this is the first queued update, must notify
 						if (queuedUpdates.Count == 1)
 							doInvoke = true;
-					} else
+					} else {
 						pendingRequests.Remove (id);
-
+#if DEBUGIMAGE
+						pendingTimes.Remove (id);
+#endif
+					}
 					idToUrl.Remove (id);
 
 					// Try to get more jobs.
@@ -318,6 +347,9 @@ namespace TweetStation
 						if (url == null){
 							Util.Log ("Dropping request {0} because url is null", id);
 							pendingRequests.Remove (id);
+#if DEBUGIMAGE
+							pendingTimes.Remove (id);
+#endif
 							id = -1;
 						}
 					} else {
@@ -338,6 +370,9 @@ namespace TweetStation
 				foreach (var qid in queuedUpdates){
 					var list = pendingRequests [qid];
 					pendingRequests.Remove (qid);
+#if DEBUGIMAGE
+					pendingTimes.Remove (qid);
+#endif
 					foreach (var pr in list){
 						try {
 							pr.UpdatedImage (qid);

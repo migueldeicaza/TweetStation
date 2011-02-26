@@ -119,6 +119,10 @@ namespace TweetStation
 	
 			CheckDatabase ();
 			tabbarController.SetViewControllers (navigationRoots, false);
+			
+#if false && DEBUGIMAGE
+			AddDebugHook ();
+#endif
 		}
 
 		void CheckDatabase ()
