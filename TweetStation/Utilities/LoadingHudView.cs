@@ -151,25 +151,26 @@ namespace TweetStation {
 	
 	public static class UIViewExtensions {
 		
-			public static void DrawRoundRectangle(this UIView view, RectangleF rrect, float radius, UIColor color) {
-			var context = UIGraphics.GetCurrentContext();
+		public static void DrawRoundRectangle (this UIView view, RectangleF rrect, float radius, UIColor color) 
+		{
+			var context = UIGraphics.GetCurrentContext ();
 	
-			color.SetColor();
+			color.SetColor ();	
 			
 			float minx = rrect.Left;
 			float midx = rrect.Left + (rrect.Width)/2;
 			float maxx = rrect.Right;
 			float miny = rrect.Top;
-			float midy = rrect.Y+rrect.Size.Width/2;
+			float midy = rrect.Y+rrect.Size.Height/2;
 			float maxy = rrect.Bottom;
 	
-			context.MoveTo(minx, midy);
-			context.AddArcToPoint(minx, miny, midx, miny, radius);
-			context.AddArcToPoint(maxx, miny, maxx, midy, radius);
-			context.AddArcToPoint(maxx, maxy, midx, maxy, radius);
-			context.AddArcToPoint(minx, maxy, minx, midy, radius);
-			context.ClosePath();
-			context.DrawPath(CGPathDrawingMode.Fill); // test others?
+			context.MoveTo (minx, midy);
+			context.AddArcToPoint (minx, miny, midx, miny, radius);
+			context.AddArcToPoint (maxx, miny, maxx, midy, radius);
+			context.AddArcToPoint (maxx, maxy, midx, maxy, radius);
+			context.AddArcToPoint (minx, maxy, minx, midy, radius);
+			context.ClosePath ();
+			context.DrawPath (CGPathDrawingMode.Fill); // test others?
 		}
 	}
 }

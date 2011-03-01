@@ -155,6 +155,7 @@
     <Compile Include="Utilities\Punycode.cs" />
     <Compile Include="Images\Images.cs" />
     <Compile Include="Debug.cs" />
+    <Compile Include="Utilities\Hud.cs" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="MainWindow.xib" />
