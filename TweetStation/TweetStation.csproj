@@ -55,7 +55,7 @@
     <DefineConstants>DEBUG; TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <CodesignKey>iPhone Developer</CodesignKey>
+    <CodesignKey>iPhone Developer: Miguel De Icaza (EAH8CB4KC2)</CodesignKey>
     <MtouchDebug>True</MtouchDebug>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <MtouchI18n />
@@ -73,9 +73,9 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <MtouchI18n />
     <DefineConstants>TRACE; DEBUGIMAGE</DefineConstants>
-    <CodesignProvision>EEB2110C-C864-4631-8FF7-5477F3B921F9</CodesignProvision>
+    <CodesignProvision>0B824B88-B4A6-4C4F-8E70-9FE4F30145BB</CodesignProvision>
     <MtouchExtraArgs>-mapinject</MtouchExtraArgs>
-    <MtouchSdkVersion>4.2</MtouchSdkVersion>
+    <MtouchSdkVersion>4.3</MtouchSdkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'AdHoc|iPhone' ">
     <DebugType>none</DebugType>

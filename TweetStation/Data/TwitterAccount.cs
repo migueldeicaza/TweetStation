@@ -195,6 +195,15 @@ namespace TweetStation
 							stream.Close ();
 							stream = ms;
 						}
+					} catch (WebException we){
+						var response = we.Response as HttpWebResponse;
+						switch (response.StatusCode){
+						case HttpStatusCode.Unauthorized:
+							// This is the case of sharing two keys
+							break;
+						}
+						stream = null;
+						Console.WriteLine (we);
 					} catch (Exception e) {
 						Console.WriteLine (e);
 						stream = null;

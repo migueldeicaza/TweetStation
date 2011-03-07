@@ -41,7 +41,6 @@ namespace TweetStation
 {
 	public partial class BaseTimelineViewController
 	{
-		
 		public override UITableView MakeTableView (RectangleF bounds, UITableViewStyle style)
 		{
 			return new SwipeDetectingTableView (bounds, style, this);
@@ -85,7 +84,7 @@ namespace TweetStation
 					container.CancelMenu ();
 					swipeDetectionDisabled = false;
 				}
-
+				
 				base.TouchesBegan (touches, evt);
 			}
 			
@@ -108,13 +107,14 @@ namespace TweetStation
 								swipeDetectionDisabled = true;
 								touchStart = null;
 								return;
-							}
+							} 
 						}
 					}
 				}
 				if (ignoreUntilLift)
 					return;
 				
+				Console.WriteLine ("BASE: MOVED");
 				base.TouchesMoved (touches, evt);
 			}
 			
@@ -131,7 +131,9 @@ namespace TweetStation
 				}
 				ignoreUntilLift = false;
 
+				
 				base.TouchesEnded (touches, evt);
+					
 				touchStart = null;
 			}
 			
@@ -176,23 +178,66 @@ namespace TweetStation
 			
 			cell.ContentView.InsertSubview (menuView, 0);
 
+			NSTimer.CreateScheduledTimer (0, delegate {
+				//foreach (var v in cell.Subviews)
+				//Dump (cell, v, 0);
 #if animate
 			UIView.BeginAnimations ("Foo");
 			UIView.SetAnimationDuration (globalDelay);
 			UIView.SetAnimationCurve (UIViewAnimationCurve.EaseIn);
+			MoveCellViews (cell, menuView, offset);
+			UIView.CommitAnimations ();
+#else
+			MoveCellViews (cell, menuView, offset);
 #endif
+			});
+		}
+
+		void MoveCellViews (UITableViewCell cell, UIView menuView, float offset)
+		{
 			Move (cell.SelectedBackgroundView, offset);
 			foreach (var view in cell.ContentView.Subviews){
 				if (view == menuView)
 					continue;
 				Move (view, offset);
-				
 			}
-#if animate
-			UIView.CommitAnimations ();
-#endif
 		}
-
+		
+		static string indent (int level)
+		{
+			var s = "";
+			for (int i = 0; i < level; i++)
+			     s += "  ";
+			return s;
+		}
+		
+		void Dump (UITableViewCell cell, UIView view, int level)
+		{
+			string flags;
+			if (view == cell.AccessoryView)
+				flags = "AccessoryView";
+			else if (view == cell.BackgroundView)
+				flags = "BackgroundView";
+			else if (view == cell.EditingAccessoryView)
+				flags = "EditingAccessory";
+			else if (view == cell.ImageView)
+				flags = "ImageView";
+			else if (view == cell.SelectedBackgroundView)
+				flags = "SelectedBackground";
+			else if (view == cell.ContentView)
+				flags = "ContentView";
+			else if (view == currentMenuView)
+				flags = "[*] CurrentMenuView";
+			else
+				flags = "";
+			Console.WriteLine ("{0} {1} {2}", indent (level), view.Frame, flags);
+			var sub = view.Subviews;
+			if (sub.Length == 0)
+				return;
+			foreach (var s in sub)
+				Dump (cell, s, level + 1);
+		}
+			
 		void AnimateBack (UIView view, CAAnimation animation)
 		{
 			var b = view.Bounds;

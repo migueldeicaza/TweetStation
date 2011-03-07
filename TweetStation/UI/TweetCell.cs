@@ -120,7 +120,6 @@ namespace TweetStation
 				else 
 					tweet.PicUrl = null;
 				tweetImage = img == null ? ImageStore.DefaultImage : img;
-				
 				if (tweet.Retweeter == null)
 					retweetImage = null;
 				else {
@@ -132,6 +131,7 @@ namespace TweetStation
 					
 					retweetImage = img == null ? ImageStore.DefaultImage : img;
 				}
+
 				SetNeedsDisplay ();
 			}
 			

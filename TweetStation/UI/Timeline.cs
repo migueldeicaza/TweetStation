@@ -268,7 +268,7 @@ namespace TweetStation {
 					if (mainSection.Count > 0 && (insertElement = mainSection [insertPoint] as StyledStringElement) != null)
 						insertElement.Caption = msg;
 					else
-						mainSection.Insert (insertPoint, new StyledStringElement (msg){
+						mainSection.Insert (insertPoint, new StyledMultilineElement (Account.lasterror ?? "Error"){
 							Font = UIFont.SystemFontOfSize (14)
 						});
 					count = 1;

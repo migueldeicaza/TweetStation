@@ -1,3 +1,9 @@
+* Password:
+
+	On unauthorized show a message
+
+	Do not reload the same timeline if this is the same user
+
 * Feedback:
 
 	Instapaper support, deal breaker for @dssstrkl

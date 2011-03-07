@@ -173,7 +173,8 @@ namespace TweetStation
 		{
 			NSUserDefaults.StandardUserDefaults.SetInt (LocalAccountId, DEFAULT_ACCOUNT); 
 		}
-
+		
+		public string lasterror;
 		public void ReloadTimeline (TweetKind kind, long? since, long? max_id, Action<int> done)
 		{				
 			var req = MakeTimelineRequest (kind, since, max_id);
@@ -183,8 +184,10 @@ namespace TweetStation
 				if (result != null){
 					try {
 						count = Tweet.LoadJson (result, LocalAccountId, kind);
+						lasterror = null;
 					} catch (Exception e) { 
 						Console.WriteLine (e);
+						lasterror = e.ToString ();
 					}
 				}
 
