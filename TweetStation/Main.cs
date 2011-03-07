@@ -120,7 +120,7 @@ namespace TweetStation
 			CheckDatabase ();
 			tabbarController.SetViewControllers (navigationRoots, false);
 			
-#if DEBUGIMAGE
+#if false && DEBUGIMAGE
 			AddDebugHook ();
 #endif
 		}
