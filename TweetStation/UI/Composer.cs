@@ -204,6 +204,7 @@ namespace TweetStation
 		string directRecipient;
 		internal CLLocation location;
 		AudioPlay player;
+		ProgressHud progressHud;
 		LoadingHUDView hud;
 		bool FromLibrary;
 		UIImage Picture;
@@ -339,6 +340,7 @@ namespace TweetStation
 						Picture = Scale (Picture, new SizeF (maxWidth, maxWidth*size.Height/size.Width));
 					hud.StopAnimating ();
 					hud.RemoveFromSuperview ();
+					hud = null;
 				});
 			} else {
 				//NSUrl movieUrl = pictureDict [UIImagePickerController.MediaURL] as NSUrl;
@@ -398,17 +400,21 @@ namespace TweetStation
 				Post ();
 				return;
 			}
-
-			hud = new LoadingHUDView (Locale.GetText ("Image"), Locale.GetText ("Uploading"));
-			View.AddSubview (hud);
-			hud.StartAnimating ();
 			
 			var jpeg = Picture.AsJPEG ();
 			Stream stream;
 			unsafe { stream = new UnmanagedMemoryStream ((byte*) jpeg.Bytes, jpeg.Length); }
+			 
+			var uploader = TwitterAccount.CurrentAccount.UploadPicture (stream, PicUploadComplete, progressHud);
+			progressHud = new ProgressHud (Locale.GetText ("Uploading Image"), Locale.GetText ("Stop"));
+			progressHud.ButtonPressed += delegate { 
+				uploader.Cancel (); 
+				DestroyProgressHud ();
+			};
+			View.AddSubview (progressHud);
 			
 			ThreadPool.QueueUserWorkItem (delegate {
-				TwitterAccount.CurrentAccount.UploadPicture (stream, PicUploadComplete);
+				uploader.Upload ();
 				
 				// This captures the variable and handle of jpeg, and then we clear it
 				// to release it
@@ -416,12 +422,16 @@ namespace TweetStation
 			});
 		}
 		
+		void DestroyProgressHud ()
+		{
+			progressHud.RemoveFromSuperview ();
+			progressHud = null;
+		}
+			
 		UIAlertView alert;
 		void PicUploadComplete (string name)
 		{
-			hud.StopAnimating ();
-			hud.RemoveFromSuperview ();
-			hud = null;
+			DestroyProgressHud ();
 			
 			if (name == null){
 				alert = new UIAlertView (Locale.GetText ("Error"), 

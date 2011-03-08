@@ -22,7 +22,7 @@ namespace TweetStation
 	}
 	
 	public class ProgressHud : Hud {
-		const int minWidth = 200;
+		const int minWidth = 240;
 		SizeF captionSize;
 		UIFont font;
 		string caption, buttonText;
@@ -49,7 +49,7 @@ namespace TweetStation
 			this.buttonText = buttonText;
 			button = UIButton.FromType (UIButtonType.Custom);
 			button.BackgroundColor = UIColor.Clear;
-			button.Font = UIFont.BoldSystemFontOfSize (12);
+			button.Font = UIFont.BoldSystemFontOfSize (16);
 			button.SetTitle (buttonText, UIControlState.Normal);
 			button.SetTitleColor (UIColor.White, UIControlState.Normal);
 			button.TouchDown += delegate { 
@@ -76,7 +76,9 @@ namespace TweetStation
 			HudRect = new RectangleF ((bounds.Width-width)/2, bounds.Height > bounds.Width ? 120 : 60, width, 120);
 			
 			var ss = StringSize (buttonText, font);
-			button.Frame = new RectangleF (HudRect.Right-ss.Width-20, HudRect.Bottom-ss.Height-10, ss.Width+5, ss.Height);
+			var sh = Math.Max (ss.Height, 30);
+			var sw = Math.Max (ss.Width, 60);
+			button.Frame = new RectangleF (HudRect.Right-sw-20, HudRect.Bottom-sh-10, sw+5, sh);
 			
 			progressRect = new RectangleF (HudRect.Left+10, HudRect.Y+45, HudRect.Width-20, 10);
 		}
@@ -92,6 +94,12 @@ namespace TweetStation
 				ctx.SetLineWidth (2);
 				ctx.AddPath (path);
 				ctx.StrokePath ();
+			}
+			var prect = progressRect.Inset (3, 3);
+			prect.Width *= Progress;
+			using (var path = GraphicsUtil.MakeRoundedRectPath (prect, 2)){
+				ctx.AddPath (path);
+				ctx.FillPath ();
 			}
 //			UIColor.White.SetColor ();
 		//	ctx.AddRect (progressRect);

@@ -190,7 +190,7 @@ namespace TweetStation
 						// Since the stream will deliver in chunks, make a copy before passing to the main UI
 						if (callbackOnMainThread){
 							var ms = new MemoryStream ();
-							CopyToEnd (stream, ms);
+							CopyStream (stream, ms);
 							ms.Position = 0;
 							stream.Close ();
 							stream = ms;
@@ -226,76 +226,150 @@ namespace TweetStation
 			}, null);
 		}
 		
-		static void CopyToEnd (Stream source, Stream dest)
+		// Temporary
+		static void CopyStream (Stream source, Stream dest)
 		{
 			var buffer = new byte [4096];
 			int n = 0;
+			long total = 0;
 
 			while ((n = source.Read (buffer, 0, buffer.Length)) != 0){
+				total += n;
 				dest.Write (buffer, 0, n);
 			}
 		}
 
-		static void AddPart (Stream target, string boundary, bool newline, string header, string value)
-		{
-			if (newline)
-				target.Write (new byte [] { 13, 10 }, 0, 2);
+		public class Uploader {
+			TwitterAccount account;
+			public Stream SourceStream;
+			public Action<string> UploadCompletedCallback;
+			public ProgressHud ProgressHudView;
+			bool stop;
 			
-			var enc = Encoding.UTF8.GetBytes (String.Format ("--{0}\r\n{1}\r\n\r\n", boundary, header));
-			target.Write (enc, 0, enc.Length);
-			if (value != null){
-				enc = Encoding.UTF8.GetBytes (value);
-				target.Write (enc, 0, enc.Length);
+			public Uploader (TwitterAccount account)
+			{
+				this.account = account;
 			}
-		}
-		
-		//
-		// Creates the YFrog form to upload the image
-		//
-		static Stream GenerateYFrogFrom (string boundary, Stream source, string username)
-		{
-			var dest = new MemoryStream ();
-			AddPart (dest, boundary, false, "Content-Disposition: form-data; name=\"media\"; filename=\"none.png\"\r\nContent-Type: application/octet-stream", null);
-			source.Position = 0;
-			CopyToEnd (source, dest);
-			AddPart (dest, boundary, true, "Content-Disposition: form-data; name=\"username\"", username);
-			var bbytes = Encoding.ASCII.GetBytes (String.Format ("\r\n--{0}--", boundary));
-			dest.Write (bbytes, 0, bbytes.Length);
-
-			return dest;
-		}
-		
-		public void UploadPicture (Stream source, Action<string> completed)
-		{
-			var boundary = "###" + Guid.NewGuid ().ToString () + "###";
-						
-			//var url = new Uri ("http://api.twitpic.com/2/upload.json");
-			var url = new Uri ("http://yfrog.com/api/xauth_upload");
-			var req = (HttpWebRequest) WebRequest.Create (url);
-			req.Method = "POST";
-			req.ContentType = "multipart/form-data; boundary=" + boundary;
-			OAuthAuthorizer.AuthorizeTwitPic (OAuthConfig, req, OAuthToken, OAuthTokenSecret);
-
-			Stream upload = GenerateYFrogFrom (boundary, source, Username);
-			req.ContentLength = upload.Length;
-			using (var rs = req.GetRequestStream ()){
-				upload.Position = 0;
-				CopyToEnd (upload, rs);
-				rs.Close ();
+			
+			public void Cancel ()
+			{
+				stop = true;
 			}
-			string urlToPic = null;
-			try {
-				var response = (HttpWebResponse) req.GetResponse  ();
-				var stream = response.GetResponseStream ();
-				var doc = XDocument.Load (stream);
-				if (doc.Element ("rsp").Attribute ("stat").Value == "ok"){
-					urlToPic = doc.Element ("rsp").Element ("mediaurl").Value;
+			
+			void CopyToEnd (Stream source, Stream dest, Action<long> progressCallback)
+			{
+				var buffer = new byte [8192];
+				int n = 0;
+				long total = 0;
+	
+				while ((n = source.Read (buffer, 0, buffer.Length)) != 0){
+					total += n;
+					if (stop)
+						return;
+					
+					dest.Write (buffer, 0, n);
+					progressCallback (total);
 				}
-				stream.Close ();
-			} catch (Exception e){
-				Console.WriteLine (e);
 			}
-			invoker.BeginInvokeOnMainThread (delegate { completed (urlToPic); });
+	
+			static void AddPart (Stream target, string boundary, bool newline, string header, string value)
+			{
+				if (newline)
+					target.Write (new byte [] { 13, 10 }, 0, 2);
+				
+				var enc = Encoding.UTF8.GetBytes (String.Format ("--{0}\r\n{1}\r\n\r\n", boundary, header));
+				target.Write (enc, 0, enc.Length);
+				if (value != null){
+					enc = Encoding.UTF8.GetBytes (value);
+					target.Write (enc, 0, enc.Length);
+				}
+			}
+			
+			//
+			// Creates the YFrog form to upload the image
+			//
+			static Stream GenerateYFrogFrom (string boundary, Stream source, string username)
+			{
+				var dest = new MemoryStream ();
+				AddPart (dest, boundary, false, "Content-Disposition: form-data; name=\"media\"; filename=\"none.png\"\r\nContent-Type: application/octet-stream", null);
+				source.Position = 0;
+				CopyStream (source, dest);
+				AddPart (dest, boundary, true, "Content-Disposition: form-data; name=\"username\"", username);
+				var bbytes = Encoding.ASCII.GetBytes (String.Format ("\r\n--{0}--", boundary));
+				dest.Write (bbytes, 0, bbytes.Length);
+	
+				return dest;
+			}
+			
+			float progressValue;
+			void SetProgress (float newvalue)
+			{
+				progressValue = newvalue;
+				
+				TwitterAccount.invoker.BeginInvokeOnMainThread (delegate {
+					ProgressHudView.Progress = progressValue;
+				});
+			}
+			
+			//
+			// the progress is reported like this:
+			// 10% to open the connection
+			// 70% for the image upload
+			// 20% for the server response
+			//
+			public void Upload ()
+			{
+				var boundary = "###" + Guid.NewGuid ().ToString () + "###";
+							
+				//var url = new Uri ("http://api.twitpic.com/2/upload.json");
+				var url = new Uri ("http://yfrog.com/api/xauth_upload");
+				var req = (HttpWebRequest) WebRequest.Create (url);
+				req.Method = "POST";
+				req.ContentType = "multipart/form-data; boundary=" + boundary;
+				OAuthAuthorizer.AuthorizeTwitPic (OAuthConfig, req, account.OAuthToken, account.OAuthTokenSecret);
+	
+				Stream upload = GenerateYFrogFrom (boundary, SourceStream, account.Username);
+				req.ContentLength = upload.Length;
+				SetProgress (0);
+				using (var rs = req.GetRequestStream ()){
+					SetProgress (0.1f);
+					upload.Position = 0;
+					CopyToEnd (upload, rs, (sofar) => {
+						SetProgress (.1f + ((sofar/upload.Length) * 0.8f));
+					});
+					rs.Close ();
+				}
+				if (stop)
+					return;
+				string urlToPic = null;
+				try {
+					var response = (HttpWebResponse) req.GetResponse  ();
+					var stream = response.GetResponseStream ();
+					var doc = XDocument.Load (stream);
+					if (doc.Element ("rsp").Attribute ("stat").Value == "ok"){
+						urlToPic = doc.Element ("rsp").Element ("mediaurl").Value;
+					}
+					stream.Close ();
+				} catch (Exception e){
+					Console.WriteLine (e);
+				}
+				if (stop)
+					return;
+				
+				invoker.BeginInvokeOnMainThread (delegate { 
+					ProgressHudView.Progress = 1;
+					UploadCompletedCallback (urlToPic); 
+				});
+			}
+		}
+		
+		public Uploader UploadPicture (Stream source, Action<string> completed, ProgressHud progressHud)
+		{
+			return new Uploader (this) { 
+				SourceStream = source, 
+				UploadCompletedCallback = completed, 
+				ProgressHudView = progressHud 
+			};
 		}
 	}
 	

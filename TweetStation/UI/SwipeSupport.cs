@@ -114,7 +114,6 @@ namespace TweetStation
 				if (ignoreUntilLift)
 					return;
 				
-				Console.WriteLine ("BASE: MOVED");
 				base.TouchesMoved (touches, evt);
 			}
 			

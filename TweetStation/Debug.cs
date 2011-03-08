@@ -24,7 +24,8 @@ namespace TweetStation
 		
 		void RunDebugUi2 ()
 		{
-			var b = new ProgressHud ("Uploading image", "Stop");
+			var b = new ProgressHud ("Uploading image ", "Stop");
+			b.Progress = .5f;
 			window.BringSubviewToFront (b);
 			window.AddSubview (b);
 		}
