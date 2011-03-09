@@ -273,6 +273,10 @@ namespace TweetStation {
 						});
 					count = 1;
 				} else {
+					// Remove previous error message
+					if (mainSection.Count > 0 && mainSection [0] is StyledStringElement)
+						mainSection.Remove (0);
+					
 					// If we find an overlapping value, the timeline is continous, otherwise, we offer to load more
 					
 					// If insertPoint == 0, this is a top load, otherwise it is a "Load more tweets" load, so we 
