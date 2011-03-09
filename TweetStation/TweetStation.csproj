@@ -33,7 +33,11 @@
     <MtouchExtraArgs>-i18n=west -mapinject</MtouchExtraArgs>
     <MtouchI18n />
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <MtouchSdkVersion>4.1</MtouchSdkVersion>
+    <MtouchSdkVersion>4.3</MtouchSdkVersion>
+    <MtouchUseLlvm>false</MtouchUseLlvm>
+    <MtouchUseArmv7>false</MtouchUseArmv7>
+    <MtouchUseThumb>false</MtouchUseThumb>
+    <MtouchUseSGen>false</MtouchUseSGen>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhoneSimulator' ">
     <DebugType>none</DebugType>
@@ -45,7 +49,11 @@
     <MtouchDebug>False</MtouchDebug>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <MtouchI18n />
-    <MtouchSdkVersion>4.2</MtouchSdkVersion>
+    <MtouchSdkVersion>4.3</MtouchSdkVersion>
+    <MtouchUseLlvm>false</MtouchUseLlvm>
+    <MtouchUseArmv7>false</MtouchUseArmv7>
+    <MtouchUseThumb>false</MtouchUseThumb>
+    <MtouchUseSGen>false</MtouchUseSGen>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|iPhone' ">
     <DebugSymbols>true</DebugSymbols>
@@ -61,6 +69,10 @@
     <MtouchI18n />
     <MtouchExtraArgs>-mapinject</MtouchExtraArgs>
     <CodesignProvision>EEB2110C-C864-4631-8FF7-5477F3B921F9</CodesignProvision>
+    <MtouchUseLlvm>false</MtouchUseLlvm>
+    <MtouchUseArmv7>false</MtouchUseArmv7>
+    <MtouchUseThumb>false</MtouchUseThumb>
+    <MtouchUseSGen>false</MtouchUseSGen>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhone' ">
     <DebugType>none</DebugType>
@@ -73,9 +85,13 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <MtouchI18n />
     <DefineConstants>TRACE; DEBUGIMAGE</DefineConstants>
-    <CodesignProvision>0B824B88-B4A6-4C4F-8E70-9FE4F30145BB</CodesignProvision>
-    <MtouchExtraArgs>-mapinject</MtouchExtraArgs>
-    <MtouchSdkVersion>4.3</MtouchSdkVersion>
+    <CodesignProvision>EEB2110C-C864-4631-8FF7-5477F3B921F9</CodesignProvision>
+    <MtouchExtraArgs>-mapinject -v -v -v</MtouchExtraArgs>
+    <MtouchUseLlvm>false</MtouchUseLlvm>
+    <MtouchUseArmv7>false</MtouchUseArmv7>
+    <MtouchUseThumb>false</MtouchUseThumb>
+    <MtouchUseSGen>false</MtouchUseSGen>
+    <MtouchSdkVersion>4.2</MtouchSdkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'AdHoc|iPhone' ">
     <DebugType>none</DebugType>
@@ -89,6 +105,10 @@
     <CodesignKey>iPhone Distribution</CodesignKey>
     <DefineConstants>TRACE</DefineConstants>
     <MtouchSdkVersion>4.1</MtouchSdkVersion>
+    <MtouchUseLlvm>false</MtouchUseLlvm>
+    <MtouchUseArmv7>false</MtouchUseArmv7>
+    <MtouchUseThumb>false</MtouchUseThumb>
+    <MtouchUseSGen>false</MtouchUseSGen>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'AppStore|iPhone' ">
     <DebugType>none</DebugType>
@@ -102,6 +122,10 @@
     <CodesignKey>iPhone Distribution</CodesignKey>
     <MtouchExtraArgs>-mapinject</MtouchExtraArgs>
     <MtouchSdkVersion>4.1</MtouchSdkVersion>
+    <MtouchUseLlvm>false</MtouchUseLlvm>
+    <MtouchUseArmv7>false</MtouchUseArmv7>
+    <MtouchUseThumb>false</MtouchUseThumb>
+    <MtouchUseSGen>false</MtouchUseSGen>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
