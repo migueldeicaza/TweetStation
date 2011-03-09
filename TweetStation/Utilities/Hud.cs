@@ -73,7 +73,7 @@ namespace TweetStation
 			float width = captionSize.Width < minWidth ? minWidth : captionSize.Width;
 			var bounds = Bounds;
 			
-			HudRect = new RectangleF ((bounds.Width-width)/2, bounds.Height > bounds.Width ? 120 : 60, width, 120);
+			HudRect = new RectangleF ((bounds.Width-width)/2, bounds.Height > bounds.Width ? 60 : 30, width, 120);
 			
 			var ss = StringSize (buttonText, font);
 			var sh = Math.Max (ss.Height, 30);

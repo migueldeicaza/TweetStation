@@ -33,7 +33,6 @@
     <MtouchExtraArgs>-i18n=west -mapinject</MtouchExtraArgs>
     <MtouchI18n />
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <MtouchSdkVersion>4.3</MtouchSdkVersion>
     <MtouchUseLlvm>false</MtouchUseLlvm>
     <MtouchUseArmv7>false</MtouchUseArmv7>
     <MtouchUseThumb>false</MtouchUseThumb>

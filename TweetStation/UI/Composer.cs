@@ -52,8 +52,13 @@ namespace TweetStation
 		{
 			this.composer = composer;
 			textView = new UITextView (RectangleF.Empty) {
-				Font = UIFont.SystemFontOfSize (18)
+				Font = UIFont.SystemFontOfSize (18),
 			};
+			
+			// Work around an Apple bug in the UITextView that crashes
+			if (MonoTouch.ObjCRuntime.Runtime.Arch == MonoTouch.ObjCRuntime.Arch.SIMULATOR)
+				textView.AutocorrectionType = UITextAutocorrectionType.No;
+			
 			textView.Changed += HandleTextViewChanged;
 
 			charsLeft = new UILabel (RectangleF.Empty) { 
@@ -406,13 +411,12 @@ namespace TweetStation
 			
 			progressHud = new ProgressHud (Locale.GetText ("Uploading Image"), Locale.GetText ("Stop"));
 			var uploader = TwitterAccount.CurrentAccount.UploadPicture (stream, PicUploadComplete, progressHud);
-			
+	
 			progressHud.ButtonPressed += delegate { 
 				uploader.Cancel (); 
 				DestroyProgressHud ();
 			};
 			View.AddSubview (progressHud);
-			
 			ThreadPool.QueueUserWorkItem (delegate {
 				uploader.Upload ();
 				

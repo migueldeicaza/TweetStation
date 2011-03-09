@@ -197,12 +197,14 @@ namespace TweetStation
 						}
 					} catch (WebException we){
 						var response = we.Response as HttpWebResponse;
-						switch (response.StatusCode){
-						case HttpStatusCode.Unauthorized:
-							// This is the case of sharing two keys
-							break;
+						if (response != null){
+							switch (response.StatusCode){
+							case HttpStatusCode.Unauthorized:
+								// This is the case of sharing two keys
+								break;
+							}
+							stream = null;
 						}
-						stream = null;
 						Console.WriteLine (we);
 					} catch (Exception e) {
 						Console.WriteLine (e);
@@ -308,7 +310,7 @@ namespace TweetStation
 				progressValue = newvalue;
 				
 				TwitterAccount.invoker.BeginInvokeOnMainThread (delegate {
-					ProgressHudView.Progress = progressValue;
+					// ProgressHudView.Progress = progressValue;
 				});
 			}
 			
@@ -331,15 +333,19 @@ namespace TweetStation
 				Stream upload = GenerateYFrogFrom (boundary, SourceStream, account.Username);
 				req.ContentLength = upload.Length;
 				SetProgress (0);
-				using (var rs = req.GetRequestStream ()){
-					SetProgress (0.1f);
-					upload.Position = 0;
-					CopyToEnd (upload, rs, (sofar) => {
-						SetProgress (.1f + ((sofar/upload.Length) * 0.9f));
-					});
-					try {
-						rs.Close ();
-					} catch {}
+				try {
+					using (var rs = req.GetRequestStream ()){
+						SetProgress (0.1f);
+						upload.Position = 0;
+						CopyToEnd (upload, rs, (sofar) => {
+							SetProgress (.1f + ((sofar/upload.Length) * 0.9f));
+						});
+						try {
+							rs.Close ();
+						} catch {}
+					}
+				} catch (Exception e){
+					UploadCompletedCallback (null);
 				}
 				if (stop)
 					return;
@@ -359,7 +365,7 @@ namespace TweetStation
 					return;
 				
 				invoker.BeginInvokeOnMainThread (delegate { 
-					ProgressHudView.Progress = 1;
+					//ProgressHudView.Progress = 1;
 					UploadCompletedCallback (urlToPic); 
 				});
 			}
