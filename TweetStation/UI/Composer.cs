@@ -205,7 +205,6 @@ namespace TweetStation
 		internal CLLocation location;
 		AudioPlay player;
 		ProgressHud progressHud;
-		LoadingHUDView hud;
 		bool FromLibrary;
 		UIImage Picture;
 		
@@ -404,9 +403,10 @@ namespace TweetStation
 			var jpeg = Picture.AsJPEG ();
 			Stream stream;
 			unsafe { stream = new UnmanagedMemoryStream ((byte*) jpeg.Bytes, jpeg.Length); }
-			 
-			var uploader = TwitterAccount.CurrentAccount.UploadPicture (stream, PicUploadComplete, progressHud);
+			
 			progressHud = new ProgressHud (Locale.GetText ("Uploading Image"), Locale.GetText ("Stop"));
+			var uploader = TwitterAccount.CurrentAccount.UploadPicture (stream, PicUploadComplete, progressHud);
+			
 			progressHud.ButtonPressed += delegate { 
 				uploader.Cancel (); 
 				DestroyProgressHud ();
@@ -432,6 +432,7 @@ namespace TweetStation
 		void PicUploadComplete (string name)
 		{
 			DestroyProgressHud ();
+		return;
 			
 			if (name == null){
 				alert = new UIAlertView (Locale.GetText ("Error"), 
