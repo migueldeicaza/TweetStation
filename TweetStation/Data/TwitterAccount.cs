@@ -304,6 +304,7 @@ namespace TweetStation
 			float progressValue;
 			void SetProgress (float newvalue)
 			{
+				// We copy this to a global, as the async methods can be invoked out of order
 				progressValue = newvalue;
 				
 				TwitterAccount.invoker.BeginInvokeOnMainThread (delegate {
@@ -314,8 +315,7 @@ namespace TweetStation
 			//
 			// the progress is reported like this:
 			// 10% to open the connection
-			// 70% for the image upload
-			// 20% for the server response
+			// 90% for the image upload
 			//
 			public void Upload ()
 			{
@@ -335,9 +335,11 @@ namespace TweetStation
 					SetProgress (0.1f);
 					upload.Position = 0;
 					CopyToEnd (upload, rs, (sofar) => {
-						SetProgress (.1f + ((sofar/upload.Length) * 0.8f));
+						SetProgress (.1f + ((sofar/upload.Length) * 0.9f));
 					});
-					rs.Close ();
+					try {
+						rs.Close ();
+					} catch {}
 				}
 				if (stop)
 					return;
