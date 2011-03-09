@@ -74,10 +74,6 @@ namespace TweetStation
 				return (long) json [key];
 			else
 				return 0;
-			
-			if (value.JsonType == JsonType.Number)
-				return (long) value;
-			return 0;
 		}
 		
 		static long ParseCreation (JsonObject json)
