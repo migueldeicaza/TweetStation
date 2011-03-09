@@ -432,7 +432,6 @@ namespace TweetStation
 		void PicUploadComplete (string name)
 		{
 			DestroyProgressHud ();
-		return;
 			
 			if (name == null){
 				alert = new UIAlertView (Locale.GetText ("Error"), 
