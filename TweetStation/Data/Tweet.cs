@@ -69,7 +69,8 @@ namespace TweetStation
 		
 		static long GetLong (JsonObject json, string key)
 		{
-			if (json [key].JsonType == JsonType.Number)
+			var jv = json [key];
+			if (jv != null && jv.JsonType == JsonType.Number)
 				return (long) json [key];
 			else
 				return 0;
