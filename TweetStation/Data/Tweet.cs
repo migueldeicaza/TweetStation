@@ -424,7 +424,7 @@ namespace TweetStation
 		
 		public string Url {
 			get {
-				return (string) Json ["url"];
+				return (string) Json ["url"] ?? "";
 			}
 		}
 		
