@@ -168,10 +168,22 @@ namespace TweetStation
 				(max_id.HasValue ? "&max_id=" + max_id.Value : "");
 		}
 		
+		static long lastLaunchTick;
+		static object minuteLock = new object ();
+		
 		void Launch (string url, bool callbackOnMainThread, Action<Stream> callback)
 		{
 			Util.PushNetworkActive ();
 			Uri uri = new Uri (url);
+			
+			// Wake up 3G if it has been more than 3 minutes
+			lock (minuteLock){
+				var nowTicks = DateTime.UtcNow.Ticks;
+				if (nowTicks-lastLaunchTick > TimeSpan.TicksPerMinute*3)
+					MonoTouch.ObjCRuntime.Runtime.StartWWAN (uri);
+				lastLaunchTick = nowTicks;
+			}
+			
 			var request = (HttpWebRequest) WebRequest.Create (uri);
 			request.AutomaticDecompression = DecompressionMethods.GZip;
 			request.Headers [HttpRequestHeader.Authorization] = OAuthAuthorizer.AuthorizeRequest (OAuthConfig, OAuthToken, OAuthTokenSecret, "GET", uri, null);
