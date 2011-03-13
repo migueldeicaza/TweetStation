@@ -100,13 +100,15 @@ namespace TweetStation
 							
 							if (deltaY < 10 && deltaX > 16){
 								var menuPath = IndexPathForRowAtPoint (currentPos);
-								var cell = CellAt (menuPath);
-								
-								container.OnSwipe (menuPath, cell);
-								ignoreUntilLift = true;
-								swipeDetectionDisabled = true;
-								touchStart = null;
-								return;
+								if (menuPath != null){
+									var cell = CellAt (menuPath);
+									
+									container.OnSwipe (menuPath, cell);
+									ignoreUntilLift = true;
+									swipeDetectionDisabled = true;
+									touchStart = null;
+									return;
+								}
 							} 
 						}
 					}
