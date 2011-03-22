@@ -214,6 +214,8 @@ namespace TweetStation
 		{
 			if (source.StartsWith ("http://"))
 				return source.Trim ();
+			if (source.StartsWith ("bit.ly/"))
+				return "http://" + source.Trim ();
 			if (source [0] == '@'){
 				source = source.Trim ();
 				if (source.EndsWith (":") || source.EndsWith ("."))
