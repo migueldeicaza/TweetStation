@@ -67,6 +67,12 @@ namespace TweetStation
 		// this strips it
 		//
 		
+		public bool ContainsUrl {
+			get {
+				return Text.IndexOf ("http://") != -1 || Text.IndexOf ("bit.ly/") != -1;
+			}
+		}
+				
 		static long GetLong (JsonObject json, string key)
 		{
 			var jv = json [key];
