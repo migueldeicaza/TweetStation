@@ -97,7 +97,7 @@ namespace TweetStation
 				}
 				
 				var start = segment [0];
-				if (start == '@' || start == '#' || segment.StartsWith ("http://", StringComparison.Ordinal))
+				if (start == '@' || start == '#' || segment.StartsWith ("http://", StringComparison.Ordinal) || segment.StartsWith ("bit.ly/", StringComparison.Ordinal))
 					font = bold;
 				else
 					font = regular;
