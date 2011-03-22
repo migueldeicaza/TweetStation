@@ -251,6 +251,12 @@
     <Content Include="es.lproj\Localizable.strings" />
     <Content Include="es.lproj\InfoPlist.strings" />
     <Content Include="en.lproj\Localizable.strings" />
+    <Content Include="Default%402x.png" />
+    <Content Include="Default.png" />
+    <Content Include="Images\swipe-clip%402x.png" />
+    <Content Include="Images\swipe-clip.png" />
+    <Content Include="Images\swipe-clipdark%402x.png" />
+    <Content Include="Images\swipe-clipdark.png" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\MonoTouch.Dialog\MonoTouch.Dialog\MonoTouch.Dialog.csproj">

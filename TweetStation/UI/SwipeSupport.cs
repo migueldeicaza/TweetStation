@@ -544,17 +544,21 @@ namespace TweetStation
 						UIImage.FromBundle ("Images/swipe-profile.png"),
 						UIImage.FromBundle ("Images/swipe-star-off.png"),
 						UIImage.FromBundle ("Images/swipe-star-on.png"),
+						UIImage.FromBundle ("Images/swipe-clip.png"),
+						UIImage.FromBundle ("Images/swipe-clipdark.png"),
 					};
 
 					onImages = new UIImage [] {
-						swipeMenuImages [0], swipeMenuImages [1], swipeMenuImages [2], swipeMenuImages [4]
+						swipeMenuImages [0], swipeMenuImages [1], swipeMenuImages [2], swipeMenuImages [4], swipeMenuImages [5]
 					};
 					offImages = new UIImage [] {
-						swipeMenuImages [0], swipeMenuImages [1], swipeMenuImages [2], swipeMenuImages [3]
+						swipeMenuImages [0], swipeMenuImages [1], swipeMenuImages [2], swipeMenuImages [3], swipeMenuImages [5]
 					};
 				}
+				var imageSet = MenuHostElement.Tweet.Favorited ? onImages : offImages;
+				imageSet [4] = MenuHostElement.Tweet.ContainsUrl ? swipeMenuImages [5] : swipeMenuImages [6];
 				
-				var menu = new SwipeMenuView (this, MenuHostElement.Tweet.Favorited ? onImages : offImages, frame);
+				var menu = new SwipeMenuView (this, imageSet, frame);
 				menu.Selected += idx => {
 					switch (idx){
 					case 0:
@@ -571,6 +575,10 @@ namespace TweetStation
 						
 					case 3:
 						AppDelegate.MainAppDelegate.ToggleFavorite (MenuHostElement.Tweet);
+						break;
+						
+					case 4:
+						// Instapaper
 						break;
 					}
 				};
