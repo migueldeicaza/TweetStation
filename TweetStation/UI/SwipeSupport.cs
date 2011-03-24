@@ -579,6 +579,11 @@ namespace TweetStation
 						
 					case 4:
 						// Instapaper
+						UrlBookmark.Instapaper.SignIn (this, x=> {
+							if (!x) return;
+							
+							// Add the url here
+						});
 						break;
 					}
 				};

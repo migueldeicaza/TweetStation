@@ -179,6 +179,7 @@
     <Compile Include="Images\Images.cs" />
     <Compile Include="Debug.cs" />
     <Compile Include="Utilities\Hud.cs" />
+    <Compile Include="Utilities\Instapaper.cs" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="MainWindow.xib" />
