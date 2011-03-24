@@ -6,28 +6,32 @@ using System.Drawing;
 using System.Threading;
 using System.Net;
 using System.Text;
+using System.Collections.Specialized;
 
 namespace TweetStation
 {
 	public abstract class UrlBookmark {
 		
 		public static UrlBookmark Instapaper;
+		public static UrlBookmark Bookmarker;
 		
 		static UrlBookmark ()
 		{
 			Instapaper = new InstapaperBookmark ();
+			Bookmarker = Instapaper;
 		}
 		
-		public abstract void Add (string url, string title);
+		public abstract void Add (string url);
 		public abstract bool LoggedIn { get; }
 		public abstract void SignIn (UIViewController container, Action<bool> done);
 		
 		class InstapaperBookmark : UrlBookmark {
 			const string kPass = "instapaper.password";
 			const string kUser = "instapaper.username";
-			
 			static Uri instapaperAddUri = new Uri ("https://www.instapaper.com/api/add");
+
 			string username, password;
+			bool passwordError;
 			UINavigationController nav;
 			DialogViewController dvc;
 			
@@ -42,14 +46,23 @@ namespace TweetStation
 				password = Util.Defaults.StringForKey (kPass);
 			}
 			
-			public override void Add (string url, string title)
+			public override void Add (string url)
 			{
-				throw new NotImplementedException ();
+				var wc = new WebClient ();
+				wc.Headers [HttpRequestHeader.Authorization] = MakeAuth (username, password);
+				
+				try {
+					wc.UploadValues (instapaperAddUri, new NameValueCollection () { { "url", url } }); 
+				} catch (WebException we) {
+					var response = we.Response as HttpWebResponse;
+					if (response != null && response.StatusCode == HttpStatusCode.Forbidden)
+						passwordError = true;
+				}
 			}
 			
 			public override bool LoggedIn {
 				get {
-					return username != null && password != null;
+					return username != null && password != null && passwordError == false;
 				}
 			}
 			
@@ -91,6 +104,11 @@ namespace TweetStation
 				hud = null;
 			}
 			
+			string MakeAuth (string user, string pass)
+			{
+				return "Basic " + Convert.ToBase64String (Encoding.ASCII.GetBytes (user + ":" + pass));
+			}
+			
 			void Save (Action<bool> callback, EntryElement userElement, EntryElement passwordElement)
 			{
 				userElement.FetchValue ();
@@ -108,7 +126,7 @@ namespace TweetStation
 					try {
 						var req = (HttpWebRequest) WebRequest.Create (instapaperAddUri);
 						req.Method = "POST";
-						req.Headers.Add("Authorization", "Basic " + Convert.ToBase64String (Encoding.ASCII.GetBytes (userElement.Value + ":" + passwordElement.Value)));
+						req.Headers.Add ("Authorization", MakeAuth (userElement.Value, passwordElement.Value));
 						try {
 							req.GetResponse ();
 							nav.BeginInvokeOnMainThread (delegate { hud.Progress = 0.5f; });
@@ -133,6 +151,7 @@ namespace TweetStation
 						// We got a valid password
 						Util.Defaults.SetString (username = userElement.Value, kUser);
 						Util.Defaults.SetString (password = passwordElement.Value, kPass);
+						passwordError = false;
 					} catch (Exception e){
 						Console.WriteLine ("Error: {0}", e);
 					}

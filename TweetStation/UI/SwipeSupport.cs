@@ -36,6 +36,7 @@ using MonoTouch.CoreAnimation;
 using MonoTouch.CoreGraphics;
 using System.Runtime.InteropServices;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace TweetStation
 {
@@ -579,16 +580,30 @@ namespace TweetStation
 						
 					case 4:
 						// Instapaper
-						UrlBookmark.Instapaper.SignIn (this, x=> {
-							if (!x) return;
+						if (!UrlBookmark.Bookmarker.LoggedIn){
+							UrlBookmark.Bookmarker.SignIn (this, x=> {
+								if (!x) return;
 							
-							// Add the url here
-						});
+								BookmarkUrls (MenuHostElement.Tweet);
+							});
+						} else 
+							BookmarkUrls (MenuHostElement.Tweet);
 						break;
 					}
 				};
 				ShowMenu (menu, cell);
 			}
+		}
+
+		void BookmarkUrls (Tweet tweet)
+		{
+			var urls = tweet.ExtractUrls ();
+			if (urls == null)
+				return;
+			ThreadPool.QueueUserWorkItem (delegate {
+				foreach (var url in urls)
+					UrlBookmark.Bookmarker.Add (url);
+			});
 		}
 		
 		// Returns true if the menu was cancelled, false if there was no menu to cancel

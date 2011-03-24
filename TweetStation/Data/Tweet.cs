@@ -364,6 +364,41 @@ namespace TweetStation
 			return "@" + String.Join (" @", recipients.ToArray ()) + " ";
 		}
 		
+		static int UrlStart (string text, int startIndex)
+		{
+			int p = text.IndexOf ("http://", startIndex);
+			int q = text.IndexOf ("bit.ly/", startIndex);
+			
+			if (p == -1){
+				if (q == -1)
+					return -1;
+				return q;
+			}
+			if (q == -1)
+				return p;
+			return Math.Min (p, q);
+		}
+		
+		public List<string> ExtractUrls ()
+		{
+			string text = Text;
+			int last = 0;
+			List<string> result = null;
+			
+			do {
+				int p = UrlStart (text, last);
+				if (p == -1)
+					break;
+				last = text.IndexOf (' ', p);
+				if (last == -1)
+					last = text.Length;
+				
+				if (result == null)
+					result = new List<string> ();
+				result.Add (text.Substring (p, last-p));
+			} while (true);
+			return result;
+		}
 		
 		public override string ToString ()
 		{
