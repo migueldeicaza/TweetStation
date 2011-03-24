@@ -23,8 +23,13 @@ namespace TweetStation
 		public abstract void SignIn (UIViewController container, Action<bool> done);
 		
 		class InstapaperBookmark : UrlBookmark {
+			const string kPass = "instapaper.password";
+			const string kUser = "instapaper.username";
+			
+			static Uri instapaperAddUri = new Uri ("https://www.instapaper.com/api/add");
 			string username, password;
 			UINavigationController nav;
+			DialogViewController dvc;
 			
 			public InstapaperBookmark ()
 			{
@@ -33,8 +38,8 @@ namespace TweetStation
 
 			void LoadSettings ()
 			{
-				username = Util.Defaults.StringForKey ("instapaper.username");
-				password = Util.Defaults.StringForKey ("instapaper.password");
+				username = Util.Defaults.StringForKey (kUser);
+				password = Util.Defaults.StringForKey (kPass);
 			}
 			
 			public override void Add (string url, string title)
@@ -47,7 +52,7 @@ namespace TweetStation
 					return username != null && password != null;
 				}
 			}
-
+			
 			public override void SignIn (UIViewController container, Action<bool> done)
 			{
 				EntryElement ue, pe;
@@ -58,7 +63,7 @@ namespace TweetStation
 						(pe = new EntryElement ("Password", "", password, true))
 					}
 				};
-				var dvc = new DialogViewController (UITableViewStyle.Grouped, root, true);
+				dvc = new DialogViewController (UITableViewStyle.Grouped, root, true);
 				nav = new UINavigationController (dvc);
 				
 				ue.BecomeFirstResponder (false);
@@ -72,6 +77,8 @@ namespace TweetStation
 			void Close (Action<bool> callback, bool done)
 			{
 				nav.DismissModalViewControllerAnimated (true);
+				nav = null;
+				dvc = null;
 				callback (done);
 			}
 			
@@ -94,11 +101,12 @@ namespace TweetStation
 					DestroyHud ();
 					Close (callback, false);
 				};
+				dvc.View.AddSubview (hud);
 				
 				// Send an incomplete request with login/password, if this returns 403, we got the wrong password
 				ThreadPool.QueueUserWorkItem ((x) => {
 					try {
-						var req = (HttpWebRequest) WebRequest.Create (new Uri ("http://www.instapaper.com/api/add"));
+						var req = (HttpWebRequest) WebRequest.Create (instapaperAddUri);
 						req.Method = "POST";
 						req.Headers.Add("Authorization", "Basic " + Convert.ToBase64String (Encoding.ASCII.GetBytes (userElement.Value + ":" + passwordElement.Value)));
 						try {
@@ -110,7 +118,7 @@ namespace TweetStation
 								if (response.StatusCode == HttpStatusCode.Forbidden){
 									nav.BeginInvokeOnMainThread (delegate {
 										DestroyHud ();
-										var alert = new UIAlertView (Locale.GetText ("Login error"), Locale.GetText ("Invalid password"), null, Locale.GetText ("Close"));
+										alert = new UIAlertView (Locale.GetText ("Login error"), Locale.GetText ("Invalid password"), null, Locale.GetText ("Close"));
 										alert.WillDismiss += delegate { 
 											userElement.BecomeFirstResponder (true); 
 											alert = null; 
@@ -123,8 +131,8 @@ namespace TweetStation
 							}
 						}
 						// We got a valid password
-						Util.Defaults.SetString (username = userElement.Value, "instapaper.username");
-						Util.Defaults.SetString (password = passwordElement.Value, "instapaper.password");
+						Util.Defaults.SetString (username = userElement.Value, kUser);
+						Util.Defaults.SetString (password = passwordElement.Value, kPass);
 					} catch (Exception e){
 						Console.WriteLine ("Error: {0}", e);
 					}
