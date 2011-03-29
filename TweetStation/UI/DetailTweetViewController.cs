@@ -135,7 +135,7 @@ namespace TweetStation
 		{
 			UIActionSheet sheet;
 			
-			if (data.StartsWith ("http://")){
+			if (Tweet.IndexOfUrlStarter (data, 0) != -1){
 				sheet = Util.GetSheet (data);
 
 				sheet.AddButton (Locale.GetText ("Open"));

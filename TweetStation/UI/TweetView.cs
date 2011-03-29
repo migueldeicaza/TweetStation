@@ -97,7 +97,7 @@ namespace TweetStation
 				}
 				
 				var start = segment [0];
-				if (start == '@' || start == '#' || segment.StartsWith ("http://", StringComparison.Ordinal) || segment.StartsWith ("bit.ly/", StringComparison.Ordinal))
+				if (start == '@' || start == '#' || Tweet.IndexOfUrlStarter (segment, 0) != -1)
 					font = bold;
 				else
 					font = regular;
@@ -212,7 +212,7 @@ namespace TweetStation
 		//
 		static string PrepareTappedText (string source)
 		{
-			if (source.StartsWith ("http://"))
+			if (source.StartsWith ("http://") || source.StartsWith ("https://"))
 				return source.Trim ();
 			if (source.StartsWith ("bit.ly/"))
 				return "http://" + source.Trim ();

@@ -69,7 +69,7 @@ namespace TweetStation
 		
 		public bool ContainsUrl {
 			get {
-				return Text.IndexOf ("http://") != -1 || Text.IndexOf ("bit.ly/") != -1;
+				return IndexOfUrlStarter (Text, 0) != -1;
 			}
 		}
 				
@@ -363,20 +363,25 @@ namespace TweetStation
 			recipients.Remove (TwitterAccount.CurrentAccount.Username);
 			return "@" + String.Join (" @", recipients.ToArray ()) + " ";
 		}
+
+		static string [] urlStarters = {
+			"http://", "https://", "bit.ly/"
+		};
 		
-		static int UrlStart (string text, int startIndex)
+		public static int IndexOfUrlStarter (string text, int startIndex)
 		{
-			int p = text.IndexOf ("http://", startIndex);
-			int q = text.IndexOf ("bit.ly/", startIndex);
-			
-			if (p == -1){
-				if (q == -1)
-					return -1;
-				return q;
+			int min = -1;
+				
+			foreach (var urlStart in urlStarters){
+				int n = text.IndexOf (urlStart, startIndex, StringComparison.InvariantCultureIgnoreCase);
+				if (n > 0){
+					if (min == -1)
+						min = n;
+					else if (n < min)
+						min = n;
+				}
 			}
-			if (q == -1)
-				return p;
-			return Math.Min (p, q);
+			return min;
 		}
 		
 		public List<string> ExtractUrls ()
@@ -386,7 +391,7 @@ namespace TweetStation
 			List<string> result = null;
 			
 			do {
-				int p = UrlStart (text, last);
+				int p = IndexOfUrlStarter (text, last);
 				if (p == -1)
 					break;
 				last = text.IndexOf (' ', p);
