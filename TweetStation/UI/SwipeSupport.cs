@@ -580,14 +580,16 @@ namespace TweetStation
 						
 					case 4:
 						// Instapaper
+						var bookmarkTweet = MenuHostElement.Tweet;
+						
 						if (!UrlBookmark.Bookmarker.LoggedIn){
 							UrlBookmark.Bookmarker.SignIn (this, x=> {
 								if (!x) return;
 							
-								BookmarkUrls (MenuHostElement.Tweet);
+								BookmarkUrls (bookmarkTweet);
 							});
 						} else 
-							BookmarkUrls (MenuHostElement.Tweet);
+							BookmarkUrls (bookmarkTweet);
 						break;
 					}
 				};
