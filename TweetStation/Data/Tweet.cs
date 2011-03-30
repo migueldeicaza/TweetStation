@@ -374,7 +374,7 @@ namespace TweetStation
 				
 			foreach (var urlStart in urlStarters){
 				int n = text.IndexOf (urlStart, startIndex, StringComparison.InvariantCultureIgnoreCase);
-				if (n > 0){
+				if (n >= 0){
 					if (min == -1)
 						min = n;
 					else if (n < min)
