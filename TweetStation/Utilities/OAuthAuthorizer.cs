@@ -188,8 +188,8 @@ namespace TweetStation
 				{ "oauth_version", "1.0" }};
 			var content = "";
 			if (xAuthUsername == null){
-				headers.Add ("oauth_token", AuthorizationToken);
-				headers.Add ("oauth_verifier", AuthorizationVerifier);
+				headers.Add ("oauth_token", OAuth.PercentEncode (AuthorizationToken));
+				headers.Add ("oauth_verifier", OAuth.PercentEncode (AuthorizationVerifier));
 			} else {
 				headers.Add ("x_auth_username", OAuth.PercentEncode (xAuthUsername));
 				headers.Add ("x_auth_password", OAuth.PercentEncode (xAuthPassword));
