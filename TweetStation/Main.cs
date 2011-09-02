@@ -164,13 +164,6 @@ namespace TweetStation
 			messages.ReloadIfAtTop ();
 		}
 		
-		public override void DidEnterBackground (UIApplication application)
-		{
-			// releases all of our chubby images in the cache.
-			ImageStore.Purge ();
-		}
-		
-		
 		//
 		// Dispatcher that can open various assorted link-like text entries
 		//

@@ -174,6 +174,12 @@ namespace TweetStation {
 				base.RowSelected (tableView, indexPath);
 			}
 		}
+		
+		public override void DidReceiveMemoryWarning ()
+		{
+			base.DidReceiveMemoryWarning ();
+			ImageStore.Purge ();
+		}
 	}
 	
 	public class TimelineViewController : BaseTimelineViewController {
