@@ -1,3 +1,28 @@
+Ideas for Updating TweetStation
+
+	I have grown used to various options to reply/retweet
+	to be part of the bottom bar isntead of buttons in the
+	view.   Layer a new toolbar at the bottom of the screen
+	for tweets.
+
+	Photo icon should be more like Twitter for iPhone, 
+	hides the keyboard, offers options and in the remaining
+	area shows the current attached pictures, with an option
+	to remove.
+
+	Add support for auto-selecting all but the first nick name
+	of a tweet. 
+
+	Reorganize the UI: Favorites is no longer something I use
+	very often, so it can release one slot from the bottom bar
+	and that can be the hub for profile/favorite/drafts/lists
+
+	Collapse saved searches by default.
+
+	Make bios clickable, and extract @foo and urls from it
+
+	Use Twitter's hint API to use server-delimited hot words
+
 * Password:
 
 	On unauthorized show a message
