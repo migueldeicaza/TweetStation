@@ -10,7 +10,7 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>TweetStation</RootNamespace>
     <MainNibFile>MainWindow.xib</MainNibFile>
-    <TargetFrameworkVersion>v1.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <AssemblyName>TweetStation</AssemblyName>
     <BundleIdentifier>org.tirania.tweetstation</BundleIdentifier>
     <BundleVersion>2.1</BundleVersion>
@@ -81,12 +81,11 @@
     <OutputPath>bin\iPhone\Release</OutputPath>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <CodesignKey>iPhone Developer</CodesignKey>
+    <CodesignKey>iPhone Distribution</CodesignKey>
     <MtouchDebug>False</MtouchDebug>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <MtouchI18n />
     <DefineConstants>TRACE; DEBUGIMAGE</DefineConstants>
-    <CodesignProvision>EEB2110C-C864-4631-8FF7-5477F3B921F9</CodesignProvision>
     <MtouchExtraArgs>-mapinject -v -v -v --armv7</MtouchExtraArgs>
     <MtouchUseLlvm>false</MtouchUseLlvm>
     <MtouchUseArmv7>false</MtouchUseArmv7>
@@ -190,6 +189,11 @@
     <Page Include="MainWindow.xib" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ProjectExtensions>
+    <MonoDevelop>
+      <Properties InternalTargetFrameworkVersion="IPhone" />
+    </MonoDevelop>
+  </ProjectExtensions>
   <ItemGroup>
     <Folder Include="SqliteNet\" />
     <Folder Include="Data\" />
@@ -260,6 +264,18 @@
     <Content Include="Images\swipe-clipdark.png" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\MonoTouch.Dialog\MonoTouch.Dialog\MonoTouch.Dialog.csproj">
+      <Project>{3FFBFFF8-5560-4EDE-82E5-3FFDFBBA8A50}</Project>
+      <Name>MonoTouch.Dialog</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
     <ApplicationDefinition Include="Info.plist" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\MonoTouch.Dialog\MonoTouch.Dialog\MonoTouch.Dialog.csproj">
+      <Project>{3FFBFFF8-5560-4EDE-82E5-3FFDFBBA8A50}</Project>
+      <Name>MonoTouch.Dialog</Name>
+    </ProjectReference>
   </ItemGroup>
 </Project>
