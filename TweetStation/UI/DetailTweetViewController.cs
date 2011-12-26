@@ -275,6 +275,7 @@ namespace TweetStation
 			AddSubview (new UILabel (rect) {
 				Text = Locale.Format ("{0} ago from {1}", Util.FormatTime (new TimeSpan (DateTime.UtcNow.Ticks - tweet.CreatedAt)), tweet.Source),
 				TextColor = UIColor.Gray,
+				BackgroundColor = UIColor.Clear,
 				Font = UIFont.SystemFontOfSize (smallSize)
 			});
 			y += PadY;
