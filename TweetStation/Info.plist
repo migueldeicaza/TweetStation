@@ -1,19 +1,35 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
-  <dict>
-    <key>CFBundleURLTypes</key>
-    <array>
-      <dict>
-        <key>CFBundleURLName</key>
-        <string>org.tirania.tweetstation</string>
-        <key>CFBundleURLSchemes</key>
-        <array>
-          <string>tweetstation</string>
-        </array>
-      </dict>
-    </array>
-    <key>SBUsesNetwork</key>
-    <true />
-  </dict>
+<dict>
+	<key>CFBundleDisplayName</key>
+	<string>TweetStation</string>
+	<key>CFBundleIconFiles</key>
+	<array>
+		<string>Icon.png</string>
+		<string>Icon@2x.png</string>
+		<string>IconSpotlight.png</string>
+	</array>
+	<key>CFBundleIdentifier</key>
+	<string>org.tirania.tweetstation</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>org.tirania.tweetstation</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>tweetstation</string>
+			</array>
+		</dict>
+	</array>
+	<key>CFBundleVersion</key>
+	<string>2.1</string>
+	<key>MinimumOSVersion</key>
+	<string>3.0</string>
+	<key>NSMainNibFile</key>
+	<string>MainWindow</string>
+	<key>SBUsesNetwork</key>
+	<true/>
+</dict>
 </plist>

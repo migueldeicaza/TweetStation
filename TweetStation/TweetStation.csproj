@@ -6,19 +6,11 @@
     <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{7C7D3161-2DFB-4201-B70E-88ACD3976AA9}</ProjectGuid>
-    <ProjectTypeGuids>{E613F3A2-FE9C-494F-B74E-F63BCB86FEA6};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <ProjectTypeGuids>{6BC8ED88-2882-458C-8E55-DFD12B67127B};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <OutputType>Exe</OutputType>
     <RootNamespace>TweetStation</RootNamespace>
-    <MainNibFile>MainWindow.xib</MainNibFile>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <AssemblyName>TweetStation</AssemblyName>
-    <BundleIdentifier>org.tirania.tweetstation</BundleIdentifier>
-    <BundleVersion>2.1</BundleVersion>
-    <BundleDisplayName>TweetStation</BundleDisplayName>
-    <BundleIcon>Icon.png</BundleIcon>
-    <BundleIconSpotlight>IconSpotlight.png</BundleIconSpotlight>
-    <BundleIconHigh>Icon@2x.png</BundleIconHigh>
-    <MtouchMinimumOS>3.0</MtouchMinimumOS>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|iPhoneSimulator' ">
     <DebugSymbols>true</DebugSymbols>
@@ -186,7 +178,7 @@
     <Compile Include="Utilities\Instapaper.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="MainWindow.xib" />
+    <InterfaceDefinition Include="MainWindow.xib" xmlns="" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
@@ -262,6 +254,9 @@
     <Content Include="Images\swipe-clip.png" />
     <Content Include="Images\swipe-clipdark%402x.png" />
     <Content Include="Images\swipe-clipdark.png" />
+    <Content Include="Icon.png" />
+    <Content Include="Icon@2x.png" />
+    <Content Include="IconSpotlight.png" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\MonoTouch.Dialog\MonoTouch.Dialog\MonoTouch.Dialog.csproj">
@@ -271,11 +266,5 @@
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="Info.plist" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\MonoTouch.Dialog\MonoTouch.Dialog\MonoTouch.Dialog.csproj">
-      <Project>{3FFBFFF8-5560-4EDE-82E5-3FFDFBBA8A50}</Project>
-      <Name>MonoTouch.Dialog</Name>
-    </ProjectReference>
   </ItemGroup>
 </Project>
