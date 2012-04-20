@@ -63,7 +63,7 @@ namespace TweetStation
 			} catch {}				
 #else
 			var cfg = TwitterAccount.OAuthConfig;
-			useXauth = true;
+			//useXauth = true;
 
 #endif
 			
