@@ -253,14 +253,14 @@ namespace TweetStation
 		{
 			long now = DateTime.UtcNow.Ticks;
 			
-			Console.WriteLine ("[{0}] ticks since last invoke: {1}", s, now-lastTime);
+			Debug.WriteLine (string.Format ("[{0}] ticks since last invoke: {1}", s, now-lastTime));
 			lastTime = now;
 		}
 		
 		[Conditional ("TRACE")]
 		public static void Log (string format, params object [] args)
 		{
-			Console.WriteLine (String.Format (format, args));
+			Debug.WriteLine (String.Format (format, args));
 		}
 		
 		public static void LogException (string text, Exception e)

@@ -49,7 +49,7 @@ namespace TweetStation
 			// Required by some HTTP calls to Twitter
 			System.Net.ServicePointManager.Expect100Continue = false;
 
-#if true
+#if false
 			try {
 				if (File.Exists ("/Users/miguel/xauth")){
 					using (var f = File.OpenText ("/Users/miguel/xauth")){
