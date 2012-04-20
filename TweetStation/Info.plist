@@ -24,12 +24,16 @@
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>2.1</string>
+	<string>2.2</string>
 	<key>MinimumOSVersion</key>
-	<string>3.0</string>
+	<string>5.1</string>
 	<key>NSMainNibFile</key>
 	<string>MainWindow</string>
 	<key>SBUsesNetwork</key>
 	<true/>
+	<key>UIDeviceFamily</key>
+	<array>
+		<integer>1</integer>
+	</array>
 </dict>
 </plist>
