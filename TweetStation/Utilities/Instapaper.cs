@@ -99,9 +99,9 @@ namespace TweetStation
 					this.callback = callback;
 					
 					var root = new RootElement ("Instapaper") {
-						new Section ("", "Get your account at instapaper.com"){
-							(userElement = new EntryElement ("Username", "or email address", instapaper.username)),
-							(passwordElement = new EntryElement ("Password", "", instapaper.password, true))
+						new Section ("", Locale.GetText ("Get your account at instapaper.com")){
+							(userElement = new EntryElement (Locale.GetText ("Username"), Locale.GetText ("or email address"), instapaper.username)),
+							(passwordElement = new EntryElement (Locale.GetText ("Password"), "", instapaper.password, true))
 						}
 					};
 					dvc = new DialogViewController (UITableViewStyle.Grouped, root, true);
@@ -140,7 +140,7 @@ namespace TweetStation
 						try {
 							ok = ValidateCredentials (); 
 						} catch (Exception e){
-							Util.ReportError (this, e, "While validating credentials");
+							Util.ReportError (this, e, Locale.GetText ("While validating credentials"));
 						}
 						BeginInvokeOnMainThread (delegate {
 							DestroyHud ();
