@@ -1,9 +1,46 @@
-Ideas for Updating TweetStation
+Fixing TweetStation
 
-	I have grown used to various options to reply/retweet
-	to be part of the bottom bar isntead of buttons in the
-	view.   Layer a new toolbar at the bottom of the screen
-	for tweets.
+	TweetStation has not been maintained in over a year, and many
+	things are either broken, or have not aged properly.  Here is
+	a list of things that need to be done:
+
+	* Fixing Favorites: the old url/mechanism for favorites has
+	changed, and now we get a 403 Forbidden.
+
+	* Update TweetStation to flag the documents in tweets.db to 
+	not be backed up
+
+	* Split the databases in configuration settings, and tweets,
+	so the configuration settings are backed up.
+
+	* Store configuration in iCloud, so we can log in once, and
+	work everywhere, without having to re-authenticate.
+
+	* Favorites is not as useful as it once was, take away that
+	tab item and use it for a control center, like the official
+	"Me", where we link to profile, private messages, drafts,
+	lists, saved searches.
+
+	* Profile view looks old, perhaps take the Instagram design
+	for the status of tweets/followers/followed.
+
+	* Selection looks aging, when a cell is selected, the color
+	is too dark.
+
+	* Instead of Foo -> Bar for retweets, add to the bottom of
+	the tweet "Retweeted by XXXX" in gray.
+
+	* Add transparency detector, to render icons with a white
+	background, without the border in those profiles cases.
+
+	* Twitter API changes: these days, Twitter blocks third-party
+	apps from Messages, so we need to authentica twice when using
+	OAuth, once with our xAuth token, and once with the web-view
+	based authenticator for messages.
+
+	* Add support for follow-ups in conversations
+
+Ideas for Updating TweetStation
 
 	Photo icon should be more like Twitter for iPhone, 
 	hides the keyboard, offers options and in the remaining
@@ -12,10 +49,6 @@ Ideas for Updating TweetStation
 
 	Add support for auto-selecting all but the first nick name
 	of a tweet. 
-
-	Reorganize the UI: Favorites is no longer something I use
-	very often, so it can release one slot from the bottom bar
-	and that can be the hub for profile/favorite/drafts/lists
 
 	Collapse saved searches by default.
 
