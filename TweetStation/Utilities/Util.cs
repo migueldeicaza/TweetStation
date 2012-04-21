@@ -70,6 +70,9 @@ namespace TweetStation
 				
 		public static void ReportError (UIViewController current, Exception e, string msg)
 		{
+			if (current == null)
+				throw new ArgumentNullException ("current");
+			
 			var root = new RootElement (Locale.GetText ("Error")) {
 				new Section (Locale.GetText ("Error")) {
 					new StyledStringElement (msg){
