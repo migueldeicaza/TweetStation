@@ -501,15 +501,19 @@ namespace TweetStation {
 		{
 			var fullUrl = BuildUrl (page, since_id);
 			TwitterAccount.CurrentAccount.Download (fullUrl, false, res => {
-				CancelMenu ();
 				if (res == null){
-					BeginInvokeOnMainThread (delegate { Root = Util.MakeError (TimelineTitle); });
+					BeginInvokeOnMainThread (delegate { 
+						CancelMenu ();
+						Root = Util.MakeError (TimelineTitle); 
+					});
 					return;
 				}
 				Element [] tweetArray = (from tweet in GetTweetStream (res) select (Element) new TweetElement (tweet)).ToArray ();
 				
 				// Now on the main thread, do the UI work
 				BeginInvokeOnMainThread (delegate {
+					CancelMenu ();
+					
 					Section section;
 					if (since_id == 0){
 						if (page == 1){
