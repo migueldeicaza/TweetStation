@@ -139,31 +139,10 @@ namespace TweetStation {
 			
 			public override void Scrolled (UIScrollView scrollView)
 			{
-				try {
-					var point = Container.TableView.ContentOffset;
-				
-					try {
-						if (point.Y <= 10)
-							parent.NavigationController.TabBarItem.BadgeValue = null;
-					} catch (Exception e){
-						if (parent == null)
-							Util.ReportError (parent, e, "parent is null");
-						else if (parent.NavigationController == null)
-							Util.ReportError (parent, e, "navcontroller is null");
-						else if (parent.NavigationController.TabBarItem == null)
-							Util.ReportError (parent, e, "TabBarItem is null");
-						else 
-							Util.ReportError (parent, e, "Other error");
-					}
-				} catch (Exception e){
-					if (Container == null)
-						Util.ReportError (parent, e, "Container is null");
-					else if (Container.TableView == null)
-						Util.ReportError (parent, e, "Container.TableView is null");
-					else
-						Util.ReportError (parent, e, "Container.TableView.ContentOffset");
-				}
-				
+				var point = Container.TableView.ContentOffset;
+			
+				if (point.Y <= 10)
+					parent.NavigationController.TabBarItem.BadgeValue = null;
 				base.Scrolled (scrollView);
 			}
 			
