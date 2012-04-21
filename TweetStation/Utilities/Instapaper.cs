@@ -67,7 +67,7 @@ namespace TweetStation
 
 			public override bool LoggedIn {
 				get {
-					return false && username != null && password != null && passwordError == false;
+					return username != null && password != null && passwordError == false;
 				}
 			}
 			
